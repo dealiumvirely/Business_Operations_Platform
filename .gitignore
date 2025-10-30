@@ -851,6 +851,38 @@ color: var(--text-muted);
 margin-bottom: 3px;
 }
 
+.contact-link {
+color: var(--text-muted);
+text-decoration: none;
+transition: all 0.2s ease;
+display: inline-block;
+position: relative;
+}
+
+.contact-link:hover {
+color: var(--accent-primary);
+text-decoration: none;
+transform: translateX(2px);
+}
+
+.contact-link:hover::before {
+content: '→ ';
+position: absolute;
+left: -16px;
+color: var(--accent-primary);
+font-weight: 700;
+animation: arrowBounce 0.6s ease infinite;
+}
+
+@keyframes arrowBounce {
+0%, 100% { transform: translateX(0); }
+50% { transform: translateX(3px); }
+}
+
+.contact-link:active {
+color: var(--accent-secondary);
+}
+
 .contact-card .actions {
 display: flex;
 gap: 6px;
@@ -1449,6 +1481,9 @@ margin-top: 12px;
 <div class="nav-item" data-section="roadmap">
 <span>🗺️ Roadmap & Tasks</span>
 </div>
+<div class="nav-item" data-section="calendar">
+<span>📅 Calendar</span>
+</div>
 <div class="nav-item" data-section="divisions">
 <span>🏢 Divisions</span>
 </div>
@@ -1668,6 +1703,60 @@ margin-top: 12px;
 </div>
 </div>
 
+<!-- Calendar Section -->
+<div class="section-content" data-section="calendar">
+<div class="panel">
+<div class="panel-header">
+<h2>📅 Google Calendar</h2>
+<div class="btn-group">
+<button class="btn" id="connectCalendarBtn">🔗 Connect Calendar</button>
+<button class="ghost" id="refreshCalendar">🔄 Refresh</button>
+<button class="ghost" id="todayBtn">📍 Today</button>
+</div>
+</div>
+<div id="calendarStatus" style="padding: 16px; background: rgba(110,231,183,0.1); border: 1px solid rgba(110,231,183,0.3); border-radius: 12px; margin-bottom: 16px; display: none;">
+<div style="display: flex; align-items: center; gap: 12px;">
+<span style="font-size: 24px;">✅</span>
+<div>
+<div style="font-weight: 600; margin-bottom: 4px;">Connected to Google Calendar</div>
+<div class="tiny muted">Viewing schedule for <span id="calendarEmail">user@example.com</span></div>
+</div>
+</div>
+</div>
+<div id="calendarDisconnected" style="padding: 40px; text-align: center; background: rgba(255,255,255,0.02); border-radius: 12px;">
+<div style="font-size: 48px; margin-bottom: 16px;">📅</div>
+<h3 style="margin-bottom: 12px;">Connect Your Google Calendar</h3>
+<p class="tiny muted" style="margin-bottom: 24px;">Sync your calendar to view and manage your schedule directly from Virely Ops</p>
+<button class="btn" onclick="connectGoogleCalendar()">🔗 Connect Google Calendar</button>
+</div>
+</div>
+
+<div class="panel" id="calendarViewPanel" style="display: none;">
+<div class="panel-header">
+<h2>📆 Schedule</h2>
+<div class="btn-group">
+<button class="ghost" data-view="day" onclick="changeCalendarView('day')">Day</button>
+<button class="ghost" data-view="week" onclick="changeCalendarView('week')">Week</button>
+<button class="ghost active" data-view="month" onclick="changeCalendarView('month')">Month</button>
+</div>
+</div>
+<div id="calendarControls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 16px; background: rgba(255,255,255,0.02); border-radius: 12px;">
+<button class="ghost" onclick="navigateCalendar(-1)">◀ Previous</button>
+<h3 id="calendarMonth" style="margin: 0;">January 2025</h3>
+<button class="ghost" onclick="navigateCalendar(1)">Next ▶</button>
+</div>
+<div id="calendarView"></div>
+</div>
+
+<div class="panel" id="upcomingEventsPanel" style="display: none;">
+<div class="panel-header">
+<h2>🔔 Upcoming Events</h2>
+<span class="tiny muted">Next 7 days</span>
+</div>
+<div id="upcomingEventsList"></div>
+</div>
+</div>
+
 <!-- Divisions Section -->
 <div class="section-content" data-section="divisions">
 <div class="panel">
@@ -1822,7 +1911,17 @@ chartType: 'line',
 expenseChartType: 'bar',
 alerts: [
 {id:'a1', name:'Low Runway Alert', rule:{type:'runway', months:3, threshold:0}, enabled:true},
-{id:'a2', name:'Expense Spike Alert', rule:{type:'expense_spike', days:7, percent:50}, enabled:true}
+{id:'a2', name:'Expense Spike Alert', rule:{type:'expense_spike', days:7, percent:50}, enabled:true},
+{id:'a3', name:'High Churn Rate Alert', rule:{type:'churn_rate', threshold:5}, enabled:true},
+{id:'a4', name:'Low Profit Margin Alert', rule:{type:'profit_margin', threshold:15}, enabled:true},
+{id:'a5', name:'Revenue Drop Alert', rule:{type:'revenue_drop', days:30, percent:20}, enabled:true},
+{id:'a6', name:'High CAC Alert', rule:{type:'high_cac', threshold:500}, enabled:true},
+{id:'a7', name:'Low LTV:CAC Ratio Alert', rule:{type:'ltv_cac_ratio', threshold:3}, enabled:true},
+{id:'a8', name:'MRR Growth Stagnation', rule:{type:'mrr_growth', days:90, threshold:2}, enabled:false},
+{id:'a9', name:'Transaction Volume Drop', rule:{type:'transaction_volume', days:7, percent:30}, enabled:true},
+{id:'a10', name:'Negative Cash Flow Alert', rule:{type:'cash_flow', days:30}, enabled:true},
+{id:'a11', name:'Product Underperformance', rule:{type:'product_performance', threshold:1000}, enabled:false},
+{id:'a12', name:'Division Loss Alert', rule:{type:'division_loss'}, enabled:true}
 ],
 scheduledReports: [
 {id:'r1', name:'Monthly Financial Summary', schedule:'1st of month', enabled:true},
@@ -3478,6 +3577,34 @@ showToast('Reports refreshed');
 });
 }
 
+// Calendar controls
+const connectCalendarBtn = $('#connectCalendarBtn');
+if (connectCalendarBtn) {
+connectCalendarBtn.addEventListener('click', connectGoogleCalendar);
+}
+
+const refreshCalendar = $('#refreshCalendar');
+if (refreshCalendar) {
+refreshCalendar.addEventListener('click', () => {
+renderCalendarView();
+showToast('Calendar refreshed');
+});
+}
+
+const todayBtn = $('#todayBtn');
+if (todayBtn) {
+todayBtn.addEventListener('click', () => {
+calendarState.currentDate = new Date();
+renderCalendarView();
+showToast('Jumped to today');
+});
+}
+
+// Make calendar functions global
+window.connectGoogleCalendar = connectGoogleCalendar;
+window.changeCalendarView = changeCalendarView;
+window.navigateCalendar = navigateCalendar;
+
 const prodSelect = $('#prodSelect');
 if (prodSelect) {
 prodSelect.addEventListener('change', () => {
@@ -4480,8 +4607,8 @@ const divisionColors = {
 return '<div class="contact-card">' +
 '<div class="name">' + c.name + '</div>' +
 '<div class="company">' + c.company + '</div>' +
-'<div class="email">📧 ' + c.email + '</div>' +
-(c.phone ? '<div class="email">📱 ' + c.phone + '</div>' : '') +
+'<div class="email"><a href="mailto:' + c.email + '" class="contact-link" title="Send email to ' + c.email + '">📧 ' + c.email + '</a></div>' +
+(c.phone ? '<div class="email"><a href="tel:' + c.phone.replace(/[^0-9+]/g, '') + '" class="contact-link" title="Call ' + c.phone + '">📱 ' + c.phone + '</a></div>' : '') +
 '<div style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">' +
 '<span style="display: inline-block; padding: 4px 10px; background: rgba(110,231,183,0.15); border: 1px solid rgba(110,231,183,0.3); border-radius: 6px; font-size: 10px; font-weight: 600; color: ' + divisionColors[division] + ';">' + divisionLabels[division] + '</span>' +
 (product ? '<span style="font-size: 11px; color: var(--text-muted);">📦 ' + product.name + '</span>' : '') +
@@ -4694,6 +4821,246 @@ return '<div style="padding: 12px; margin-bottom: 10px; background: rgba(255,255
 }).join('');
 const container = $('#scheduledReports');
 if(container) container.innerHTML = html;
+}
+
+// ============================================
+// CALENDAR FUNCTIONS
+// ============================================
+let calendarState = {
+	connected: false,
+	view: 'month',
+	currentDate: new Date(),
+	events: []
+};
+
+function connectGoogleCalendar() {
+	// Simulate connection
+	calendarState.connected = true;
+	calendarState.events = generateDemoCalendarEvents();
+	renderCalendarView();
+	showToast('✅ Connected to Google Calendar');
+}
+
+function generateDemoCalendarEvents() {
+	const events = [];
+	const now = new Date();
+	
+	// Generate some demo events
+	const eventTemplates = [
+		{ title: 'Team Standup', duration: 30, color: '#6ee7b7' },
+		{ title: 'Client Meeting', duration: 60, color: '#7c5cff' },
+		{ title: 'Product Review', duration: 90, color: '#60a5fa' },
+		{ title: 'Strategy Planning', duration: 120, color: '#ffb86b' },
+		{ title: '1:1 with Manager', duration: 30, color: '#ff6b6b' },
+		{ title: 'Workshop', duration: 180, color: '#4ade80' },
+		{ title: 'Demo Presentation', duration: 45, color: '#7c5cff' },
+		{ title: 'Code Review', duration: 60, color: '#60a5fa' },
+		{ title: 'Lunch & Learn', duration: 60, color: '#ffb86b' },
+		{ title: 'Sprint Planning', duration: 120, color: '#6ee7b7' }
+	];
+	
+	// Add events for the next 30 days
+	for (let i = 0; i < 25; i++) {
+		const daysAhead = Math.floor(Math.random() * 30);
+		const template = eventTemplates[Math.floor(Math.random() * eventTemplates.length)];
+		const eventDate = new Date(now);
+		eventDate.setDate(eventDate.getDate() + daysAhead);
+		eventDate.setHours(9 + Math.floor(Math.random() * 8), [0, 15, 30, 45][Math.floor(Math.random() * 4)], 0, 0);
+		
+		const endDate = new Date(eventDate);
+		endDate.setMinutes(endDate.getMinutes() + template.duration);
+		
+		events.push({
+			id: 'evt' + i,
+			title: template.title,
+			start: eventDate,
+			end: endDate,
+			color: template.color,
+			description: 'Demo event for ' + template.title
+		});
+	}
+	
+	return events.sort((a, b) => a.start - b.start);
+}
+
+function renderCalendarView() {
+	if (!calendarState.connected) {
+		$('#calendarStatus').style.display = 'none';
+		$('#calendarDisconnected').style.display = 'block';
+		$('#calendarViewPanel').style.display = 'none';
+		$('#upcomingEventsPanel').style.display = 'none';
+		return;
+	}
+	
+	$('#calendarStatus').style.display = 'block';
+	$('#calendarDisconnected').style.display = 'none';
+	$('#calendarViewPanel').style.display = 'block';
+	$('#upcomingEventsPanel').style.display = 'block';
+	
+	// Update calendar month display
+	const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+	                     'July', 'August', 'September', 'October', 'November', 'December'];
+	const monthEl = $('#calendarMonth');
+	if (monthEl) {
+		monthEl.textContent = monthNames[calendarState.currentDate.getMonth()] + ' ' + calendarState.currentDate.getFullYear();
+	}
+	
+	// Render based on view
+	if (calendarState.view === 'month') {
+		renderMonthView();
+	} else if (calendarState.view === 'week') {
+		renderWeekView();
+	} else {
+		renderDayView();
+	}
+	
+	renderUpcomingEvents();
+}
+
+function renderMonthView() {
+	const year = calendarState.currentDate.getFullYear();
+	const month = calendarState.currentDate.getMonth();
+	const firstDay = new Date(year, month, 1);
+	const lastDay = new Date(year, month + 1, 0);
+	const startingDayOfWeek = firstDay.getDay();
+	const daysInMonth = lastDay.getDate();
+	
+	let html = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--glass-border); border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden;">';
+	
+	// Day headers
+	const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+	dayNames.forEach(day => {
+		html += '<div style="padding: 12px; background: rgba(110,231,183,0.1); text-align: center; font-weight: 700; font-size: 12px; color: var(--text-primary);">' + day + '</div>';
+	});
+	
+	// Empty cells before first day
+	for (let i = 0; i < startingDayOfWeek; i++) {
+		html += '<div style="padding: 12px; background: var(--bg-secondary); min-height: 100px;"></div>';
+	}
+	
+	// Days of month
+	const today = new Date();
+	for (let day = 1; day <= daysInMonth; day++) {
+		const currentDate = new Date(year, month, day);
+		const isToday = currentDate.toDateString() === today.toDateString();
+		const dayEvents = calendarState.events.filter(e => {
+			const eventDate = new Date(e.start);
+			return eventDate.getDate() === day && 
+			       eventDate.getMonth() === month && 
+			       eventDate.getFullYear() === year;
+		});
+		
+		html += '<div style="padding: 8px; background: var(--bg-secondary); min-height: 100px; position: relative; ' + (isToday ? 'outline: 2px solid var(--accent-primary);' : '') + '">' +
+		        '<div style="font-weight: 700; margin-bottom: 8px; font-size: 14px; ' + (isToday ? 'color: var(--accent-primary);' : 'color: var(--text-primary);') + '">' + day + '</div>';
+		
+		// Add events for this day
+		dayEvents.slice(0, 3).forEach(evt => {
+			const startTime = evt.start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+			html += '<div style="font-size: 10px; padding: 4px; margin-bottom: 4px; background: ' + evt.color + '20; border-left: 3px solid ' + evt.color + '; border-radius: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="' + evt.title + ' at ' + startTime + '">' +
+			        '<div style="font-weight: 600; color: var(--text-primary);">' + startTime + '</div>' +
+			        '<div style="color: var(--text-secondary);">' + evt.title + '</div>' +
+			        '</div>';
+		});
+		
+		if (dayEvents.length > 3) {
+			html += '<div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">+' + (dayEvents.length - 3) + ' more</div>';
+		}
+		
+		html += '</div>';
+	}
+	
+	html += '</div>';
+	
+	const calendarView = $('#calendarView');
+	if (calendarView) calendarView.innerHTML = html;
+}
+
+function renderWeekView() {
+	const html = '<div style="text-align: center; padding: 60px; color: var(--text-muted);">' +
+	             '<div style="font-size: 48px; margin-bottom: 16px;">📅</div>' +
+	             '<h3>Week View</h3>' +
+	             '<p class="tiny muted">Week view coming soon</p></div>';
+	const calendarView = $('#calendarView');
+	if (calendarView) calendarView.innerHTML = html;
+}
+
+function renderDayView() {
+	const html = '<div style="text-align: center; padding: 60px; color: var(--text-muted);">' +
+	             '<div style="font-size: 48px; margin-bottom: 16px;">📅</div>' +
+	             '<h3>Day View</h3>' +
+	             '<p class="tiny muted">Day view coming soon</p></div>';
+	const calendarView = $('#calendarView');
+	if (calendarView) calendarView.innerHTML = html;
+}
+
+function renderUpcomingEvents() {
+	const now = new Date();
+	const nextWeek = new Date(now);
+	nextWeek.setDate(nextWeek.getDate() + 7);
+	
+	const upcoming = calendarState.events.filter(e => {
+		return new Date(e.start) >= now && new Date(e.start) <= nextWeek;
+	}).slice(0, 10);
+	
+	if (upcoming.length === 0) {
+		const list = $('#upcomingEventsList');
+		if (list) {
+			list.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">' +
+			                 '<div style="font-size: 32px; margin-bottom: 12px;">📅</div>' +
+			                 '<p>No upcoming events in the next 7 days</p></div>';
+		}
+		return;
+	}
+	
+	const html = upcoming.map(evt => {
+		const startDate = new Date(evt.start);
+		const endDate = new Date(evt.end);
+		const isToday = startDate.toDateString() === now.toDateString();
+		const isTomorrow = startDate.toDateString() === new Date(now.getTime() + 86400000).toDateString();
+		
+		let dateLabel = startDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+		if (isToday) dateLabel = 'Today';
+		if (isTomorrow) dateLabel = 'Tomorrow';
+		
+		const timeStr = startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) + 
+		                ' - ' + endDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+		
+		return '<div style="padding: 16px; margin-bottom: 12px; background: rgba(255,255,255,0.03); border-left: 4px solid ' + evt.color + '; border-radius: 8px; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.background=\'rgba(255,255,255,0.06)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.03)\'">' +
+		       '<div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">' +
+		       '<div style="font-weight: 700; font-size: 15px; color: var(--text-primary);">' + evt.title + '</div>' +
+		       '<span style="font-size: 11px; padding: 4px 8px; background: ' + evt.color + '20; color: var(--text-primary); border-radius: 6px; font-weight: 600;">' + dateLabel + '</span>' +
+		       '</div>' +
+		       '<div style="font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">' +
+		       '<span>🕐</span>' + timeStr +
+		       '</div></div>';
+	}).join('');
+	
+	const list = $('#upcomingEventsList');
+	if (list) list.innerHTML = html;
+}
+
+function changeCalendarView(view) {
+	calendarState.view = view;
+	
+	// Update button states
+	$$('button[data-view]').forEach(btn => {
+		btn.classList.remove('active');
+	});
+	const activeBtn = $('button[data-view="' + view + '"]');
+	if (activeBtn) activeBtn.classList.add('active');
+	
+	renderCalendarView();
+}
+
+function navigateCalendar(direction) {
+	if (calendarState.view === 'month') {
+		calendarState.currentDate.setMonth(calendarState.currentDate.getMonth() + direction);
+	} else if (calendarState.view === 'week') {
+		calendarState.currentDate.setDate(calendarState.currentDate.getDate() + (direction * 7));
+	} else {
+		calendarState.currentDate.setDate(calendarState.currentDate.getDate() + direction);
+	}
+	renderCalendarView();
 }
 
 // ============================================
@@ -5016,6 +5383,7 @@ renderReports();
 renderMini();
 renderScheduledReports();
 renderProductsSelects();
+renderCalendarView();
 console.log('✅ All rendered');
 }
 
