@@ -92,74 +92,6 @@ border-radius: 5px;
 background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
 }
 
-/* Scrolling Inspirational Message Bar */
-.inspiration-bar {
-background: linear-gradient(135deg, rgba(110,231,183,0.12), rgba(124,92,255,0.12));
-border: 1px solid var(--glass-border);
-border-radius: 12px;
-padding: 12px 16px;
-margin-bottom: 18px;
-overflow: hidden;
-position: relative;
-backdrop-filter: blur(10px);
-box-shadow: var(--shadow-sm);
-}
-
-.inspiration-bar::before {
-content: '';
-position: absolute;
-top: 0;
-left: 0;
-right: 0;
-bottom: 0;
-background: linear-gradient(90deg, 
-    rgba(110,231,183,0.1) 0%, 
-    transparent 50%, 
-    rgba(124,92,255,0.1) 100%);
-animation: shimmer 3s ease-in-out infinite;
-pointer-events: none;
-}
-
-@keyframes shimmer {
-0%, 100% { opacity: 0.3; }
-50% { opacity: 0.6; }
-}
-
-.inspiration-content {
-display: flex;
-align-items: center;
-gap: 12px;
-white-space: nowrap;
-animation: scroll-left 30s linear infinite;
-position: relative;
-z-index: 1;
-}
-
-@keyframes scroll-left {
-0% { transform: translateX(0); }
-100% { transform: translateX(-50%); }
-}
-
-.inspiration-icon {
-font-size: 18px;
-flex-shrink: 0;
-filter: drop-shadow(0 2px 4px rgba(110,231,183,0.3));
-}
-
-.inspiration-text {
-font-size: 13px;
-font-weight: 500;
-color: var(--text-primary);
-letter-spacing: 0.3px;
-text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-margin: 0 40px;
-flex-shrink: 0;
-}
-
-.inspiration-bar:hover .inspiration-content {
-animation-play-state: paused;
-}
-
 /* Notifications Panel Styles */
 .notifications-container {
 position: fixed;
@@ -2378,36 +2310,6 @@ Notifications
 
 <!-- Compact Right Sidebar Panels -->
 <div style="display: flex; flex-direction: column; gap: 18px;">
-<!-- Scrolling Inspirational Message Bar -->
-<div class="inspiration-bar">
-<div class="inspiration-content">
-<span class="inspiration-icon">✨</span>
-<span class="inspiration-text">Success is not final, failure is not fatal: it is the courage to continue that counts.</span>
-<span class="inspiration-icon">🚀</span>
-<span class="inspiration-text">The only way to do great work is to love what you do.</span>
-<span class="inspiration-icon">💡</span>
-<span class="inspiration-text">Innovation distinguishes between a leader and a follower.</span>
-<span class="inspiration-icon">🎯</span>
-<span class="inspiration-text">Your time is limited, don't waste it living someone else's life.</span>
-<span class="inspiration-icon">⭐</span>
-<span class="inspiration-text">Believe you can and you're halfway there.</span>
-<span class="inspiration-icon">🌟</span>
-<span class="inspiration-text">The future belongs to those who believe in the beauty of their dreams.</span>
-<span class="inspiration-icon">✨</span>
-<span class="inspiration-text">Success is not final, failure is not fatal: it is the courage to continue that counts.</span>
-<span class="inspiration-icon">🚀</span>
-<span class="inspiration-text">The only way to do great work is to love what you do.</span>
-<span class="inspiration-icon">💡</span>
-<span class="inspiration-text">Innovation distinguishes between a leader and a follower.</span>
-<span class="inspiration-icon">🎯</span>
-<span class="inspiration-text">Your time is limited, don't waste it living someone else's life.</span>
-<span class="inspiration-icon">⭐</span>
-<span class="inspiration-text">Believe you can and you're halfway there.</span>
-<span class="inspiration-icon">🌟</span>
-<span class="inspiration-text">The future belongs to those who believe in the beauty of their dreams.</span>
-</div>
-</div>
-
 <!-- AI Insights - Compact -->
 <div class="mini-panel" style="padding: 20px;">
 <h3 style="font-size: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">🔮 AI Insights</h3>
@@ -3457,6 +3359,64 @@ const cleanPhone = phone.replace(/\D/g, '');
 return '<a href="tel:+1' + cleanPhone + '" style="color: var(--accent-primary); text-decoration: none; transition: all 0.2s ease;" onmouseover="this.style.textDecoration=\'underline\'" onmouseout="this.style.textDecoration=\'none\'">' + escapeHtml(phone) + '</a>';
 };
 
+// Reusable phone formatting utility function
+// Formats phone input as user types to (XXX) XXX-XXXX format
+const applyPhoneMask = (inputElement) => {
+if (!inputElement) return;
+inputElement.addEventListener('input', function() {
+let phone = this.value.replace(/\D/g, '');
+if (phone.length > 0) {
+if (phone.length <= 3) {
+this.value = '(' + phone;
+} else if (phone.length <= 6) {
+this.value = '(' + phone.slice(0, 3) + ') ' + phone.slice(3);
+} else {
+this.value = '(' + phone.slice(0, 3) + ') ' + phone.slice(3, 6) + '-' + phone.slice(6, 10);
+}
+}
+});
+};
+
+// Reusable email validation utility function
+// Validates email format in real-time and shows visual feedback
+const applyEmailValidation = (inputElement) => {
+if (!inputElement) return;
+
+// Create validation message element
+const validationMsg = document.createElement('small');
+validationMsg.style.cssText = 'display: block; margin-top: 4px; font-size: 12px; transition: all 0.3s ease;';
+
+// Insert after the input element
+if (inputElement.nextSibling) {
+inputElement.parentNode.insertBefore(validationMsg, inputElement.nextSibling);
+} else {
+inputElement.parentNode.appendChild(validationMsg);
+}
+
+const validateEmail = () => {
+const email = inputElement.value;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+if (email && emailRegex.test(email)) {
+validationMsg.textContent = '✓ Valid email format';
+validationMsg.style.color = 'var(--success)';
+inputElement.style.borderColor = 'var(--success)';
+return true;
+} else if (email) {
+validationMsg.textContent = '⚠ Invalid email format';
+validationMsg.style.color = 'var(--warning)';
+inputElement.style.borderColor = 'var(--warning)';
+return false;
+} else {
+validationMsg.textContent = '';
+inputElement.style.borderColor = '';
+return false;
+}
+};
+
+inputElement.addEventListener('blur', validateEmail);
+inputElement.addEventListener('input', validateEmail);
+};
+
 const makeWebsiteLink = (url) => {
 if (!url) return '';
 // Ensure URL has protocol
@@ -4389,6 +4349,7 @@ state.transactions = state.transactions.filter(t => t.id !== id);
 save();
 renderTxnTable();
 renderDivisions();
+updateFinancialSummary(); // Update Financial Summary and Platform Activity panels
 showToast('Transaction deleted');
 }
 
@@ -4402,61 +4363,15 @@ const title = isEdit ? 'Edit Contact' : 'New Contact';
 // Calculate contact metrics if editing
 let contactLTV = 0;
 let contactTransactions = 0;
-let health = { score: 50, status: 'fair', factors: [] };
-let churn = { risk: 0, level: 'low', reasons: [] };
-let actions = [];
-
 if (contact) {
 const txs = state.transactions.filter(t => t.customer === contact.name);
 contactLTV = txs.filter(t => t.type === 'revenue').reduce((sum, t) => sum + t.amount, 0);
 contactTransactions = txs.length;
-health = calculateCustomerHealth(contact);
-churn = predictChurnRisk(contact);
-actions = generateNextBestActions(contact);
 }
-
-const healthColors = {
-'excellent': '#4ade80',
-'good': '#6ee7b7',
-'fair': '#ffb86b',
-'poor': '#ff6b6b',
-'critical': '#dc2626'
-};
-const healthColor = healthColors[health.status] || '#64748b';
 
 const html = '<div>' +
 '<h3>' + title + '</h3>' +
-'<p class="tiny muted" style="margin-bottom: 24px;">Manage contact information and track engagement</p>' +
-
-// Smart insights for existing contacts
-(isEdit ? 
-'<div style="background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(96,165,250,0.1)); border: 1px solid var(--accent-primary); border-radius: 12px; padding: 16px; margin-bottom: 20px;">' +
-'<h4 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--accent-primary);">🔮 Smart Insights</h4>' +
-'<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">' +
-'<div style="text-align: center; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">' +
-'<div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Health Score</div>' +
-'<div style="font-size: 20px; font-weight: 800; color: ' + healthColor + ';">' + health.score + '</div>' +
-'</div>' +
-'<div style="text-align: center; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">' +
-'<div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Lifetime Value</div>' +
-'<div style="font-size: 18px; font-weight: 800; color: var(--accent-primary);">' + money(contactLTV) + '</div>' +
-'</div>' +
-'<div style="text-align: center; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">' +
-'<div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Transactions</div>' +
-'<div style="font-size: 20px; font-weight: 800; color: var(--accent-tertiary);">' + contactTransactions + '</div>' +
-'</div>' +
-'</div>' +
-(churn.level === 'high' || churn.level === 'critical' ? 
-'<div style="background: rgba(255,107,107,0.15); border: 1px solid var(--danger); border-radius: 8px; padding: 10px; margin-bottom: 12px;">' +
-'<strong style="color: var(--danger);">⚠️ Churn Risk: ' + churn.level.toUpperCase() + ' (' + churn.risk + '%)</strong>' +
-'</div>' : '') +
-(actions.length > 0 ? 
-'<div style="font-size: 12px; color: var(--text-secondary);">' +
-'<strong>Next Actions:</strong> ' + actions.slice(0, 2).map(a => a.icon + ' ' + a.action).join(', ') +
-(actions.length > 2 ? '...' : '') +
-'</div>' : '') +
-'</div>' : '') +
-
+'<p class="tiny muted" style="margin-bottom: 24px;">Manage contact information</p>' +
 '<form id="contactForm">' +
 '<div class="form-group">' +
 '<label>Name</label>' +
@@ -4469,31 +4384,11 @@ const html = '<div>' +
 '<div class="form-group">' +
 '<label>Email</label>' +
 '<input type="email" id="contactEmail" value="' + (contact ? contact.email : '') + '" required>' +
-'<small id="emailValidation" style="display: block; margin-top: 4px; font-size: 12px;"></small>' +
 '</div>' +
 '<div class="form-group">' +
 '<label>Phone</label>' +
 '<input type="tel" id="contactPhone" value="' + (contact ? contact.phone || '' : '') + '" placeholder="(555) 123-4567">' +
 '<small style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 12px;">Format: (XXX) XXX-XXXX</small>' +
-'</div>' +
-'<div class="form-group">' +
-'<label>Role/Position</label>' +
-'<select id="contactRole">' +
-'<option value="customer" ' + (contact && contact.role === 'customer' ? 'selected' : '') + '>Customer</option>' +
-'<option value="lead" ' + (contact && contact.role === 'lead' ? 'selected' : '') + '>Lead</option>' +
-'<option value="partner" ' + (contact && contact.role === 'partner' ? 'selected' : '') + '>Partner</option>' +
-'<option value="vendor" ' + (contact && contact.role === 'vendor' ? 'selected' : '') + '>Vendor</option>' +
-'<option value="other" ' + (contact && contact.role === 'other' ? 'selected' : '') + '>Other</option>' +
-'</select>' +
-'</div>' +
-'<div class="form-group">' +
-'<label>Lead Score (0-100)</label>' +
-'<input type="range" id="contactLeadScore" min="0" max="100" value="' + (contact ? contact.leadScore || 50 : 50) + '" style="width: 100%;">' +
-'<div style="display: flex; justify-content: space-between; margin-top: 4px;">' +
-'<small style="color: var(--text-muted); font-size: 11px;">Cold</small>' +
-'<small id="leadScoreValue" style="color: var(--accent-primary); font-weight: 600;">50</small>' +
-'<small style="color: var(--text-muted); font-size: 11px;">Hot</small>' +
-'</div>' +
 '</div>' +
 '<div class="form-group">' +
 '<label>Product/Service</label>' +
@@ -4514,14 +4409,19 @@ state.products.filter(p => p.division === 'reservations').map(p => '<option valu
 '<input type="text" id="contactDivision" value="" disabled style="background: rgba(255,255,255,0.05); color: var(--text-primary); font-weight: 600;">' +
 '</div>' +
 '<div class="form-group">' +
-'<label>Tags (comma-separated)</label>' +
-'<input type="text" id="contactTags" value="' + (contact && contact.tags ? contact.tags.join(', ') : '') + '" placeholder="vip, enterprise, tech">' +
-'<small style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 11px;">Add tags for better categorization</small>' +
-'</div>' +
-'<div class="form-group">' +
 '<label>Notes</label>' +
 '<textarea id="contactNotes" style="min-height: 80px;" placeholder="Add notes about this contact...">' + (contact ? contact.notes || '' : '') + '</textarea>' +
 '</div>' +
+(isEdit && contactTransactions > 0 ? 
+'<div style="background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(96,165,250,0.1)); border: 1px solid var(--accent-primary); border-radius: 12px; padding: 16px; margin: 20px 0;">' +
+'<h4 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--accent-primary);">💡 Contact Insights</h4>' +
+'<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 13px; color: var(--text-secondary);">' +
+'<div><strong>Lifetime Value:</strong> ' + money(contactLTV) + '</div>' +
+'<div><strong>Total Transactions:</strong> ' + contactTransactions + '</div>' +
+'<div><strong>Avg Transaction:</strong> ' + money(contactTransactions > 0 ? contactLTV / contactTransactions : 0) + '</div>' +
+'<div><strong>Status:</strong> ' + (contactLTV > 1000 ? '🌟 VIP' : contactLTV > 500 ? '⭐ Valued' : '👤 Standard') + '</div>' +
+'</div>' +
+'</div>' : '') +
 '<div style="display: flex; gap: 12px; margin-top: 24px;">' +
 '<button type="submit" class="btn" style="flex: 1;">💾 ' + (isEdit ? 'Update' : 'Save') + '</button>' +
 '<button type="button" id="cancelContact" class="ghost" style="flex: 1;">Cancel</button>' +
@@ -4535,10 +4435,7 @@ const form = $('#contactForm');
 const productSelect = $('#contactProduct');
 const divisionInput = $('#contactDivision');
 const emailInput = $('#contactEmail');
-const emailValidation = $('#emailValidation');
 const phoneInput = $('#contactPhone');
-const leadScoreInput = $('#contactLeadScore');
-const leadScoreValue = $('#leadScoreValue');
 
 // Auto-assign division based on product
 function updateDivisionFromProduct() {
@@ -4556,74 +4453,17 @@ divisionInput.value = divisionNames[product.division] || '';
 }
 }
 
-// Email validation
-function validateEmail() {
-const email = emailInput.value;
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-if (email && emailRegex.test(email)) {
-emailValidation.textContent = '✓ Valid email format';
-emailValidation.style.color = 'var(--success)';
-return true;
-} else if (email) {
-emailValidation.textContent = '⚠ Invalid email format';
-emailValidation.style.color = 'var(--warning)';
-return false;
-} else {
-emailValidation.textContent = '';
-return false;
-}
-}
-
-// Phone formatting
-function formatPhone() {
-let phone = phoneInput.value.replace(/\D/g, '');
-if (phone.length > 0) {
-if (phone.length <= 3) {
-phoneInput.value = '(' + phone;
-} else if (phone.length <= 6) {
-phoneInput.value = '(' + phone.slice(0, 3) + ') ' + phone.slice(3);
-} else {
-phoneInput.value = '(' + phone.slice(0, 3) + ') ' + phone.slice(3, 6) + '-' + phone.slice(6, 10);
-}
-}
-}
-
-// Update lead score display
-function updateLeadScore() {
-const score = leadScoreInput.value;
-leadScoreValue.textContent = score;
-
-if (score >= 75) {
-leadScoreValue.style.color = 'var(--success)';
-} else if (score >= 50) {
-leadScoreValue.style.color = 'var(--accent-primary)';
-} else if (score >= 25) {
-leadScoreValue.style.color = 'var(--warning)';
-} else {
-leadScoreValue.style.color = 'var(--danger)';
-}
-}
-
 // Initial setup
 if (productSelect) {
 updateDivisionFromProduct();
 productSelect.addEventListener('change', updateDivisionFromProduct);
 }
 
-if (emailInput) {
-emailInput.addEventListener('blur', validateEmail);
-emailInput.addEventListener('input', validateEmail);
-if (contact) validateEmail();
-}
+// Apply email validation to contact email field
+applyEmailValidation(emailInput);
 
-if (phoneInput) {
-phoneInput.addEventListener('input', formatPhone);
-}
-
-if (leadScoreInput) {
-leadScoreInput.addEventListener('input', updateLeadScore);
-updateLeadScore();
-}
+// Apply phone formatting mask to contact phone field
+applyPhoneMask(phoneInput);
 
 if(form) {
 form.addEventListener('submit', (e) => {
@@ -4638,9 +4478,6 @@ return;
 
 const productId = $('#contactProduct').value;
 const product = state.products.find(p => p.id === productId);
-const tagsInput = $('#contactTags').value;
-const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
-const leadScore = parseInt($('#contactLeadScore').value) || 50;
 
 const data = {
 id: contact ? contact.id : uid(),
@@ -4651,50 +4488,23 @@ phone: $('#contactPhone').value,
 product: productId,
 productName: product ? product.name : '',
 division: product ? product.division : 'referrals',
-role: $('#contactRole').value,
 notes: $('#contactNotes').value,
-tags: tags,
-leadScore: leadScore,
 lastActivity: new Date().toISOString().slice(0,10),
-lastContact: contact ? contact.lastContact : new Date().toISOString(),
-created: contact ? contact.created : new Date().toISOString(),
-interactions: contact ? contact.interactions : 0,
-lifetimeValue: contact ? contact.lifetimeValue : 0,
-status: contact ? contact.status : 'active'
+created: contact ? contact.created : new Date().toISOString()
 };
-
-// Calculate health score for new or updated contact
-const health = calculateCustomerHealth(data);
-data.engagementScore = health.score;
-data.healthScore = health.status;
 
 if(isEdit) {
 const index = state.contacts.findIndex(c => c.id === contact.id);
-if(index >= 0) {
-// Preserve certain fields from original contact
-data.interactions = contact.interactions;
-data.lifetimeValue = contact.lifetimeValue;
-state.contacts[index] = data;
-}
-showToast('Contact updated successfully with smart insights!');
-addActivityLog(`Updated contact: ${data.name} (Health: ${health.score})`, 'success');
+if(index >= 0) state.contacts[index] = data;
+showToast('Contact updated successfully');
 } else {
 state.contacts.push(data);
-showToast('Contact created successfully with smart insights!');
-addActivityLog(`Created contact: ${data.name} (Lead Score: ${leadScore})`, 'success');
-
-// Add notification for high-value contacts
-if (leadScore >= 75) {
-addNotification(
-'🔥 High-Priority Contact',
-`${data.name} has been added with a high lead score (${leadScore}). Consider immediate follow-up.`,
-'success'
-);
-}
+showToast('Contact created successfully');
 }
 
 save();
 renderContacts();
+updateFinancialSummary(); // Update Platform Activity panel
 window.closeModal();
 });
 }
@@ -4709,6 +4519,7 @@ if(!confirm('Delete this contact?')) return;
 state.contacts = state.contacts.filter(c => c.id !== id);
 save();
 renderContacts();
+updateFinancialSummary(); // Update Platform Activity panel
 showToast('Contact deleted');
 }
 
@@ -5348,6 +5159,7 @@ showToast('Note created successfully');
 
 save();
 renderNotes();
+updateFinancialSummary(); // Update Platform Activity panel
 window.closeModal();
 });
 }
@@ -5362,6 +5174,7 @@ if(!confirm('Delete this note?')) return;
 state.notes = state.notes.filter(n => n.id !== id);
 save();
 renderNotes();
+updateFinancialSummary(); // Update Platform Activity panel
 showToast('Note deleted');
 }
 
@@ -5424,7 +5237,8 @@ const html = '<div>' +
 '</div>' +
 '<div class="form-group">' +
 '<label>Phone</label>' +
-'<input type="text" id="teamPhone" value="' + (member ? member.phone || '' : '') + '">' +
+'<input type="tel" id="teamPhone" value="' + (member ? member.phone || '' : '') + '" placeholder="(555) 123-4567">' +
+'<small style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 12px;">Format: (XXX) XXX-XXXX</small>' +
 '</div>' +
 '<div class="form-group">' +
 '<label>Department</label>' +
@@ -5448,6 +5262,15 @@ window.openModal(html);
 
 setTimeout(() => {
 const form = $('#teamForm');
+const teamEmailInput = $('#teamEmail');
+const teamPhoneInput = $('#teamPhone');
+
+// Apply email validation to team email field
+applyEmailValidation(teamEmailInput);
+
+// Apply phone formatting mask to team phone field
+applyPhoneMask(teamPhoneInput);
+
 if(form) {
 form.addEventListener('submit', (e) => {
 e.preventDefault();
@@ -5537,6 +5360,11 @@ const html = '<div>' +
 '<input type="email" id="vendorContact" value="' + (vendor ? vendor.contact || '' : '') + '">' +
 '</div>' +
 '<div class="form-group">' +
+'<label>Contact Phone</label>' +
+'<input type="tel" id="vendorPhone" value="' + (vendor ? vendor.phone || '' : '') + '" placeholder="(555) 123-4567">' +
+'<small style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 12px;">Format: (XXX) XXX-XXXX</small>' +
+'</div>' +
+'<div class="form-group">' +
 '<label>Renewal Date</label>' +
 '<input type="date" id="vendorRenewal" value="' + (vendor ? vendor.renewalDate || '' : '') + '">' +
 '</div>' +
@@ -5550,6 +5378,15 @@ window.openModal(html);
 
 setTimeout(() => {
 const form = $('#vendorForm');
+const vendorPhoneInput = $('#vendorPhone');
+const vendorEmailInput = $('#vendorContact');
+
+// Apply phone formatting mask to vendor phone field
+applyPhoneMask(vendorPhoneInput);
+
+// Apply email validation to vendor email field
+applyEmailValidation(vendorEmailInput);
+
 if(form) {
 form.addEventListener('submit', (e) => {
 e.preventDefault();
@@ -5562,6 +5399,7 @@ monthlyCost: parseFloat($('#vendorCost').value) || 0,
 status: $('#vendorStatus').value,
 website: $('#vendorWebsite').value || '',
 contact: $('#vendorContact').value || '',
+phone: $('#vendorPhone').value || '',
 renewalDate: $('#vendorRenewal').value || '',
 created: vendor ? vendor.created : new Date().toISOString(),
 updated: new Date().toISOString()
@@ -5638,6 +5476,11 @@ const html = '<div>' +
 '<input type="email" id="dealEmail" value="' + (deal ? deal.contactEmail || '' : '') + '">' +
 '</div>' +
 '<div class="form-group">' +
+'<label>Contact Phone</label>' +
+'<input type="tel" id="dealPhone" value="' + (deal ? deal.contactPhone || '' : '') + '" placeholder="(555) 123-4567">' +
+'<small style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 12px;">Format: (XXX) XXX-XXXX</small>' +
+'</div>' +
+'<div class="form-group">' +
 '<label>Notes</label>' +
 '<textarea id="dealNotes" style="min-height: 80px;" placeholder="Add notes about this deal...">' + (deal ? deal.notes || '' : '') + '</textarea>' +
 '</div>' +
@@ -5651,6 +5494,15 @@ window.openModal(html);
 
 setTimeout(() => {
 const form = $('#dealForm');
+const dealPhoneInput = $('#dealPhone');
+const dealEmailInput = $('#dealEmail');
+
+// Apply phone formatting mask to deal phone field
+applyPhoneMask(dealPhoneInput);
+
+// Apply email validation to deal email field
+applyEmailValidation(dealEmailInput);
+
 if(form) {
 form.addEventListener('submit', (e) => {
 e.preventDefault();
@@ -5664,6 +5516,7 @@ leadScore: parseInt($('#dealLeadScore').value),
 expectedCloseDate: $('#dealCloseDate').value || '',
 contactPerson: $('#dealContact').value || '',
 contactEmail: $('#dealEmail').value || '',
+contactPhone: $('#dealPhone').value || '',
 notes: $('#dealNotes').value || '',
 created: deal ? deal.created : new Date().toISOString(),
 updated: new Date().toISOString()
@@ -5709,38 +5562,155 @@ const stageColors = {
 'closed-lost': '#ff6b6b'
 };
 
-let html = '<div style="width: 95vw; max-width: 1400px;">' +
-'<h3>📊 Deal Pipeline</h3>' +
-'<p class="tiny muted" style="margin-bottom: 24px;">Visualize your sales funnel</p>' +
-'<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 24px;">';
+const deals = state.deals || [];
+
+// Calculate advanced pipeline metrics
+const activeStages = ['lead', 'qualified', 'proposal', 'negotiation'];
+const activeDeals = deals.filter(d => activeStages.includes(d.stage));
+const totalPipelineValue = activeDeals.reduce((sum, d) => sum + d.value, 0);
+const wonDeals = deals.filter(d => d.stage === 'closed-won');
+const lostDeals = deals.filter(d => d.stage === 'closed-lost');
+const totalWonValue = wonDeals.reduce((sum, d) => sum + d.value, 0);
+const totalLostValue = lostDeals.reduce((sum, d) => sum + d.value, 0);
+const closedDeals = wonDeals.length + lostDeals.length;
+const winRate = closedDeals > 0 ? ((wonDeals.length / closedDeals) * 100).toFixed(1) : 0;
+const avgDealSize = wonDeals.length > 0 ? (totalWonValue / wonDeals.length) : 0;
+const avgLeadScore = activeDeals.length > 0 ? Math.round(activeDeals.reduce((sum, d) => sum + (d.leadScore || 0), 0) / activeDeals.length) : 0;
+
+// Calculate conversion rates between stages
+const conversionRates = {};
+for (let i = 0; i < stages.length - 2; i++) {
+const currentStage = stages[i];
+const nextStage = stages[i + 1];
+const currentCount = deals.filter(d => d.stage === currentStage).length;
+const nextCount = deals.filter(d => d.stage === nextStage).length + deals.filter(d => stages.indexOf(d.stage) > i).length;
+conversionRates[currentStage] = currentCount > 0 ? ((nextCount / currentCount) * 100).toFixed(1) : 0;
+}
+
+// Calculate deal velocity (avg days in pipeline for won deals)
+const avgDaysToClose = wonDeals.length > 0 ? Math.round(wonDeals.reduce((sum, d) => {
+const created = new Date(d.created);
+const updated = new Date(d.updated);
+return sum + ((updated - created) / (1000 * 60 * 60 * 24));
+}, 0) / wonDeals.length) : 0;
+
+// Revenue forecast (pipeline value * win rate)
+const forecastedRevenue = totalPipelineValue * (parseFloat(winRate) / 100);
+
+// Risk scoring - deals with low lead scores in late stages
+const atRiskDeals = deals.filter(d => ['proposal', 'negotiation'].includes(d.stage) && (d.leadScore || 0) < 50);
+
+let html = '<div style="width: 95vw; max-width: 1600px;">' +
+'<h3 style="font-size: 24px; margin-bottom: 8px;">📊 Deal Pipeline Analytics</h3>' +
+'<p class="tiny muted" style="margin-bottom: 24px;">Comprehensive sales funnel visualization and insights</p>';
+
+// Pipeline Health Dashboard
+html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; padding: 20px; background: linear-gradient(135deg, rgba(110,231,183,0.08), rgba(96,165,250,0.08)); border-radius: 12px; border: 1px solid var(--glass-border);">';
+html += '<div style="text-align: center;"><div style="font-size: 24px; font-weight: 700; color: var(--accent-primary);">' + money(totalPipelineValue) + '</div><div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Pipeline Value</div></div>';
+html += '<div style="text-align: center;"><div style="font-size: 24px; font-weight: 700; color: var(--success);">' + winRate + '%</div><div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Win Rate</div></div>';
+html += '<div style="text-align: center;"><div style="font-size: 24px; font-weight: 700; color: var(--accent-secondary);">' + money(avgDealSize) + '</div><div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Avg Deal Size</div></div>';
+html += '<div style="text-align: center;"><div style="font-size: 24px; font-weight: 700; color: var(--accent-tertiary);">' + avgDaysToClose + '</div><div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Avg Days to Close</div></div>';
+html += '<div style="text-align: center;"><div style="font-size: 24px; font-weight: 700; color: var(--warning);">' + money(forecastedRevenue) + '</div><div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Forecasted Revenue</div></div>';
+html += '<div style="text-align: center;"><div style="font-size: 24px; font-weight: 700; color: ' + (atRiskDeals.length > 0 ? 'var(--danger)' : 'var(--success)') + ';">' + atRiskDeals.length + '</div><div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">At-Risk Deals</div></div>';
+html += '</div>';
+
+// Conversion Funnel
+html += '<div style="margin-bottom: 24px; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px solid var(--glass-border);">';
+html += '<h4 style="font-size: 14px; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">📈 Conversion Funnel</h4>';
+html += '<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">';
+['lead', 'qualified', 'proposal', 'negotiation'].forEach((stage, idx) => {
+const stageDeals = deals.filter(d => d.stage === stage);
+const convRate = conversionRates[stage] || 0;
+html += '<div style="flex: 1; min-width: 100px; text-align: center;">';
+html += '<div style="font-size: 18px; font-weight: 700; color: ' + stageColors[stage] + ';">' + stageDeals.length + '</div>';
+html += '<div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">' + stageNames[stage] + '</div>';
+if (idx < 3) {
+html += '<div style="font-size: 10px; color: var(--accent-primary); margin-top: 4px;">→ ' + convRate + '%</div>';
+}
+html += '</div>';
+if (idx < 3) {
+html += '<div style="color: var(--text-muted); font-size: 20px;">→</div>';
+}
+});
+html += '</div></div>';
+
+// Stage-by-Stage Analysis
+html += '<div style="margin-bottom: 24px;"><h4 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text-primary);">🎯 Pipeline Stages</h4></div>';
+html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">';
 
 stages.forEach(stage => {
-const stageDeals = (state.deals || []).filter(d => d.stage === stage);
+const stageDeals = deals.filter(d => d.stage === stage);
 const totalValue = stageDeals.reduce((sum, d) => sum + d.value, 0);
+const avgValue = stageDeals.length > 0 ? totalValue / stageDeals.length : 0;
+const avgScore = stageDeals.length > 0 ? Math.round(stageDeals.reduce((sum, d) => sum + (d.leadScore || 0), 0) / stageDeals.length) : 0;
 
-html += '<div style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 12px; padding: 16px;">';
+html += '<div style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-left: 4px solid ' + stageColors[stage] + '; border-radius: 12px; padding: 16px; transition: all 0.3s ease;" onmouseover="this.style.background=\'rgba(255,255,255,0.06)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.03)\'">';
 html += '<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">';
-html += '<div style="width: 8px; height: 8px; border-radius: 50%; background: ' + stageColors[stage] + ';"></div>';
-html += '<div style="font-weight: 700; color: var(--text-primary);">' + stageNames[stage] + '</div>';
+html += '<div style="width: 10px; height: 10px; border-radius: 50%; background: ' + stageColors[stage] + ';"></div>';
+html += '<div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">' + stageNames[stage] + '</div>';
 html += '</div>';
-html += '<div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">' + stageDeals.length + ' deals • ' + money(totalValue) + '</div>';
+html += '<div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;"><strong>' + stageDeals.length + '</strong> deals • <strong>' + money(totalValue) + '</strong></div>';
+html += '<div style="font-size: 11px; color: var(--text-muted); padding: 8px; background: rgba(255,255,255,0.03); border-radius: 6px; margin-bottom: 8px;">';
+html += '💰 Avg: ' + money(avgValue) + '<br>';
+html += '⭐ Avg Score: ' + avgScore + '/100';
+html += '</div>';
 
 if (stageDeals.length > 0) {
+html += '<div style="max-height: 300px; overflow-y: auto;">';
 stageDeals.forEach(deal => {
-html += '<div style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; padding: 12px; margin-bottom: 8px; cursor: pointer;" onclick="editDeal(\'' + deal.id + '\')">';
-html += '<div style="font-weight: 600; font-size: 13px; color: var(--text-primary); margin-bottom: 4px;">' + escapeHtml(deal.name) + '</div>';
-html += '<div style="font-size: 12px; color: var(--text-secondary);">' + money(deal.value) + '</div>';
-html += '<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Lead Score: ' + deal.leadScore + '/100</div>';
+const scoreColor = deal.leadScore >= 75 ? 'var(--success)' : deal.leadScore >= 50 ? 'var(--warning)' : 'var(--danger)';
+html += '<div style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px; margin-bottom: 8px; cursor: pointer; transition: all 0.3s ease;" onclick="editDeal(\'' + deal.id + '\')" onmouseover="this.style.borderColor=\'' + stageColors[stage] + '\'" onmouseout="this.style.borderColor=\'var(--glass-border)\'">';
+html += '<div style="font-weight: 600; font-size: 12px; color: var(--text-primary); margin-bottom: 4px;">' + escapeHtml(deal.name) + '</div>';
+html += '<div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">' + escapeHtml(deal.customer) + '</div>';
+html += '<div style="display: flex; justify-content: space-between; align-items: center;">';
+html += '<div style="font-size: 12px; color: var(--accent-primary); font-weight: 600;">' + money(deal.value) + '</div>';
+html += '<div style="font-size: 10px; padding: 2px 8px; background: ' + scoreColor + '20; color: ' + scoreColor + '; border-radius: 10px; font-weight: 600;">Score: ' + (deal.leadScore || 0) + '</div>';
+html += '</div>';
+if (deal.expectedCloseDate) {
+html += '<div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">📅 Close: ' + deal.expectedCloseDate + '</div>';
+}
 html += '</div>';
 });
+html += '</div>';
 } else {
-html += '<div style="text-align: center; padding: 16px; font-size: 12px; color: var(--text-muted);">No deals</div>';
+html += '<div style="text-align: center; padding: 16px; font-size: 11px; color: var(--text-muted); background: rgba(255,255,255,0.02); border-radius: 8px;">No deals</div>';
 }
 
 html += '</div>';
 });
 
 html += '</div>';
+
+// Smart Insights
+html += '<div style="margin-bottom: 24px; padding: 20px; background: linear-gradient(135deg, rgba(124,92,255,0.08), rgba(110,231,183,0.08)); border-radius: 12px; border: 1px solid var(--glass-border);">';
+html += '<h4 style="font-size: 14px; font-weight: 700; margin-bottom: 16px; color: var(--accent-secondary);">💡 Pipeline Insights</h4>';
+html += '<div style="display: grid; gap: 12px; font-size: 13px; color: var(--text-secondary); line-height: 1.6;">';
+
+if (atRiskDeals.length > 0) {
+html += '<div style="padding: 12px; background: rgba(255,107,107,0.1); border-left: 3px solid var(--danger); border-radius: 8px;">⚠️ <strong>' + atRiskDeals.length + ' deals at risk</strong> - Low lead scores in advanced stages. Consider follow-up or re-qualification.</div>';
+}
+if (parseFloat(winRate) < 30 && closedDeals > 5) {
+html += '<div style="padding: 12px; background: rgba(255,182,107,0.1); border-left: 3px solid var(--warning); border-radius: 8px;">📊 Win rate below 30%. Review qualification criteria and proposal strategies.</div>';
+}
+if (avgDaysToClose > 60) {
+html += '<div style="padding: 12px; background: rgba(255,182,107,0.1); border-left: 3px solid var(--warning); border-radius: 8px;">⏱️ Average sales cycle is ' + avgDaysToClose + ' days. Consider ways to accelerate deal velocity.</div>';
+}
+const stagnantDeals = activeDeals.filter(d => {
+const daysSinceUpdate = Math.floor((new Date() - new Date(d.updated)) / (1000 * 60 * 60 * 24));
+return daysSinceUpdate > 30;
+});
+if (stagnantDeals.length > 0) {
+html += '<div style="padding: 12px; background: rgba(255,182,107,0.1); border-left: 3px solid var(--warning); border-radius: 8px;">🕐 ' + stagnantDeals.length + ' deals inactive for 30+ days. Time to re-engage or move to lost.</div>';
+}
+if (parseFloat(winRate) >= 50 && closedDeals > 5) {
+html += '<div style="padding: 12px; background: rgba(74,222,128,0.1); border-left: 3px solid var(--success); border-radius: 8px;">✅ Excellent win rate of ' + winRate + '%! Your sales process is performing well.</div>';
+}
+if (html.indexOf('padding: 12px;') === -1) {
+html += '<div style="padding: 12px; background: rgba(110,231,183,0.1); border-left: 3px solid var(--accent-primary); border-radius: 8px;">✨ Pipeline looks healthy! Keep tracking these metrics to maintain performance.</div>';
+}
+
+html += '</div></div>';
+
 html += '<div style="margin-top: 24px; text-align: right;">';
 html += '<button class="ghost" id="closePipelineView">Close</button>';
 html += '</div>';
@@ -5804,13 +5774,26 @@ URL.revokeObjectURL(url);
 function renderCRM() {
 const deals = state.deals || [];
 
-// Update CRM stats
-const activeDeals = deals.filter(d => !['closed-won', 'closed-lost'].includes(d.stage));
+// Update CRM stats with more comprehensive metrics
+const activeStages = ['lead', 'qualified', 'proposal', 'negotiation'];
+const activeDeals = deals.filter(d => activeStages.includes(d.stage));
 const wonDeals = deals.filter(d => d.stage === 'closed-won');
 const lostDeals = deals.filter(d => d.stage === 'closed-lost');
 const closedDeals = wonDeals.length + lostDeals.length;
 const winRate = closedDeals > 0 ? Math.round((wonDeals.length / closedDeals) * 100) : 0;
 const avgLeadScore = deals.length > 0 ? Math.round(deals.reduce((sum, d) => sum + (d.leadScore || 0), 0) / deals.length) : 0;
+
+// Calculate pipeline value and forecasted revenue
+const totalPipelineValue = activeDeals.reduce((sum, d) => sum + d.value, 0);
+const totalWonValue = wonDeals.reduce((sum, d) => sum + d.value, 0);
+const avgDealSize = wonDeals.length > 0 ? totalWonValue / wonDeals.length : 0;
+
+// Calculate deal velocity
+const avgDaysToClose = wonDeals.length > 0 ? Math.round(wonDeals.reduce((sum, d) => {
+const created = new Date(d.created);
+const updated = new Date(d.updated);
+return sum + ((updated - created) / (1000 * 60 * 60 * 24));
+}, 0) / wonDeals.length) : 0;
 
 // Upcoming renewals (deals with expected close date in next 30 days)
 const now = new Date();
@@ -5845,39 +5828,91 @@ grid.innerHTML = '<div class="panel" style="text-align: center; padding: 48px 24
 return;
 }
 
-// Create table
-let html = '<div class="panel">';
+// Add comprehensive pipeline analytics before the table
+let html = '<div class="panel" style="margin-bottom: 24px; background: linear-gradient(135deg, rgba(110,231,183,0.05), rgba(96,165,250,0.05));">';
+html += '<h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">📊 Pipeline Analytics</h3>';
+html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px;">';
+
+// Key metrics
+html += '<div style="text-align: center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--glass-border);">';
+html += '<div style="font-size: 20px; font-weight: 700; color: var(--accent-primary);">' + money(totalPipelineValue) + '</div>';
+html += '<div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Pipeline Value</div>';
+html += '</div>';
+
+html += '<div style="text-align: center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--glass-border);">';
+html += '<div style="font-size: 20px; font-weight: 700; color: var(--success);">' + money(totalWonValue) + '</div>';
+html += '<div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Total Won</div>';
+html += '</div>';
+
+html += '<div style="text-align: center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--glass-border);">';
+html += '<div style="font-size: 20px; font-weight: 700; color: var(--accent-secondary);">' + money(avgDealSize) + '</div>';
+html += '<div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Avg Deal Size</div>';
+html += '</div>';
+
+html += '<div style="text-align: center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--glass-border);">';
+html += '<div style="font-size: 20px; font-weight: 700; color: var(--accent-tertiary);">' + avgDaysToClose + 'd</div>';
+html += '<div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Avg Days to Close</div>';
+html += '</div>';
+
+html += '<div style="text-align: center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--glass-border);">';
+html += '<div style="font-size: 20px; font-weight: 700; color: var(--warning);">' + money(totalPipelineValue * (winRate / 100)) + '</div>';
+html += '<div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Forecast</div>';
+html += '</div>';
+
+html += '</div>';
+
+// Stage distribution
+html += '<div style="padding: 16px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid var(--glass-border);">';
+html += '<h4 style="font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--text-secondary);">Stage Distribution</h4>';
+html += '<div style="display: flex; gap: 8px; flex-wrap: wrap;">';
+
+const stages = ['lead', 'qualified', 'proposal', 'negotiation', 'closed-won', 'closed-lost'];
+const stageNames = { 'lead': 'Lead', 'qualified': 'Qualified', 'proposal': 'Proposal', 'negotiation': 'Negotiation', 'closed-won': 'Won', 'closed-lost': 'Lost' };
+const stageColors = { 'lead': '#64748b', 'qualified': '#60a5fa', 'proposal': '#7c5cff', 'negotiation': '#ffb86b', 'closed-won': '#4ade80', 'closed-lost': '#ff6b6b' };
+
+stages.forEach(stage => {
+const stageDeals = deals.filter(d => d.stage === stage);
+const stageValue = stageDeals.reduce((sum, d) => sum + d.value, 0);
+html += '<div style="flex: 1; min-width: 90px; padding: 8px; background: ' + stageColors[stage] + '15; border-left: 3px solid ' + stageColors[stage] + '; border-radius: 6px;">';
+html += '<div style="font-size: 16px; font-weight: 700; color: ' + stageColors[stage] + ';">' + stageDeals.length + '</div>';
+html += '<div style="font-size: 10px; color: var(--text-secondary);">' + stageNames[stage] + '</div>';
+html += '<div style="font-size: 9px; color: var(--text-muted); margin-top: 2px;">' + money(stageValue) + '</div>';
+html += '</div>';
+});
+
+html += '</div></div></div>';
+
+// Create deals table
+html += '<div class="panel">';
+html += '<div style="display: flex; justify-content: between; align-items: center; margin-bottom: 16px;">';
+html += '<h4 style="font-size: 14px; font-weight: 700; color: var(--text-primary);">All Deals (' + deals.length + ')</h4>';
+html += '</div>';
+html += '<div style="overflow-x: auto;">';
 html += '<table style="width: 100%; border-collapse: collapse;">';
 html += '<thead><tr style="border-bottom: 2px solid var(--glass-border); text-align: left;">';
 html += '<th style="padding: 12px; font-size: 12px; font-weight: 700; color: var(--text-secondary);">Deal Name</th>';
 html += '<th style="padding: 12px; font-size: 12px; font-weight: 700; color: var(--text-secondary);">Customer</th>';
 html += '<th style="padding: 12px; font-size: 12px; font-weight: 700; color: var(--text-secondary);">Value</th>';
 html += '<th style="padding: 12px; font-size: 12px; font-weight: 700; color: var(--text-secondary);">Stage</th>';
-html += '<th style="padding: 12px; font-size: 12px; font-weight: 700; color: var(--text-secondary);">Lead Score</th>';
+html += '<th style="padding: 12px; font-size: 12px; font-weight: 700; color: var(--text-secondary);">Score</th>';
 html += '<th style="padding: 12px; font-size: 12px; font-weight: 700; color: var(--text-secondary);">Close Date</th>';
+html += '<th style="padding: 12px; font-size: 12px; font-weight: 700; color: var(--text-secondary);">Contact</th>';
 html += '<th style="padding: 12px; font-size: 12px; font-weight: 700; color: var(--text-secondary);">Actions</th>';
 html += '</tr></thead>';
 html += '<tbody>';
 
 deals.forEach(deal => {
-const stageColors = {
-'lead': '#64748b',
-'qualified': '#60a5fa',
-'proposal': '#7c5cff',
-'negotiation': '#ffb86b',
-'closed-won': '#4ade80',
-'closed-lost': '#ff6b6b'
-};
-
 const stageColor = stageColors[deal.stage] || '#64748b';
+const scoreColor = (deal.leadScore || 0) >= 75 ? 'var(--success)' : (deal.leadScore || 0) >= 50 ? 'var(--warning)' : 'var(--danger)';
 
-html += '<tr style="border-bottom: 1px solid var(--glass-border);">';
-html += '<td style="padding: 12px;"><div style="font-weight: 600; color: var(--text-primary);">' + escapeHtml(deal.name) + '</div></td>';
-html += '<td style="padding: 12px; color: var(--text-secondary);">' + escapeHtml(deal.customer) + '</td>';
-html += '<td style="padding: 12px; font-weight: 600; color: var(--accent-primary);">' + money(deal.value) + '</td>';
-html += '<td style="padding: 12px;"><span style="display: inline-block; padding: 4px 12px; background: ' + stageColor + '20; color: ' + stageColor + '; border-radius: 12px; font-size: 11px; font-weight: 600;">' + deal.stage + '</span></td>';
-html += '<td style="padding: 12px; color: var(--text-secondary);">' + (deal.leadScore || 0) + '/100</td>';
-html += '<td style="padding: 12px; color: var(--text-secondary);">' + (deal.expectedCloseDate || 'Not set') + '</td>';
+html += '<tr style="border-bottom: 1px solid var(--glass-border); transition: all 0.3s ease;" onmouseover="this.style.background=\'rgba(255,255,255,0.03)\'" onmouseout="this.style.background=\'transparent\'">';
+html += '<td style="padding: 12px;"><div style="font-weight: 600; color: var(--text-primary); font-size: 13px;">' + escapeHtml(deal.name) + '</div></td>';
+html += '<td style="padding: 12px; color: var(--text-secondary); font-size: 13px;">' + escapeHtml(deal.customer) + '</td>';
+html += '<td style="padding: 12px; font-weight: 600; color: var(--accent-primary); font-size: 13px;">' + money(deal.value) + '</td>';
+html += '<td style="padding: 12px;"><span style="display: inline-block; padding: 4px 12px; background: ' + stageColor + '20; color: ' + stageColor + '; border-radius: 12px; font-size: 11px; font-weight: 600;">' + stageNames[deal.stage] + '</span></td>';
+html += '<td style="padding: 12px;"><span style="display: inline-block; padding: 4px 10px; background: ' + scoreColor + '15; color: ' + scoreColor + '; border-radius: 10px; font-size: 11px; font-weight: 600;">' + (deal.leadScore || 0) + '</span></td>';
+html += '<td style="padding: 12px; color: var(--text-secondary); font-size: 12px;">' + (deal.expectedCloseDate || 'Not set') + '</td>';
+html += '<td style="padding: 12px; color: var(--text-secondary); font-size: 12px;">' + (deal.contactPerson || '-') + '</td>';
 html += '<td style="padding: 12px;">';
 html += '<button class="ghost" onclick="editDeal(\'' + deal.id + '\')" style="padding: 4px 12px; font-size: 12px; margin-right: 4px;">Edit</button>';
 html += '<button class="ghost" onclick="deleteDeal(\'' + deal.id + '\')" style="padding: 4px 12px; font-size: 12px; color: var(--danger);">Delete</button>';
@@ -5886,7 +5921,7 @@ html += '</tr>';
 });
 
 html += '</tbody></table>';
-html += '</div>';
+html += '</div></div>';
 
 grid.innerHTML = html;
 }
@@ -7296,7 +7331,8 @@ function showLeadForm(lead = null) {
 			</div>
 			<div class="form-group">
 				<label>Phone</label>
-				<input type="tel" id="leadPhone" value="${lead ? lead.phone || '' : ''}">
+				<input type="tel" id="leadPhone" value="${lead ? lead.phone || '' : ''}" placeholder="(555) 123-4567">
+				<small style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 12px;">Format: (XXX) XXX-XXXX</small>
 			</div>
 			<div class="form-group">
 				<label>Company</label>
@@ -7344,6 +7380,15 @@ function showLeadForm(lead = null) {
 	
 	setTimeout(() => {
 		const form = $('#leadForm');
+		const leadPhoneInput = $('#leadPhone');
+		const leadEmailInput = $('#leadEmail');
+		
+		// Apply phone formatting mask to lead phone field
+		applyPhoneMask(leadPhoneInput);
+		
+		// Apply email validation to lead email field
+		applyEmailValidation(leadEmailInput);
+		
 		if (form) {
 			form.addEventListener('submit', (e) => {
 				e.preventDefault();
@@ -10187,53 +10232,11 @@ const transactionCount = customerTransactions.length;
 const totalRevenue = customerTransactions.filter(t => t.type === 'revenue').reduce((sum, t) => sum + t.amount, 0);
 const productName = product ? product.name : 'N/A';
 
-// Calculate health score
-const health = calculateCustomerHealth(c);
-const healthColors = {
-'excellent': '#4ade80',
-'good': '#6ee7b7',
-'fair': '#ffb86b',
-'poor': '#ff6b6b',
-'critical': '#dc2626'
-};
-const healthColor = healthColors[health.status] || '#64748b';
-
-// Calculate churn risk
-const churn = predictChurnRisk(c);
-const showChurnWarning = churn.level === 'high' || churn.level === 'critical';
-
-// Lead score color
-const leadScore = c.leadScore || 50;
-const leadScoreColor = leadScore >= 75 ? '#4ade80' : leadScore >= 50 ? '#6ee7b7' : leadScore >= 25 ? '#ffb86b' : '#ff6b6b';
-
-return '<div class="contact-card" style="position: relative;">' +
-// Churn warning badge
-(showChurnWarning ? '<div style="position: absolute; top: 12px; right: 12px; background: var(--danger); color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; z-index: 1;">⚠️ AT RISK</div>' : '') +
+return '<div class="contact-card">' +
 '<div class="name">' + escapeHtml(c.name) + '</div>' +
 '<div class="company">' + escapeHtml(c.company) + '</div>' +
 '<div class="email" style="margin: 6px 0;">📧 ' + makeEmailLink(c.email) + '</div>' +
 (c.phone ? '<div class="email" style="margin: 6px 0;">📱 ' + makePhoneLink(c.phone) + '</div>' : '') +
-// Tags
-(c.tags && c.tags.length > 0 ? 
-'<div style="display: flex; gap: 4px; flex-wrap: wrap; margin: 8px 0;">' +
-c.tags.slice(0, 3).map(tag => 
-`<span style="padding: 2px 8px; background: rgba(124,92,255,0.2); border: 1px solid rgba(124,92,255,0.4); border-radius: 4px; font-size: 10px; color: var(--accent-secondary);">${tag}</span>`
-).join('') +
-(c.tags.length > 3 ? `<span style="padding: 2px 8px; font-size: 10px; color: var(--text-muted);">+${c.tags.length - 3}</span>` : '') +
-'</div>' : '') +
-// Health Score & Lead Score
-'<div style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">' +
-'<div style="background: rgba(110,231,183,0.1); padding: 8px; border-radius: 6px; border-left: 3px solid ' + healthColor + ';">' +
-'<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 2px;">Health Score</div>' +
-'<div style="font-size: 16px; font-weight: 700; color: ' + healthColor + ';">' + health.score + '</div>' +
-'<div style="font-size: 9px; color: var(--text-muted); text-transform: uppercase;">' + health.status + '</div>' +
-'</div>' +
-'<div style="background: rgba(124,92,255,0.1); padding: 8px; border-radius: 6px; border-left: 3px solid ' + leadScoreColor + ';">' +
-'<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 2px;">Lead Score</div>' +
-'<div style="font-size: 16px; font-weight: 700; color: ' + leadScoreColor + ';">' + leadScore + '</div>' +
-'<div style="font-size: 9px; color: var(--text-muted);">' + (leadScore >= 75 ? 'HOT' : leadScore >= 50 ? 'WARM' : 'COLD') + '</div>' +
-'</div>' +
-'</div>' +
 '<div style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">' +
 '<span style="display: inline-block; padding: 4px 10px; background: rgba(110,231,183,0.15); border: 1px solid rgba(110,231,183,0.3); border-radius: 6px; font-size: 10px; font-weight: 600; color: ' + divisionColors[division] + ';">' + divisionLabels[division] + '</span>' +
 (product ? '<span style="font-size: 11px; color: var(--accent-primary); cursor: pointer; text-decoration: underline;" onclick="window.showProductPurchaseHistory(\'' + c.id + '\', \'' + c.name + '\', \'' + productName + '\')" title="Click to view purchase history">📦 ' + productName + '</span>' : '') +
@@ -10249,8 +10252,7 @@ c.tags.slice(0, 3).map(tag =>
 '</div>' +
 '</div>' +
 '<div class="tiny muted" style="margin-top: 8px;">Last activity: ' + c.lastActivity + '</div>' +
-'<div class="actions" style="display: flex; gap: 6px; flex-wrap: wrap;">' +
-'<button class="action-btn" onclick="window.showContactCRMInsights(\'' + c.id + '\')" style="background: linear-gradient(135deg, rgba(110,231,183,0.2), rgba(124,92,255,0.2)); border: 1px solid var(--accent-primary);">🔮 Insights</button>' +
+'<div class="actions">' +
 '<button class="action-btn" onclick="window.editContact(\'' + c.id + '\')">✏️ Edit</button>' +
 '<button class="action-btn danger" onclick="window.deleteContact(\'' + c.id + '\')">🗑️ Delete</button>' +
 '</div></div>';
@@ -10395,53 +10397,230 @@ if(container) container.innerHTML = html;
 }
 
 function renderDivisions() {
-const html = Object.keys(state.divisions).map(key => {
-const div = state.divisions[key];
-const profit = div.revenue - div.expenses;
+const divisions = state.divisions || {};
+const transactions = state.transactions || [];
+	
+// Calculate overall totals for comparison
+const overallRevenue = Object.values(divisions).reduce((sum, d) => sum + (d.revenue || 0), 0);
+const overallExpenses = Object.values(divisions).reduce((sum, d) => sum + (d.expenses || 0), 0);
+const overallProfit = overallRevenue - overallExpenses;
+	
+const html = Object.keys(divisions).map(key => {
+const div = divisions[key];
+const profit = (div.revenue || 0) - (div.expenses || 0);
 const margin = div.revenue > 0 ? ((profit / div.revenue) * 100).toFixed(1) : 0;
+const revenueShare = overallRevenue > 0 ? ((div.revenue / overallRevenue) * 100).toFixed(1) : 0;
+const expenseShare = overallExpenses > 0 ? ((div.expenses / overallExpenses) * 100).toFixed(1) : 0;
+		
 const icons = {
 referrals: '🤝',
 appointments: '📅',
 reservations: '🎫'
 };
 
-return '<div class="division-card" onclick="editDivision(\'' + key + '\')" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform=\'translateY(-4px)\'; this.style.boxShadow=\'0 8px 32px rgba(110,231,183,0.2)\';" onmouseout="this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'\';">' +
-'<div class="division-header">' +
-'<div class="division-name">' + div.name + '</div>' +
-'<div class="division-icon">' + (icons[key] || '🏢') + '</div>' +
+// Calculate advanced metrics
+const divTransactions = transactions.filter(t => t.division === key);
+const revenueTransactions = divTransactions.filter(t => t.amount > 0);
+const expenseTransactions = divTransactions.filter(t => t.amount < 0);
+		
+const avgTransactionValue = revenueTransactions.length > 0 ? 
+(revenueTransactions.reduce((sum, t) => sum + t.amount, 0) / revenueTransactions.length) : 0;
+		
+const avgExpenseValue = expenseTransactions.length > 0 ?
+(Math.abs(expenseTransactions.reduce((sum, t) => sum + t.amount, 0)) / expenseTransactions.length) : 0;
+		
+// Growth calculation (mock - would need historical data)
+const monthlyGrowth = div.mrr && div.previousMrr ? (((div.mrr - div.previousMrr) / div.previousMrr) * 100).toFixed(1) : 0;
+		
+// Expense breakdown (if available in division data)
+const expenseCategories = div.expenseBreakdown || {
+'Personnel': div.expenses * 0.45,
+'Operations': div.expenses * 0.25,
+'Marketing': div.expenses * 0.15,
+'Technology': div.expenses * 0.10,
+'Other': div.expenses * 0.05
+};
+		
+// Revenue breakdown (if available in division data)
+const revenueCategories = div.revenueBreakdown || {
+'New Customers': div.revenue * 0.40,
+'Recurring': div.revenue * 0.35,
+'Upsells': div.revenue * 0.15,
+'Other': div.revenue * 0.10
+};
+
+return '<div class="division-card" onclick="editDivision(\'' + key + '\')" style="cursor: pointer; transition: all 0.3s ease; border: 1px solid var(--glass-border);" onmouseover="this.style.transform=\'translateY(-4px)\'; this.style.boxShadow=\'0 8px 32px rgba(110,231,183,0.2)\'; this.style.borderColor=\'var(--accent-primary)\';" onmouseout="this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'\'; this.style.borderColor=\'var(--glass-border)\';">' +
+'<div class="division-header" style="margin-bottom: 16px;">' +
+'<div class="division-name" style="font-size: 18px; font-weight: 700;">' + div.name + '</div>' +
+'<div class="division-icon" style="font-size: 32px;">' + (icons[key] || '🏢') + '</div>' +
 '</div>' +
-'<div class="division-stats">' +
-'<div class="division-stat revenue">' +
-'<div class="division-stat-label">MRR</div>' +
-'<div class="division-stat-value">' + money(div.mrr || 0) + '</div>' +
+			
+// Primary Metrics Row
+'<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px;">' +
+'<div style="text-align: center;">' +
+'<div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">MRR</div>' +
+'<div style="font-size: 20px; font-weight: 700; color: var(--accent-primary);">' + money(div.mrr || 0) + '</div>' +
+(monthlyGrowth !== 0 ? '<div style="font-size: 10px; margin-top: 4px; color: ' + (monthlyGrowth > 0 ? 'var(--success)' : 'var(--danger)') + ';">' + (monthlyGrowth > 0 ? '↑' : '↓') + ' ' + Math.abs(monthlyGrowth) + '%</div>' : '') +
 '</div>' +
-'<div class="division-stat expense">' +
-'<div class="division-stat-label">ARR</div>' +
-'<div class="division-stat-value">' + money(div.arr || 0) + '</div>' +
-'</div>' +
-'<div class="division-stat" style="grid-column: 1 / -1;">' +
-'<div class="division-stat-label">Total Revenue</div>' +
-'<div class="division-stat-value">' + money(div.revenue || 0) + '</div>' +
-'</div>' +
-'<div class="division-stat" style="grid-column: 1 / -1;">' +
-'<div class="division-stat-label">Total Expenses</div>' +
-'<div class="division-stat-value" style="color: var(--danger);">' + money(div.expenses || 0) + '</div>' +
-'</div>' +
-'<div class="division-stat" style="grid-column: 1 / -1;">' +
-'<div class="division-stat-label">Transaction Count</div>' +
-'<div class="division-stat-value">' + (div.count || 0).toLocaleString() + '</div>' +
-'</div>' +
-'<div class="division-stat profit" style="grid-column: 1 / -1;">' +
-'<div class="division-stat-label">Net Profit (Margin: ' + margin + '%)</div>' +
-'<div class="division-stat-value" style="color: ' + (profit >= 0 ? 'var(--success)' : 'var(--danger)') + ';">' + money(profit) + '</div>' +
+'<div style="text-align: center;">' +
+'<div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">ARR</div>' +
+'<div style="font-size: 20px; font-weight: 700; color: var(--accent-secondary);">' + money(div.arr || 0) + '</div>' +
 '</div>' +
 '</div>' +
-'<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--glass-border); text-align: center; font-size: 12px; color: var(--text-muted);">Click to edit division details</div>' +
+			
+// Revenue & Expense Overview
+'<div style="margin-bottom: 16px; padding: 12px; background: linear-gradient(135deg, rgba(110,231,183,0.05), rgba(96,165,250,0.05)); border-radius: 8px; border: 1px solid var(--glass-border);">' +
+'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">' +
+'<div style="font-size: 12px; font-weight: 600; color: var(--text-primary);">Total Revenue</div>' +
+'<div style="font-size: 16px; font-weight: 700; color: var(--success);">' + money(div.revenue || 0) + '</div>' +
+'</div>' +
+'<div style="font-size: 10px; color: var(--text-secondary); margin-bottom: 8px;">' + revenueShare + '% of overall revenue • ' + revenueTransactions.length + ' transactions</div>' +
+'<div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin-bottom: 12px;">' +
+'<div style="height: 100%; background: linear-gradient(90deg, var(--success), var(--accent-primary)); width: ' + revenueShare + '%;"></div>' +
+'</div>' +
+'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">' +
+'<div style="font-size: 12px; font-weight: 600; color: var(--text-primary);">Total Expenses</div>' +
+'<div style="font-size: 16px; font-weight: 700; color: var(--danger);">' + money(div.expenses || 0) + '</div>' +
+'</div>' +
+'<div style="font-size: 10px; color: var(--text-secondary); margin-bottom: 8px;">' + expenseShare + '% of overall expenses • ' + expenseTransactions.length + ' transactions</div>' +
+'<div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">' +
+'<div style="height: 100%; background: linear-gradient(90deg, var(--danger), var(--warning)); width: ' + expenseShare + '%;"></div>' +
+'</div>' +
+'</div>' +
+			
+// Revenue Breakdown
+'<div style="margin-bottom: 16px; padding: 12px; background: rgba(74,222,128,0.05); border-radius: 8px; border: 1px solid rgba(74,222,128,0.2);">' +
+'<div style="font-size: 12px; font-weight: 700; margin-bottom: 12px; color: var(--success); display: flex; align-items: center; gap: 8px;"><span>💰</span> Revenue Breakdown</div>' +
+Object.entries(revenueCategories).map(([category, amount]) => {
+const percentage = div.revenue > 0 ? ((amount / div.revenue) * 100).toFixed(0) : 0;
+return '<div style="margin-bottom: 8px;">' +
+'<div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">' +
+'<span style="color: var(--text-secondary);">' + category + '</span>' +
+'<span style="color: var(--text-primary); font-weight: 600;">' + money(amount) + ' (' + percentage + '%)</span>' +
+'</div>' +
+'<div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">' +
+'<div style="height: 100%; background: var(--success); width: ' + percentage + '%;"></div>' +
+'</div>' +
+'</div>';
+}).join('') +
+'</div>' +
+			
+// Expense Breakdown
+'<div style="margin-bottom: 16px; padding: 12px; background: rgba(255,107,107,0.05); border-radius: 8px; border: 1px solid rgba(255,107,107,0.2);">' +
+'<div style="font-size: 12px; font-weight: 700; margin-bottom: 12px; color: var(--danger); display: flex; align-items: center; gap: 8px;"><span>💸</span> Expense Breakdown</div>' +
+Object.entries(expenseCategories).map(([category, amount]) => {
+const percentage = div.expenses > 0 ? ((amount / div.expenses) * 100).toFixed(0) : 0;
+return '<div style="margin-bottom: 8px;">' +
+'<div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">' +
+'<span style="color: var(--text-secondary);">' + category + '</span>' +
+'<span style="color: var(--text-primary); font-weight: 600;">' + money(amount) + ' (' + percentage + '%)</span>' +
+'</div>' +
+'<div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">' +
+'<div style="height: 100%; background: var(--danger); width: ' + percentage + '%;"></div>' +
+'</div>' +
+'</div>';
+}).join('') +
+'</div>' +
+			
+// Key Performance Indicators
+'<div style="margin-bottom: 16px; padding: 12px; background: rgba(124,92,255,0.05); border-radius: 8px; border: 1px solid rgba(124,92,255,0.2);">' +
+'<div style="font-size: 12px; font-weight: 700; margin-bottom: 12px; color: var(--accent-secondary); display: flex; align-items: center; gap: 8px;"><span>📊</span> Key Metrics</div>' +
+'<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 11px;">' +
+'<div>' +
+'<div style="color: var(--text-muted); margin-bottom: 4px;">Avg Transaction</div>' +
+'<div style="color: var(--text-primary); font-weight: 600;">' + money(avgTransactionValue) + '</div>' +
+'</div>' +
+'<div>' +
+'<div style="color: var(--text-muted); margin-bottom: 4px;">Avg Expense</div>' +
+'<div style="color: var(--text-primary); font-weight: 600;">' + money(avgExpenseValue) + '</div>' +
+'</div>' +
+'<div>' +
+'<div style="color: var(--text-muted); margin-bottom: 4px;">Transaction Count</div>' +
+'<div style="color: var(--text-primary); font-weight: 600;">' + (div.count || 0).toLocaleString() + '</div>' +
+'</div>' +
+'<div>' +
+'<div style="color: var(--text-muted); margin-bottom: 4px;">Customer CAC</div>' +
+'<div style="color: var(--text-primary); font-weight: 600;">' + money((div.expenses || 0) * 0.15 / Math.max((div.count || 1), 1)) + '</div>' +
+'</div>' +
+'</div>' +
+'</div>' +
+			
+// Profitability Summary
+'<div style="padding: 16px; background: ' + (profit >= 0 ? 'linear-gradient(135deg, rgba(74,222,128,0.15), rgba(110,231,183,0.15))' : 'linear-gradient(135deg, rgba(255,107,107,0.15), rgba(255,182,107,0.15))') + '; border-radius: 8px; border: 2px solid ' + (profit >= 0 ? 'var(--success)' : 'var(--danger)') + '; text-align: center; margin-bottom: 16px;">' +
+'<div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">NET PROFIT</div>' +
+'<div style="font-size: 24px; font-weight: 700; color: ' + (profit >= 0 ? 'var(--success)' : 'var(--danger)') + ';">' + money(profit) + '</div>' +
+'<div style="font-size: 12px; margin-top: 8px; color: var(--text-secondary);">Margin: <strong>' + margin + '%</strong></div>' +
+'<div style="font-size: 10px; margin-top: 4px; padding: 6px 12px; background: rgba(255,255,255,0.1); border-radius: 6px; display: inline-block;">' +
+(profit >= 0 ? '✅ Profitable' : '⚠️ Operating at Loss') +
+'</div>' +
+'</div>' +
+			
+// Smart Insights
+'<div style="padding: 12px; background: rgba(110,231,183,0.08); border-radius: 8px; border-left: 3px solid var(--accent-primary); margin-bottom: 12px;">' +
+'<div style="font-size: 11px; font-weight: 700; color: var(--accent-primary); margin-bottom: 6px;">💡 Smart Insights</div>' +
+'<div style="font-size: 10px; color: var(--text-secondary); line-height: 1.5;">' +
+(margin > 50 ? '🚀 Excellent margins! This division is highly profitable.' : 
+margin > 30 ? '✅ Healthy profit margin. Strong performance.' : 
+margin > 10 ? '⚠️ Moderate margins. Look for cost optimization opportunities.' : 
+'🔴 Low margins. Review pricing strategy and cost structure.') +
+'<br>' +
+(revenueShare > 40 ? '💪 Major revenue contributor (' + revenueShare + '% of total).' : 
+revenueShare > 20 ? '📊 Significant revenue source.' : 
+'📈 Growth opportunity - consider scaling this division.') +
+'</div>' +
+'</div>' +
+			
+'<div style="padding-top: 12px; border-top: 1px solid var(--glass-border); text-align: center; font-size: 11px; color: var(--text-muted);">Click to edit division details and drill deeper</div>' +
 '</div>';
 }).join('');
 
 const grid = $('#divisionsGrid');
 if(grid) grid.innerHTML = html;
+	
+// Also update the dashboard Division Performance summary if visible
+updateDivisionSummary();
+}
+
+// New function to update dashboard division summary
+function updateDivisionSummary() {
+const divisionMetrics = $('#divisionMetrics');
+if (!divisionMetrics) return;
+	
+const divisions = state.divisions || {};
+const overallRevenue = Object.values(divisions).reduce((sum, d) => sum + (d.revenue || 0), 0);
+const overallExpenses = Object.values(divisions).reduce((sum, d) => sum + (d.expenses || 0), 0);
+const overallProfit = overallRevenue - overallExpenses;
+const overallMargin = overallRevenue > 0 ? ((overallProfit / overallRevenue) * 100).toFixed(1) : 0;
+	
+const divisionCount = Object.keys(divisions).length;
+const profitableDivisions = Object.values(divisions).filter(d => (d.revenue || 0) > (d.expenses || 0)).length;
+	
+let html = '';
+html += '<div class="metric-card" style="background: linear-gradient(135deg, rgba(110,231,183,0.08), rgba(96,165,250,0.08)); border: 1px solid var(--glass-border);">';
+html += '<div class="metric-value" style="color: var(--success);">' + money(overallRevenue) + '</div>';
+html += '<div class="metric-label">Total Revenue (All Divisions)</div>';
+html += '<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">' + divisionCount + ' active divisions</div>';
+html += '</div>';
+	
+html += '<div class="metric-card" style="background: linear-gradient(135deg, rgba(255,107,107,0.08), rgba(255,182,107,0.08)); border: 1px solid var(--glass-border);">';
+html += '<div class="metric-value" style="color: var(--danger);">' + money(overallExpenses) + '</div>';
+html += '<div class="metric-label">Total Expenses (All Divisions)</div>';
+html += '<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Across all operations</div>';
+html += '</div>';
+	
+html += '<div class="metric-card" style="background: linear-gradient(135deg, ' + (overallProfit >= 0 ? 'rgba(74,222,128,0.1)' : 'rgba(255,107,107,0.1)') + ', rgba(255,255,255,0.03)); border: 2px solid ' + (overallProfit >= 0 ? 'var(--success)' : 'var(--danger)') + ';">';
+html += '<div class="metric-value" style="color: ' + (overallProfit >= 0 ? 'var(--success)' : 'var(--danger)') + ';">' + money(overallProfit) + '</div>';
+html += '<div class="metric-label">Net Profit (All Divisions)</div>';
+html += '<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Margin: ' + overallMargin + '%</div>';
+html += '</div>';
+	
+html += '<div class="metric-card" style="background: linear-gradient(135deg, rgba(124,92,255,0.08), rgba(96,165,250,0.08)); border: 1px solid var(--glass-border);">';
+html += '<div class="metric-value" style="color: var(--accent-secondary);">' + profitableDivisions + '/' + divisionCount + '</div>';
+html += '<div class="metric-label">Profitable Divisions</div>';
+html += '<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">' + ((profitableDivisions / divisionCount) * 100).toFixed(0) + '% profitability rate</div>';
+html += '</div>';
+	
+divisionMetrics.innerHTML = html;
 }
 
 function renderNotes(searchQuery = '') {
@@ -10556,6 +10735,7 @@ return '<div class="contact-card" style="padding: 20px; background: rgba(255,255
 '<div style="display: grid; gap: 8px; font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">' +
 (v.website ? '<div>🌐 ' + makeWebsiteLink(v.website) + '</div>' : '<div>🌐 N/A</div>') +
 (v.contact ? '<div>📧 ' + makeEmailLink(v.contact) + '</div>' : '<div>📧 N/A</div>') +
+(v.phone ? '<div>📞 ' + makePhoneLink(v.phone) + '</div>' : '<div>📞 N/A</div>') +
 '<div>📅 Renewal: ' + (v.renewalDate || 'N/A') + '</div>' +
 '</div>' +
 '<div style="display: flex; gap: 8px; margin-top: 12px;">' +
@@ -11755,6 +11935,7 @@ renderProductsSelects();
 renderCalendarView();
 renderAlertsSection();
 renderAlertLists();
+updateFinancialSummary(); // Update Financial Summary and Platform Activity panels
 console.log('✅ All rendered');
 }
 
@@ -12287,68 +12468,38 @@ window.closeCreateMenu = function() {
 // Make functions globally accessible
 window.createContact = function() {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('👤 createContact() CALLED (SMART VERSION)');
+    console.log('👤 createContact() CALLED');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     try {
         console.log('1️⃣ Closing create menu...');
         closeCreateMenu();
         
         setTimeout(() => {
-        console.log('2️⃣ Building smart contact form HTML...');
+        console.log('2️⃣ Building contact form HTML...');
         const html = `
         <div>
             <h3>👤 Create New Contact</h3>
-            <p class="tiny muted" style="margin-bottom: 16px;">Add a new contact with intelligent enrichment and duplicate detection</p>
-            
-            <!-- Smart Alerts -->
-            <div id="duplicateAlert" style="display: none; background: rgba(255,182,107,0.15); border: 1px solid var(--warning); border-radius: 8px; padding: 12px; margin-bottom: 16px;">
-                <div style="display: flex; align-items: start; gap: 10px;">
-                    <span style="font-size: 20px;">⚠️</span>
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; color: var(--warning); margin-bottom: 4px;">Potential Duplicate Detected</div>
-                        <div id="duplicateMessage" style="font-size: 13px; color: var(--text-secondary);"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="enrichmentSuggestions" style="display: none; background: rgba(110,231,183,0.15); border: 1px solid var(--accent-primary); border-radius: 8px; padding: 12px; margin-bottom: 16px;">
-                <div style="display: flex; align-items: start; gap: 10px;">
-                    <span style="font-size: 20px;">💡</span>
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; color: var(--accent-primary); margin-bottom: 4px;">Smart Suggestions</div>
-                        <div id="suggestionsList" style="font-size: 13px; color: var(--text-secondary);"></div>
-                    </div>
-                </div>
-            </div>
-            
+            <p class="tiny muted" style="margin-bottom: 24px;">Add a new contact to your customer database</p>
             <form id="contactForm">
                 <div class="form-group">
                     <label>Full Name *</label>
                     <input type="text" id="contactName" placeholder="John Doe" required>
-                    <small style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 11px;">Smart duplicate detection active</small>
                 </div>
-                
                 <div class="form-group">
                     <label>Email *</label>
                     <input type="email" id="contactEmail" placeholder="john@example.com" required>
-                    <small id="emailValidation" style="display: block; margin-top: 4px; font-size: 12px;"></small>
                 </div>
-                
                 <div class="form-group">
                     <label>Phone</label>
-                    <input type="tel" id="contactPhone" placeholder="+1 (555) 123-4567">
-                    <small style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 11px;">Auto-formatted</small>
+                    <input type="tel" id="contactPhone" placeholder="(555) 123-4567">
+                    <small style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 12px;">Format: (XXX) XXX-XXXX</small>
                 </div>
-                
                 <div class="form-group">
                     <label>Company</label>
-                    <input type="text" id="contactCompany" placeholder="Acme Corp" list="companyDatalist">
-                    <datalist id="companyDatalist"></datalist>
-                    <small id="companyDomain" style="display: block; margin-top: 4px; font-size: 11px; color: var(--accent-primary);"></small>
+                    <input type="text" id="contactCompany" placeholder="Acme Corp">
                 </div>
-                
                 <div class="form-group">
-                    <label>Role/Position</label>
+                    <label>Role</label>
                     <select id="contactRole">
                         <option value="customer">Customer</option>
                         <option value="lead">Lead</option>
@@ -12357,43 +12508,10 @@ window.createContact = function() {
                         <option value="other">Other</option>
                     </select>
                 </div>
-                
-                <div class="form-group">
-                    <label>Lead Score (0-100)</label>
-                    <input type="range" id="contactLeadScore" min="0" max="100" value="50" style="width: 100%;">
-                    <div style="display: flex; justify-content: space-between; margin-top: 4px;">
-                        <small style="color: var(--text-muted); font-size: 11px;">Cold</small>
-                        <small id="leadScoreValue" style="color: var(--accent-primary); font-weight: 600;">50</small>
-                        <small style="color: var(--text-muted); font-size: 11px;">Hot</small>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Expected Value (Optional)</label>
-                    <input type="number" id="contactExpectedValue" placeholder="1000" min="0" step="100">
-                    <small style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 11px;">Potential lifetime value estimate</small>
-                </div>
-                
-                <div class="form-group">
-                    <label>Tags</label>
-                    <input type="text" id="contactTags" placeholder="vip, enterprise, tech">
-                    <small style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 11px;">Comma-separated tags for categorization</small>
-                </div>
-                
                 <div class="form-group">
                     <label>Notes</label>
                     <textarea id="contactNotes" rows="3" placeholder="Additional information about this contact..."></textarea>
                 </div>
-                
-                <!-- Smart Insights Preview -->
-                <div id="smartInsights" style="background: linear-gradient(135deg, rgba(110,231,183,0.08), rgba(124,92,255,0.08)); border: 1px solid var(--glass-border); border-radius: 12px; padding: 16px; margin-top: 16px; display: none;">
-                    <div style="font-weight: 600; color: var(--accent-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                        <span>🔮</span>
-                        <span>AI Insights</span>
-                    </div>
-                    <div id="insightsContent" style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;"></div>
-                </div>
-                
                 <div style="display: flex; gap: 12px; margin-top: 24px;">
                     <button type="submit" class="btn" style="flex: 1;">💾 Create Contact</button>
                     <button type="button" id="cancelContactForm" class="ghost" style="flex: 1;">Cancel</button>
@@ -12402,262 +12520,52 @@ window.createContact = function() {
         </div>
         `;
         
-        console.log('3️⃣ Opening modal with smart contact form...');
+        console.log('3️⃣ Opening modal with contact form...');
         window.openModal(html);
-        console.log('4️⃣ Modal opened, setting up smart handlers...');
+        console.log('4️⃣ Modal opened, setting up form handler...');
         
         setTimeout(() => {
             const form = document.getElementById('contactForm');
-            const nameInput = document.getElementById('contactName');
-            const emailInput = document.getElementById('contactEmail');
-            const phoneInput = document.getElementById('contactPhone');
-            const companyInput = document.getElementById('contactCompany');
-            const leadScoreInput = document.getElementById('contactLeadScore');
-            const leadScoreValue = document.getElementById('leadScoreValue');
-            const duplicateAlert = document.getElementById('duplicateAlert');
-            const duplicateMessage = document.getElementById('duplicateMessage');
-            const enrichmentSuggestions = document.getElementById('enrichmentSuggestions');
-            const suggestionsList = document.getElementById('suggestionsList');
-            const emailValidation = document.getElementById('emailValidation');
-            const companyDomain = document.getElementById('companyDomain');
-            const smartInsights = document.getElementById('smartInsights');
-            const insightsContent = document.getElementById('insightsContent');
+            const contactPhoneInput = document.getElementById('contactPhone');
+            const contactEmailInput = document.getElementById('contactEmail');
+            
+            // Apply phone formatting mask to contact phone field
+            applyPhoneMask(contactPhoneInput);
+            
+            // Apply email validation to contact email field
+            applyEmailValidation(contactEmailInput);
             
             console.log('   Contact form element:', form ? '✅ Found' : '❌ NOT FOUND');
-            
-            // Smart duplicate detection
-            function checkDuplicates() {
-                const name = nameInput.value.trim().toLowerCase();
-                const email = emailInput.value.trim().toLowerCase();
-                
-                if (!name && !email) return;
-                
-                const existingContacts = window.state.contacts || [];
-                const duplicates = existingContacts.filter(c => 
-                    (name && c.name.toLowerCase() === name) ||
-                    (email && c.email.toLowerCase() === email)
-                );
-                
-                if (duplicates.length > 0) {
-                    const dup = duplicates[0];
-                    duplicateMessage.innerHTML = `Similar contact found: <strong>${dup.name}</strong> (${dup.email})`;
-                    duplicateAlert.style.display = 'block';
-                } else {
-                    duplicateAlert.style.display = 'none';
-                }
-            }
-            
-            // Email validation and domain extraction
-            function validateEmail() {
-                const email = emailInput.value;
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                
-                if (email && emailRegex.test(email)) {
-                    emailValidation.textContent = '✓ Valid email format';
-                    emailValidation.style.color = 'var(--success)';
-                    
-                    // Extract and suggest company from email domain
-                    const domain = email.split('@')[1];
-                    if (domain && !companyInput.value) {
-                        const companyName = domain.split('.')[0];
-                        const formatted = companyName.charAt(0).toUpperCase() + companyName.slice(1);
-                        companyDomain.innerHTML = `💡 Suggested company: <strong>${formatted}</strong> <button type="button" onclick="document.getElementById('contactCompany').value='${formatted}'" style="font-size: 10px; padding: 2px 6px; margin-left: 4px; background: var(--accent-primary); color: var(--bg-primary); border: none; border-radius: 4px; cursor: pointer;">Apply</button>`;
-                    }
-                    return true;
-                } else if (email) {
-                    emailValidation.textContent = '⚠ Invalid email format';
-                    emailValidation.style.color = 'var(--warning)';
-                    return false;
-                } else {
-                    emailValidation.textContent = '';
-                    companyDomain.innerHTML = '';
-                    return false;
-                }
-            }
-            
-            // Phone formatting
-            function formatPhone() {
-                let phone = phoneInput.value.replace(/\D/g, '');
-                if (phone.length > 0) {
-                    if (phone.length <= 3) {
-                        phoneInput.value = '(' + phone;
-                    } else if (phone.length <= 6) {
-                        phoneInput.value = '(' + phone.slice(0, 3) + ') ' + phone.slice(3);
-                    } else {
-                        phoneInput.value = '(' + phone.slice(0, 3) + ') ' + phone.slice(3, 6) + '-' + phone.slice(6, 10);
-                    }
-                }
-            }
-            
-            // Update lead score display
-            function updateLeadScore() {
-                const score = leadScoreInput.value;
-                leadScoreValue.textContent = score;
-                
-                if (score >= 75) {
-                    leadScoreValue.style.color = 'var(--success)';
-                } else if (score >= 50) {
-                    leadScoreValue.style.color = 'var(--accent-primary)';
-                } else if (score >= 25) {
-                    leadScoreValue.style.color = 'var(--warning)';
-                } else {
-                    leadScoreValue.style.color = 'var(--danger)';
-                }
-            }
-            
-            // Generate smart insights
-            function generateInsights() {
-                const score = parseInt(leadScoreInput.value);
-                const role = document.getElementById('contactRole').value;
-                const expectedValue = parseFloat(document.getElementById('contactExpectedValue').value) || 0;
-                
-                let insights = [];
-                
-                if (score >= 75) {
-                    insights.push('🔥 <strong>Hot Lead:</strong> High priority - schedule immediate follow-up');
-                } else if (score >= 50) {
-                    insights.push('⭐ <strong>Warm Lead:</strong> Good potential - nurture with targeted content');
-                } else {
-                    insights.push('❄️ <strong>Cold Lead:</strong> Consider long-term nurturing strategy');
-                }
-                
-                if (expectedValue > 5000) {
-                    insights.push('💰 <strong>High Value:</strong> Assign to senior account manager');
-                } else if (expectedValue > 1000) {
-                    insights.push('💵 <strong>Medium Value:</strong> Standard sales process recommended');
-                }
-                
-                if (role === 'lead') {
-                    insights.push('📊 <strong>Lead Stage:</strong> Focus on qualification and needs assessment');
-                } else if (role === 'customer') {
-                    insights.push('✅ <strong>Customer:</strong> Focus on retention and upsell opportunities');
-                }
-                
-                const companies = window.state.contacts || [];
-                const companyName = companyInput.value.trim().toLowerCase();
-                const sameCompany = companies.filter(c => c.company && c.company.toLowerCase() === companyName);
-                
-                if (sameCompany.length > 0) {
-                    insights.push(`🏢 <strong>Company Insight:</strong> ${sameCompany.length} existing contact(s) at this company`);
-                }
-                
-                if (insights.length > 0) {
-                    insightsContent.innerHTML = insights.join('<br><br>');
-                    smartInsights.style.display = 'block';
-                } else {
-                    smartInsights.style.display = 'none';
-                }
-            }
-            
-            // Populate company datalist with existing companies
-            function populateCompanyDatalist() {
-                const companies = [...new Set((window.state.contacts || []).map(c => c.company).filter(c => c))];
-                const datalist = document.getElementById('companyDatalist');
-                datalist.innerHTML = companies.map(c => `<option value="${c}">`).join('');
-            }
-            
-            // Setup event listeners
-            if (nameInput) {
-                nameInput.addEventListener('blur', checkDuplicates);
-                nameInput.addEventListener('input', generateInsights);
-            }
-            
-            if (emailInput) {
-                emailInput.addEventListener('blur', () => {
-                    validateEmail();
-                    checkDuplicates();
-                });
-                emailInput.addEventListener('input', validateEmail);
-            }
-            
-            if (phoneInput) {
-                phoneInput.addEventListener('input', formatPhone);
-            }
-            
-            if (companyInput) {
-                companyInput.addEventListener('input', generateInsights);
-                populateCompanyDatalist();
-            }
-            
-            if (leadScoreInput) {
-                leadScoreInput.addEventListener('input', () => {
-                    updateLeadScore();
-                    generateInsights();
-                });
-                updateLeadScore();
-            }
-            
-            document.getElementById('contactRole').addEventListener('change', generateInsights);
-            document.getElementById('contactExpectedValue').addEventListener('input', generateInsights);
-            
-            // Initial insights generation
-            setTimeout(generateInsights, 500);
-            
-            if(form) {
+            if (form) {
                 form.addEventListener('submit', (e) => {
                     e.preventDefault();
-                    console.log('📝 Smart contact form submitted');
-                    
-                    // Validate email before saving
-                    if (!validateEmail()) {
-                        showToast('Please enter a valid email address', true);
-                        return;
-                    }
-                    
-                    // Check for hard duplicates
-                    const email = emailInput.value.trim().toLowerCase();
-                    const existingContact = (window.state.contacts || []).find(c => c.email.toLowerCase() === email);
-                    
-                    if (existingContact) {
-                        if (!confirm('A contact with this email already exists. Do you want to create anyway?')) {
-                            return;
-                        }
-                    }
-                    
-                    const tags = document.getElementById('contactTags').value.split(',').map(t => t.trim()).filter(t => t);
-                    const leadScore = parseInt(leadScoreInput.value);
-                    const expectedValue = parseFloat(document.getElementById('contactExpectedValue').value) || 0;
+                    console.log('📝 Contact form submitted');
                     
                     const contactData = {
                         id: uid(),
-                        name: nameInput.value.trim(),
-                        email: emailInput.value.trim(),
-                        phone: phoneInput.value || '',
-                        company: companyInput.value.trim() || '',
+                        name: document.getElementById('contactName').value,
+                        email: document.getElementById('contactEmail').value,
+                        phone: document.getElementById('contactPhone').value || '',
+                        company: document.getElementById('contactCompany').value || '',
                         role: document.getElementById('contactRole').value,
                         notes: document.getElementById('contactNotes').value || '',
                         created: new Date().toISOString(),
                         lastActivity: new Date().toISOString(),
-                        lastContact: new Date().toISOString(),
-                        status: 'active',
-                        leadScore: leadScore,
-                        expectedValue: expectedValue,
-                        tags: tags,
-                        engagementScore: leadScore,
-                        healthScore: leadScore >= 75 ? 'excellent' : leadScore >= 50 ? 'good' : leadScore >= 25 ? 'fair' : 'poor',
-                        nextFollowUp: new Date(Date.now() + (leadScore >= 75 ? 1 : leadScore >= 50 ? 3 : 7) * 24 * 60 * 60 * 1000).toISOString(),
-                        interactions: 0,
-                        lifetimeValue: 0
+                        status: 'active'
                     };
                     
                     if (!window.state.contacts) window.state.contacts = [];
                     window.state.contacts.push(contactData);
                     saveState();
                     
-                    showToast(`Contact "${contactData.name}" created successfully with smart enrichment!`, false);
-                    addActivityLog(`Created new contact: ${contactData.name} (Lead Score: ${leadScore})`, 'success');
-                    
-                    // Add notification for high-value contacts
-                    if (leadScore >= 75 || expectedValue > 5000) {
-                        addNotification(
-                            '🔥 High-Priority Contact Added',
-                            `${contactData.name} has been added as a high-value contact. Recommended action: Immediate follow-up.`,
-                            'success'
-                        );
-                    }
+                    showToast(`Contact "${contactData.name}" created successfully!`, false);
+                    addActivityLog(`Created new contact: ${contactData.name}`, 'success');
                     
                     if (typeof renderContacts === 'function') {
                         renderContacts();
+                    }
+                    if (typeof updateFinancialSummary === 'function') {
+                        updateFinancialSummary(); // Update Platform Activity panel
                     }
                     window.closeModal();
                 });
@@ -12771,6 +12679,9 @@ window.createTransaction = function() {
                     if (typeof renderAnalytics === 'function') {
                         renderAnalytics();
                     }
+                    if (typeof updateFinancialSummary === 'function') {
+                        updateFinancialSummary(); // Update Financial Summary and Platform Activity panels
+                    }
                     window.closeModal();
                 });
             }
@@ -12854,6 +12765,9 @@ window.createNote = function() {
                     
                     if (typeof renderNotes === 'function') {
                         renderNotes();
+                    }
+                    if (typeof updateFinancialSummary === 'function') {
+                        updateFinancialSummary(); // Update Platform Activity panel
                     }
                     window.closeModal();
                 });
@@ -12979,6 +12893,11 @@ window.createVendor = function() {
                     <input type="email" id="vendorEmail" placeholder="support@vendor.com">
                 </div>
                 <div class="form-group">
+                    <label>Contact Phone</label>
+                    <input type="tel" id="vendorPhone" placeholder="(555) 123-4567">
+                    <small style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 12px;">Format: (XXX) XXX-XXXX</small>
+                </div>
+                <div class="form-group">
                     <label>Contract End Date</label>
                     <input type="date" id="vendorContractEnd">
                 </div>
@@ -12998,6 +12917,15 @@ window.createVendor = function() {
         
         setTimeout(() => {
             const form = document.getElementById('vendorForm');
+            const vendorEmailInput = document.getElementById('vendorEmail');
+            const vendorPhoneInput = document.getElementById('vendorPhone');
+            
+            // Apply email validation to vendor email field
+            applyEmailValidation(vendorEmailInput);
+            
+            // Apply phone formatting mask to vendor phone field
+            applyPhoneMask(vendorPhoneInput);
+            
             if (form) {
                 form.addEventListener('submit', (e) => {
                     e.preventDefault();
@@ -13010,6 +12938,7 @@ window.createVendor = function() {
                         website: document.getElementById('vendorWebsite').value || '',
                         contact: document.getElementById('vendorContact').value || '',
                         email: document.getElementById('vendorEmail').value || '',
+                        phone: document.getElementById('vendorPhone').value || '',
                         contractEnd: document.getElementById('vendorContractEnd').value || '',
                         notes: document.getElementById('vendorNotes').value || '',
                         created: new Date().toISOString(),
@@ -13323,6 +13252,11 @@ function initCalendarEventForm() {
         if (typeof renderCalendarView === 'function') {
             renderCalendarView();
             console.log('✅ Calendar view rendered');
+        }
+        
+        if (typeof updateFinancialSummary === 'function') {
+            updateFinancialSummary(); // Update Platform Activity panel
+            console.log('✅ Financial Summary updated');
         }
         
         // Close modal
@@ -14268,363 +14202,6 @@ Object.keys(createFunctions).forEach(funcName => {
 });
 
 console.log('✅ All create functions verified and ready!');
-
-// ========================================
-// SMART CRM ANALYTICS & INSIGHTS
-// ========================================
-
-// Calculate customer health score
-function calculateCustomerHealth(contact) {
-    if (!contact) return { score: 0, status: 'unknown', factors: [] };
-    
-    const factors = [];
-    let score = 50; // Base score
-    
-    // Factor 1: Recent activity (max +20 points)
-    const daysSinceLastActivity = Math.floor((new Date() - new Date(contact.lastActivity)) / (1000 * 60 * 60 * 24));
-    if (daysSinceLastActivity < 7) {
-        score += 20;
-        factors.push('🟢 Very recent activity');
-    } else if (daysSinceLastActivity < 30) {
-        score += 10;
-        factors.push('🟡 Recent activity');
-    } else if (daysSinceLastActivity < 90) {
-        score += 5;
-        factors.push('🟠 Some activity');
-    } else {
-        score -= 10;
-        factors.push('🔴 Inactive');
-    }
-    
-    // Factor 2: Transaction history (max +20 points)
-    const transactions = window.state.transactions.filter(t => 
-        t.customer === contact.name || t.customer === contact.company
-    );
-    const revenue = transactions.filter(t => t.type === 'revenue').reduce((sum, t) => sum + t.amount, 0);
-    
-    if (revenue > 5000) {
-        score += 20;
-        factors.push('💰 High value customer');
-    } else if (revenue > 1000) {
-        score += 15;
-        factors.push('💵 Good value customer');
-    } else if (revenue > 100) {
-        score += 10;
-        factors.push('💸 Some revenue');
-    }
-    
-    // Factor 3: Engagement frequency (max +15 points)
-    const interactions = contact.interactions || transactions.length;
-    if (interactions > 10) {
-        score += 15;
-        factors.push('🔄 Highly engaged');
-    } else if (interactions > 5) {
-        score += 10;
-        factors.push('📊 Moderately engaged');
-    } else if (interactions > 0) {
-        score += 5;
-        factors.push('📈 Some engagement');
-    }
-    
-    // Factor 4: Lead score (max +10 points)
-    const leadScore = contact.leadScore || 50;
-    if (leadScore >= 75) {
-        score += 10;
-        factors.push('⭐ High lead quality');
-    } else if (leadScore >= 50) {
-        score += 5;
-        factors.push('⭐ Medium lead quality');
-    }
-    
-    // Factor 5: Status and role (max +5 points)
-    if (contact.status === 'active' && contact.role === 'customer') {
-        score += 5;
-        factors.push('✅ Active customer');
-    }
-    
-    // Normalize score to 0-100
-    score = Math.max(0, Math.min(100, score));
-    
-    let status;
-    if (score >= 80) status = 'excellent';
-    else if (score >= 60) status = 'good';
-    else if (score >= 40) status = 'fair';
-    else if (score >= 20) status = 'poor';
-    else status = 'critical';
-    
-    return { score, status, factors };
-}
-
-// Predict customer churn risk
-function predictChurnRisk(contact) {
-    const health = calculateCustomerHealth(contact);
-    const daysSinceLastActivity = Math.floor((new Date() - new Date(contact.lastActivity)) / (1000 * 60 * 60 * 24));
-    const transactions = window.state.transactions.filter(t => 
-        t.customer === contact.name || t.customer === contact.company
-    );
-    
-    let churnRisk = 0;
-    const reasons = [];
-    
-    if (daysSinceLastActivity > 90) {
-        churnRisk += 40;
-        reasons.push('Long period of inactivity (90+ days)');
-    } else if (daysSinceLastActivity > 60) {
-        churnRisk += 25;
-        reasons.push('Moderate inactivity (60+ days)');
-    } else if (daysSinceLastActivity > 30) {
-        churnRisk += 10;
-        reasons.push('Some inactivity (30+ days)');
-    }
-    
-    if (transactions.length === 0) {
-        churnRisk += 30;
-        reasons.push('No transaction history');
-    } else if (transactions.length < 3) {
-        churnRisk += 15;
-        reasons.push('Limited transaction history');
-    }
-    
-    if (health.score < 40) {
-        churnRisk += 20;
-        reasons.push('Low health score');
-    }
-    
-    if ((contact.leadScore || 50) < 30) {
-        churnRisk += 10;
-        reasons.push('Low engagement score');
-    }
-    
-    churnRisk = Math.min(100, churnRisk);
-    
-    let riskLevel;
-    if (churnRisk >= 70) riskLevel = 'critical';
-    else if (churnRisk >= 50) riskLevel = 'high';
-    else if (churnRisk >= 30) riskLevel = 'medium';
-    else riskLevel = 'low';
-    
-    return { risk: churnRisk, level: riskLevel, reasons };
-}
-
-// Generate next best actions for a contact
-function generateNextBestActions(contact) {
-    const actions = [];
-    const health = calculateCustomerHealth(contact);
-    const churn = predictChurnRisk(contact);
-    const daysSinceLastContact = Math.floor((new Date() - new Date(contact.lastContact || contact.lastActivity)) / (1000 * 60 * 60 * 24));
-    
-    // High churn risk actions
-    if (churn.level === 'critical' || churn.level === 'high') {
-        actions.push({
-            priority: 'urgent',
-            action: 'Schedule retention call',
-            icon: '📞',
-            reason: 'High churn risk detected'
-        });
-    }
-    
-    // Follow-up based on last contact
-    if (daysSinceLastContact > 14) {
-        actions.push({
-            priority: 'high',
-            action: 'Send follow-up email',
-            icon: '📧',
-            reason: `No contact in ${daysSinceLastContact} days`
-        });
-    }
-    
-    // Upsell opportunities
-    const revenue = window.state.transactions
-        .filter(t => (t.customer === contact.name || t.customer === contact.company) && t.type === 'revenue')
-        .reduce((sum, t) => sum + t.amount, 0);
-    
-    if (revenue > 1000 && health.score > 60) {
-        actions.push({
-            priority: 'medium',
-            action: 'Explore upsell opportunity',
-            icon: '💎',
-            reason: 'High-value customer with good health'
-        });
-    }
-    
-    // Engagement actions
-    if ((contact.leadScore || 50) >= 70 && !revenue) {
-        actions.push({
-            priority: 'high',
-            action: 'Convert lead to customer',
-            icon: '✨',
-            reason: 'High lead score, no purchases yet'
-        });
-    }
-    
-    // Regular check-ins
-    if (health.status === 'good' && daysSinceLastContact > 30) {
-        actions.push({
-            priority: 'low',
-            action: 'Quarterly check-in',
-            icon: '☕',
-            reason: 'Maintain relationship'
-        });
-    }
-    
-    return actions.sort((a, b) => {
-        const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
-        return priorityOrder[a.priority] - priorityOrder[b.priority];
-    });
-}
-
-// Show detailed CRM insights for a contact
-window.showContactCRMInsights = function(contactId) {
-    const contact = window.state.contacts.find(c => c.id === contactId);
-    if (!contact) {
-        showToast('Contact not found', true);
-        return;
-    }
-    
-    const health = calculateCustomerHealth(contact);
-    const churn = predictChurnRisk(contact);
-    const actions = generateNextBestActions(contact);
-    
-    const transactions = window.state.transactions.filter(t => 
-        t.customer === contact.name || t.customer === contact.company
-    );
-    const revenue = transactions.filter(t => t.type === 'revenue').reduce((sum, t) => sum + t.amount, 0);
-    const expenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-    
-    const healthColor = {
-        'excellent': 'var(--success)',
-        'good': 'var(--accent-primary)',
-        'fair': 'var(--warning)',
-        'poor': 'var(--danger)',
-        'critical': 'var(--danger)'
-    }[health.status] || 'var(--text-muted)';
-    
-    const churnColor = {
-        'low': 'var(--success)',
-        'medium': 'var(--warning)',
-        'high': 'var(--danger)',
-        'critical': 'var(--danger)'
-    }[churn.level] || 'var(--text-muted)';
-    
-    const html = `
-        <div style="max-width: 600px;">
-            <h3>🔮 CRM Insights: ${contact.name}</h3>
-            <p class="tiny muted" style="margin-bottom: 24px;">${contact.company || 'No company'} • ${contact.email}</p>
-            
-            <!-- Health Score -->
-            <div style="background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(96,165,250,0.1)); border: 1px solid var(--glass-border); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h4 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0;">Customer Health Score</h4>
-                    <div style="font-size: 32px; font-weight: 800; color: ${healthColor};">${health.score}</div>
-                </div>
-                <div style="background: rgba(255,255,255,0.05); border-radius: 8px; height: 8px; overflow: hidden; margin-bottom: 12px;">
-                    <div style="background: ${healthColor}; height: 100%; width: ${health.score}%; transition: width 0.5s ease;"></div>
-                </div>
-                <div style="font-size: 13px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; margin-bottom: 12px;">
-                    Status: <span style="color: ${healthColor};">${health.status.toUpperCase()}</span>
-                </div>
-                <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
-                    ${health.factors.map(f => `<div style="margin-bottom: 4px;">${f}</div>`).join('')}
-                </div>
-            </div>
-            
-            <!-- Churn Risk -->
-            <div style="background: ${churn.level === 'critical' || churn.level === 'high' ? 'rgba(255,107,107,0.15)' : 'rgba(110,231,183,0.1)'}; border: 1px solid ${churn.level === 'critical' || churn.level === 'high' ? 'var(--danger)' : 'var(--glass-border)'}; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h4 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0;">Churn Risk Analysis</h4>
-                    <div style="font-size: 32px; font-weight: 800; color: ${churnColor};">${churn.risk}%</div>
-                </div>
-                <div style="background: rgba(255,255,255,0.05); border-radius: 8px; height: 8px; overflow: hidden; margin-bottom: 12px;">
-                    <div style="background: ${churnColor}; height: 100%; width: ${churn.risk}%; transition: width 0.5s ease;"></div>
-                </div>
-                <div style="font-size: 13px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; margin-bottom: 12px;">
-                    Risk Level: <span style="color: ${churnColor};">${churn.level.toUpperCase()}</span>
-                </div>
-                ${churn.reasons.length > 0 ? `
-                    <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
-                        <strong>Contributing Factors:</strong><br>
-                        ${churn.reasons.map(r => `<div style="margin-top: 4px;">• ${r}</div>`).join('')}
-                    </div>
-                ` : ''}
-            </div>
-            
-            <!-- Key Metrics -->
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;">
-                <div style="background: rgba(110,231,183,0.1); padding: 16px; border-radius: 10px; border: 1px solid var(--glass-border);">
-                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Lifetime Value</div>
-                    <div style="font-size: 24px; font-weight: 800; color: var(--accent-primary);">${money(revenue)}</div>
-                </div>
-                <div style="background: rgba(96,165,250,0.1); padding: 16px; border-radius: 10px; border: 1px solid var(--glass-border);">
-                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Transactions</div>
-                    <div style="font-size: 24px; font-weight: 800; color: var(--accent-tertiary);">${transactions.length}</div>
-                </div>
-                <div style="background: rgba(124,92,255,0.1); padding: 16px; border-radius: 10px; border: 1px solid var(--glass-border);">
-                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Lead Score</div>
-                    <div style="font-size: 24px; font-weight: 800; color: var(--accent-secondary);">${contact.leadScore || 50}</div>
-                </div>
-                <div style="background: rgba(255,182,107,0.1); padding: 16px; border-radius: 10px; border: 1px solid var(--glass-border);">
-                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Days Since Contact</div>
-                    <div style="font-size: 24px; font-weight: 800; color: var(--warning);">${Math.floor((new Date() - new Date(contact.lastContact || contact.lastActivity)) / (1000 * 60 * 60 * 24))}</div>
-                </div>
-            </div>
-            
-            <!-- Next Best Actions -->
-            <div style="background: linear-gradient(135deg, rgba(110,231,183,0.08), rgba(124,92,255,0.08)); border: 1px solid var(--glass-border); border-radius: 12px; padding: 20px;">
-                <h4 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px;">🎯 Recommended Actions</h4>
-                ${actions.length > 0 ? actions.map(action => {
-                    const priorityColors = {
-                        urgent: 'var(--danger)',
-                        high: 'var(--warning)',
-                        medium: 'var(--accent-tertiary)',
-                        low: 'var(--text-muted)'
-                    };
-                    const priorityBg = {
-                        urgent: 'rgba(255,107,107,0.2)',
-                        high: 'rgba(255,182,107,0.2)',
-                        medium: 'rgba(96,165,250,0.2)',
-                        low: 'rgba(100,116,139,0.2)'
-                    };
-                    return `
-                        <div style="background: ${priorityBg[action.priority]}; border-left: 3px solid ${priorityColors[action.priority]}; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
-                                <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">${action.icon} ${action.action}</div>
-                                <span style="font-size: 10px; text-transform: uppercase; font-weight: 700; color: ${priorityColors[action.priority]}; padding: 2px 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">${action.priority}</span>
-                            </div>
-                            <div style="font-size: 12px; color: var(--text-secondary);">${action.reason}</div>
-                        </div>
-                    `;
-                }).join('') : '<p style="color: var(--text-muted); text-align: center;">No actions needed at this time</p>'}
-            </div>
-            
-            <div style="margin-top: 24px; display: flex; gap: 12px;">
-                <button class="btn" onclick="window.editContact('${contactId}')" style="flex: 1;">✏️ Edit Contact</button>
-                <button class="ghost" onclick="window.closeModal()" style="flex: 1;">Close</button>
-            </div>
-        </div>
-    `;
-    
-    window.openModal(html);
-};
-
-// Update contact engagement score
-function updateContactEngagement(contactId, interaction) {
-    const contact = window.state.contacts.find(c => c.id === contactId);
-    if (!contact) return;
-    
-    contact.interactions = (contact.interactions || 0) + 1;
-    contact.lastActivity = new Date().toISOString();
-    
-    // Recalculate engagement score
-    const health = calculateCustomerHealth(contact);
-    contact.engagementScore = health.score;
-    contact.healthScore = health.status;
-    
-    saveState();
-    
-    console.log(`Updated engagement for ${contact.name}: ${contact.interactions} interactions, score: ${contact.engagementScore}`);
-}
-
-console.log('✅ Smart CRM Analytics loaded!');
 
 // ========================================
 // NOTIFICATIONS SYSTEM
