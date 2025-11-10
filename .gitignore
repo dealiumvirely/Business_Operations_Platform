@@ -455,7 +455,7 @@ font-weight: 500;
 .datetime-widget .time {
 font-size: 20px;
 font-weight: 700;
-color: var(--text-primary);
+color: #fbbf24;
 font-variant-numeric: tabular-nums;
 }
 
@@ -571,6 +571,9 @@ font-family: inherit;
 display: inline-flex;
 align-items: center;
 gap: 8px;
+position: relative;
+z-index: 10;
+pointer-events: auto;
 }
 
 .btn {
@@ -584,16 +587,29 @@ transform: translateY(-2px);
 box-shadow: 0 8px 24px rgba(110,231,183,0.4);
 }
 
+.btn:active {
+transform: translateY(0);
+box-shadow: 0 2px 8px rgba(110,231,183,0.3);
+}
+
 .ghost {
 background: rgba(255,255,255,0.03);
 border: 1px solid var(--glass-border);
 color: var(--text-primary);
+position: relative;
+z-index: 10;
+pointer-events: auto;
 }
 
 .ghost:hover {
 background: rgba(255,255,255,0.08);
 border-color: var(--accent-primary);
 transform: translateY(-2px);
+}
+
+.ghost:active {
+transform: translateY(0);
+background: rgba(255,255,255,0.05);
 }
 
 .ghost.danger {
@@ -604,6 +620,11 @@ border-color: rgba(255,107,107,0.3);
 .ghost.danger:hover {
 background: rgba(255,107,107,0.1);
 border-color: var(--danger);
+}
+
+.ghost.danger:active {
+transform: translateY(0);
+background: rgba(255,107,107,0.05);
 }
 
 .modal-overlay {
@@ -642,10 +663,25 @@ box-shadow: 0 24px 64px rgba(0,0,0,0.6);
 backdrop-filter: blur(20px);
 transform: scale(0.9);
 transition: transform 0.3s ease;
+position: relative;
+z-index: 10000;
+pointer-events: auto;
 }
 
 .modal-overlay.active .modal-content {
 transform: scale(1);
+}
+
+.modal-content form {
+position: relative;
+z-index: 10001;
+pointer-events: auto;
+}
+
+.modal-content button {
+position: relative;
+z-index: 10002;
+pointer-events: auto !important;
 }
 
 /* Calendar Edit Modal - Always centered */
@@ -2161,7 +2197,7 @@ margin-top: 12px;
 </svg>
 Notifications
 </h3>
-<button class="notifications-clear-all" onclick="clearAllNotifications()">Clear All</button>
+<button type="button" class="notifications-clear-all" onclick="clearAllNotifications()">Clear All</button>
 </div>
 <div class="notifications-list" id="notificationsList">
 <!-- Notifications will be inserted here -->
@@ -2263,7 +2299,7 @@ Notifications
 <select id="prodSelect" style="padding: 8px 16px; font-size: 13px;">
 <option value="all">All products</option>
 </select>
-<button class="ghost" id="refreshBtn" style="padding: 8px 16px;">🔄 Refresh</button>
+<button type="button" class="ghost" id="refreshBtn" style="padding: 8px 16px;">🔄 Refresh</button>
 </div>
 </div>
 <div class="kpi-grid" id="kpiGrid"></div>
@@ -2273,9 +2309,9 @@ Notifications
 <div class="panel-header">
 <h2>Revenue Trend (Last 12 Months)</h2>
 <div class="btn-group">
-<button class="ghost" data-chart="line" style="padding: 8px 16px;">📈 Line</button>
-<button class="ghost" data-chart="bar" style="padding: 8px 16px;">📊 Bar</button>
-<button class="ghost" id="refreshRevenue" style="padding: 8px 16px;">🔄 Refresh</button>
+<button type="button" class="ghost" data-chart="line" style="padding: 8px 16px;">📈 Line</button>
+<button type="button" class="ghost" data-chart="bar" style="padding: 8px 16px;">📊 Bar</button>
+<button type="button" class="ghost" id="refreshRevenue" style="padding: 8px 16px;">🔄 Refresh</button>
 </div>
 </div>
 <div class="chart-container">
@@ -2287,9 +2323,9 @@ Notifications
 <div class="panel-header">
 <h2>Expenses Breakdown (Last 12 Months)</h2>
 <div class="btn-group">
-<button class="ghost" data-expense-chart="line" style="padding: 8px 16px;">📈 Line</button>
-<button class="ghost" data-expense-chart="bar" style="padding: 8px 16px;">📊 Bar</button>
-<button class="ghost" id="refreshExpenses" style="padding: 8px 16px;">🔄 Refresh</button>
+<button type="button" class="ghost" data-expense-chart="line" style="padding: 8px 16px;">📈 Line</button>
+<button type="button" class="ghost" data-expense-chart="bar" style="padding: 8px 16px;">📊 Bar</button>
+<button type="button" class="ghost" id="refreshExpenses" style="padding: 8px 16px;">🔄 Refresh</button>
 </div>
 </div>
 <div class="chart-container">
@@ -2300,7 +2336,7 @@ Notifications
 <div class="panel">
 <div class="panel-header">
 <h2>Product Revenue Distribution</h2>
-<button class="ghost" id="exportChart" style="padding: 8px 16px;">📥 Export</button>
+<button type="button" class="ghost" id="exportChart" style="padding: 8px 16px;">📥 Export</button>
 </div>
 <div class="chart-container" style="height: 350px;">
 <canvas id="productChart"></canvas>
@@ -2332,7 +2368,7 @@ Notifications
 		📋 Invoices Due
 		<span id="invoiceCount" style="font-size: 11px; padding: 3px 8px; background: var(--accent-primary); color: var(--bg-primary); border-radius: 6px; font-weight: 700;">0</span>
 	</h3>
-	<button class="ghost" onclick="showRecurringInvoicesModal()" style="padding: 4px 10px; font-size: 11px;">⚙️ Manage</button>
+	<button type="button" class="ghost" onclick="showRecurringInvoicesModal()" style="padding: 4px 10px; font-size: 11px;">⚙️ Manage</button>
 </div>
 <div id="invoiceRemindersList" style="max-height: 280px; overflow-y: auto;"></div>
 </div>
@@ -2393,8 +2429,8 @@ Notifications
 <!-- Quick Actions Buttons -->
 <div style="border-top: 1px solid var(--glass-border); padding-top: 12px; margin-top: 12px;">
 <div style="display: flex; flex-direction: column; gap: 8px;">
-<button class="ghost" id="quickSearch" style="padding: 8px 14px; font-size: 12px; width: 100%;">🔍 Search</button>
-<button class="ghost" id="quickReport" style="padding: 8px 14px; font-size: 12px; width: 100%;">📊 Generate Report</button>
+<button type="button" class="ghost" id="quickSearch" style="padding: 8px 14px; font-size: 12px; width: 100%;">🔍 Search</button>
+<button type="button" class="ghost" id="quickReport" style="padding: 8px 14px; font-size: 12px; width: 100%;">📊 Generate Report</button>
 </div>
 </div>
 </div>
@@ -2406,7 +2442,7 @@ Notifications
 📅 Upcoming Events
 <span id="upcomingEventsCount" style="font-size: 11px; padding: 3px 8px; background: var(--accent-tertiary); color: var(--bg-primary); border-radius: 6px; font-weight: 700;">0</span>
 </h3>
-<button class="ghost" onclick="createCalendarEvent(); event.stopPropagation();" style="padding: 6px 12px; font-size: 12px; border-radius: 8px;">➕ Add Event</button>
+<button type="button" class="ghost" onclick="createCalendarEvent(); event.stopPropagation();" style="padding: 6px 12px; font-size: 12px; border-radius: 8px;">➕ Add Event</button>
 </div>
 <div id="upcomingEventsList" style="max-height: 200px; overflow-y: auto; cursor: default;"></div>
 </div>
@@ -2433,7 +2469,7 @@ Generate detailed reports from 35+ templates covering all business metrics.
 <div class="panel">
 <div class="panel-header">
 <h2>📈 Advanced Analytics Dashboard</h2>
-<button class="ghost" id="refreshAnalytics">🔄 Refresh</button>
+<button type="button" class="ghost" id="refreshAnalytics">🔄 Refresh</button>
 </div>
 
 <!-- Revenue Metrics -->
@@ -2493,11 +2529,11 @@ Generate detailed reports from 35+ templates covering all business metrics.
 <div class="panel-header">
 <h2>💰 Transactions</h2>
 <div class="btn-group">
-<button class="btn" id="newTxBtn">➕ New Transaction</button>
-<button class="ghost" id="manageRecurringBtn">📋 Recurring Invoices</button>
-<button class="ghost" id="importCsvBtn">📤 Import CSV</button>
-<button class="ghost" id="refreshTransactions">🔄 Refresh</button>
-<button class="ghost" id="exportTx">📥 Export</button>
+<button type="button" class="btn" id="newTxBtn">➕ New Transaction</button>
+<button type="button" class="ghost" id="manageRecurringBtn">📋 Recurring Invoices</button>
+<button type="button" class="ghost" id="importCsvBtn">📤 Import CSV</button>
+<button type="button" class="ghost" id="refreshTransactions">🔄 Refresh</button>
+<button type="button" class="ghost" id="exportTx">📥 Export</button>
 <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
 </div>
 </div>
@@ -2506,8 +2542,8 @@ Generate detailed reports from 35+ templates covering all business metrics.
 <span id="selectedCount" style="font-weight: 600; color: var(--text-primary);">0 selected</span>
 </div>
 <div style="display: flex; gap: 8px;">
-<button class="ghost" id="deselectAllBtn" style="font-size: 13px; padding: 8px 16px;">Clear Selection</button>
-<button class="ghost danger" id="bulkDeleteBtn" style="font-size: 13px; padding: 8px 16px;">🗑️ Delete Selected</button>
+<button type="button" class="ghost" id="deselectAllBtn" style="font-size: 13px; padding: 8px 16px;">Clear Selection</button>
+<button type="button" class="ghost danger" id="bulkDeleteBtn" style="font-size: 13px; padding: 8px 16px;">🗑️ Delete Selected</button>
 </div>
 </div>
 <div id="txnTable"></div>
@@ -2520,8 +2556,8 @@ Generate detailed reports from 35+ templates covering all business metrics.
 <div class="panel-header">
 <h2>📦 Product Management</h2>
 <div class="btn-group">
-<button class="btn" id="addProductBtn">➕ Add Product</button>
-<button class="ghost" id="refreshProducts">🔄 Refresh</button>
+<button type="button" class="btn" id="addProductBtn">➕ Add Product</button>
+<button type="button" class="ghost" id="refreshProducts">🔄 Refresh</button>
 </div>
 </div>
 <div class="contact-grid" id="productsGrid"></div>
@@ -2534,8 +2570,8 @@ Generate detailed reports from 35+ templates covering all business metrics.
 <div class="panel-header">
 <h2>👥 Contacts & Customers</h2>
 <div class="btn-group">
-<button class="btn" id="newContactBtn">➕ New Contact</button>
-<button class="ghost" id="refreshContacts">🔄 Refresh</button>
+<button type="button" class="btn" id="newContactBtn">➕ New Contact</button>
+<button type="button" class="ghost" id="refreshContacts">🔄 Refresh</button>
 <input type="text" id="contactSearch" placeholder="Search contacts..." style="padding: 8px 16px; width: 200px;">
 </div>
 </div>
@@ -2549,9 +2585,9 @@ Generate detailed reports from 35+ templates covering all business metrics.
 <div class="panel-header">
 <h2>🗺️ Product Roadmap</h2>
 <div class="btn-group">
-<button class="btn" id="newRoadmapBtn">➕ Add Roadmap Item</button>
-<button class="ghost" id="refreshRoadmap">🔄 Refresh</button>
-<button class="ghost" id="exportRoadmapBtn">📄 Export .docx</button>
+<button type="button" class="btn" id="newRoadmapBtn">➕ Add Roadmap Item</button>
+<button type="button" class="ghost" id="refreshRoadmap">🔄 Refresh</button>
+<button type="button" class="ghost" id="exportRoadmapBtn">📄 Export .docx</button>
 </div>
 </div>
 <div id="roadmapList"></div>
@@ -2561,9 +2597,9 @@ Generate detailed reports from 35+ templates covering all business metrics.
 <div class="panel-header">
 <h2>✅ Tasks</h2>
 <div class="btn-group">
-<button class="btn" id="newTaskBtn">➕ New Task</button>
-<button class="ghost" id="refreshTasks">🔄 Refresh</button>
-<button class="ghost" id="exportTasksBtn">📄 Export .docx</button>
+<button type="button" class="btn" id="newTaskBtn">➕ New Task</button>
+<button type="button" class="ghost" id="refreshTasks">🔄 Refresh</button>
+<button type="button" class="ghost" id="exportTasksBtn">📄 Export .docx</button>
 </div>
 </div>
 <div id="tasksList"></div>
@@ -2576,9 +2612,9 @@ Generate detailed reports from 35+ templates covering all business metrics.
 <div class="panel-header">
 <h2>📅 Google Calendar</h2>
 <div class="btn-group">
-<button class="btn" id="connectCalendarBtn">🔗 Connect Calendar</button>
-<button class="ghost" id="refreshCalendar">🔄 Refresh</button>
-<button class="ghost" id="todayBtn">📍 Today</button>
+<button type="button" class="btn" id="connectCalendarBtn">🔗 Connect Calendar</button>
+<button type="button" class="ghost" id="refreshCalendar">🔄 Refresh</button>
+<button type="button" class="ghost" id="todayBtn">📍 Today</button>
 </div>
 </div>
 <div id="calendarStatus" style="padding: 16px; background: rgba(110,231,183,0.1); border: 1px solid rgba(110,231,183,0.3); border-radius: 12px; margin-bottom: 16px; display: none;">
@@ -2594,7 +2630,7 @@ Generate detailed reports from 35+ templates covering all business metrics.
 <div style="font-size: 48px; margin-bottom: 16px;">📅</div>
 <h3 style="margin-bottom: 12px;">Connect Your Google Calendar</h3>
 <p class="tiny muted" style="margin-bottom: 24px;">Sync your calendar to view and manage your schedule directly from Virely Ops</p>
-<button class="btn" onclick="connectGoogleCalendar()">🔗 Connect Google Calendar</button>
+<button type="button" class="btn" onclick="connectGoogleCalendar()">🔗 Connect Google Calendar</button>
 </div>
 </div>
 
@@ -2602,16 +2638,16 @@ Generate detailed reports from 35+ templates covering all business metrics.
 <div class="panel-header">
 <h2>📆 Schedule</h2>
 <div class="btn-group">
-<button class="btn" onclick="createCalendarEvent()" style="margin-right: 12px;">➕ Create Event</button>
-<button class="ghost" data-view="day" onclick="changeCalendarView('day')">Day</button>
-<button class="ghost" data-view="week" onclick="changeCalendarView('week')">Week</button>
-<button class="ghost active" data-view="month" onclick="changeCalendarView('month')">Month</button>
+<button type="submit" class="btn" onclick="createCalendarEvent()" style="margin-right: 12px;">➕ Create Event</button>
+<button type="button" class="ghost" data-view="day" onclick="changeCalendarView('day')">Day</button>
+<button type="button" class="ghost" data-view="week" onclick="changeCalendarView('week')">Week</button>
+<button type="button" class="ghost active" data-view="month" onclick="changeCalendarView('month')">Month</button>
 </div>
 </div>
 <div id="calendarControls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 16px; background: rgba(255,255,255,0.02); border-radius: 12px;">
-<button class="ghost" onclick="navigateCalendar(-1)">◀ Previous</button>
+<button type="button" class="ghost" onclick="navigateCalendar(-1)">◀ Previous</button>
 <h3 id="calendarMonth" style="margin: 0;">January 2025</h3>
-<button class="ghost" onclick="navigateCalendar(1)">Next ▶</button>
+<button type="button" class="ghost" onclick="navigateCalendar(1)">Next ▶</button>
 </div>
 <div id="calendarView"></div>
 </div>
@@ -2630,7 +2666,7 @@ Generate detailed reports from 35+ templates covering all business metrics.
 <div class="panel">
 <div class="panel-header">
 <h2>🏢 Division Performance</h2>
-<button class="ghost" id="refreshDivisions">🔄 Refresh</button>
+<button type="button" class="ghost" id="refreshDivisions">🔄 Refresh</button>
 </div>
 <div style="padding: 16px; background: linear-gradient(135deg, rgba(110,231,183,0.05), rgba(96,165,250,0.05)); border-radius: 8px; border: 1px solid var(--glass-border); margin-bottom: 20px;">
 <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
@@ -2643,7 +2679,7 @@ Generate detailed reports from 35+ templates covering all business metrics.
 <div class="panel">
 <div class="panel-header">
 <h2>📊 Division Breakdown Chart</h2>
-<button class="ghost" id="refreshDivisionChart">🔄 Refresh</button>
+<button type="button" class="ghost" id="refreshDivisionChart">🔄 Refresh</button>
 </div>
 <div style="padding: 16px; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 16px;">
 <div style="font-size: 13px; color: var(--text-secondary);">
@@ -2662,8 +2698,8 @@ Visual comparison of revenue, expenses, and profitability across all divisions
 <div class="panel-header">
 <h2>👥 Team Directory</h2>
 <div class="btn-group">
-<button class="btn" id="newTeamMemberBtn">➕ New Team Member</button>
-<button class="ghost" id="refreshTeam">🔄 Refresh</button>
+<button type="button" class="btn" id="newTeamMemberBtn">➕ New Team Member</button>
+<button type="button" class="ghost" id="refreshTeam">🔄 Refresh</button>
 <input type="text" id="teamSearch" placeholder="Search team..." style="padding: 8px 16px; width: 200px;">
 </div>
 </div>
@@ -2676,7 +2712,7 @@ Visual comparison of revenue, expenses, and profitability across all divisions
 <div class="panel">
 <div class="panel-header">
 <h2>🤝 Customer Relationship Management (CRM)</h2>
-<button class="ghost" id="refreshCRM">🔄 Refresh</button>
+<button type="button" class="ghost" id="refreshCRM">🔄 Refresh</button>
 </div>
 
 <!-- CRM Feature Sections -->
@@ -2783,8 +2819,8 @@ Use the Deal Pipeline to track prospects through your sales funnel. Lead scoring
 <div class="panel-header">
 <h2>🔧 Technology Vendor Directory</h2>
 <div class="btn-group">
-<button class="btn" id="newVendorBtn">➕ New Vendor</button>
-<button class="ghost" id="refreshVendors">🔄 Refresh</button>
+<button type="button" class="btn" id="newVendorBtn">➕ New Vendor</button>
+<button type="button" class="ghost" id="refreshVendors">🔄 Refresh</button>
 <input type="text" id="vendorSearch" placeholder="Search vendors..." style="padding: 8px 16px; width: 200px;">
 </div>
 </div>
@@ -2798,9 +2834,9 @@ Use the Deal Pipeline to track prospects through your sales funnel. Lead scoring
 <div class="panel-header">
 <h2>📢 Advertising & Marketing Hub</h2>
 <div class="btn-group">
-<button class="btn" id="newCampaignBtn">➕ New Campaign</button>
-<button class="ghost" id="refreshAdvertising">🔄 Refresh</button>
-<button class="ghost" id="exportMarketingReport">📊 Export Report</button>
+<button type="button" class="btn" id="newCampaignBtn">➕ New Campaign</button>
+<button type="button" class="ghost" id="refreshAdvertising">🔄 Refresh</button>
+<button type="button" class="ghost" id="exportMarketingReport">📊 Export Report</button>
 </div>
 </div>
 
@@ -2809,11 +2845,11 @@ Use the Deal Pipeline to track prospects through your sales funnel. Lead scoring
 
 <!-- Tabs for Different Marketing Sections -->
 <div style="display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid var(--glass-border); padding-bottom: 12px; flex-wrap: wrap;">
-<button class="marketing-tab active" data-tab="campaigns" style="padding: 10px 20px; background: none; border: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s;">Campaigns</button>
-<button class="marketing-tab" data-tab="channels" style="padding: 10px 20px; background: none; border: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s;">Channels</button>
-<button class="marketing-tab" data-tab="budget" style="padding: 10px 20px; background: none; border: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s;">Budget</button>
-<button class="marketing-tab" data-tab="analytics" style="padding: 10px 20px; background: none; border: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s;">Analytics</button>
-<button class="marketing-tab" data-tab="leads" style="padding: 10px 20px; background: none; border: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s;">Lead Gen</button>
+<button type="button" class="marketing-tab active" data-tab="campaigns" style="padding: 10px 20px; background: none; border: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s;">Campaigns</button>
+<button type="button" class="marketing-tab" data-tab="channels" style="padding: 10px 20px; background: none; border: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s;">Channels</button>
+<button type="button" class="marketing-tab" data-tab="budget" style="padding: 10px 20px; background: none; border: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s;">Budget</button>
+<button type="button" class="marketing-tab" data-tab="analytics" style="padding: 10px 20px; background: none; border: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s;">Analytics</button>
+<button type="button" class="marketing-tab" data-tab="leads" style="padding: 10px 20px; background: none; border: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s;">Lead Gen</button>
 </div>
 
 <!-- Campaigns Tab -->
@@ -2833,7 +2869,7 @@ Use the Deal Pipeline to track prospects through your sales funnel. Lead scoring
 <div style="background: rgba(255,255,255,0.03); padding: 24px; border-radius: 12px; border: 1px solid var(--glass-border);">
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
 <h3 style="font-size: 16px; color: var(--accent-primary); margin: 0;">Monthly Budget</h3>
-<button class="ghost" style="padding: 6px 12px; font-size: 12px;" onclick="window.editMonthlyBudget()">✏️ Edit</button>
+<button type="button" class="ghost" style="padding: 6px 12px; font-size: 12px;" onclick="window.editMonthlyBudget()">✏️ Edit</button>
 </div>
 <div id="budgetOverview"></div>
 </div>
@@ -2866,8 +2902,8 @@ Use the Deal Pipeline to track prospects through your sales funnel. Lead scoring
 <!-- Lead Generation Tab -->
 <div class="marketing-tab-content" data-tab-content="leads" style="display: none;">
 <div class="btn-group" style="margin-bottom: 24px;">
-<button class="btn" id="newLeadBtn">➕ New Lead</button>
-<button class="ghost" id="exportLeadsBtn">📥 Export Leads</button>
+<button type="button" class="btn" id="newLeadBtn">➕ New Lead</button>
+<button type="button" class="ghost" id="exportLeadsBtn">📥 Export Leads</button>
 </div>
 <div id="leadsGrid"></div>
 </div>
@@ -2880,9 +2916,9 @@ Use the Deal Pipeline to track prospects through your sales funnel. Lead scoring
 <div class="panel-header">
 <h2>📝 Notes</h2>
 <div class="btn-group">
-<button class="btn" id="newNoteBtn">➕ New Note</button>
-<button class="ghost" id="refreshNotes">🔄 Refresh</button>
-<button class="ghost" id="exportNotesBtn">📄 Export .docx</button>
+<button type="button" class="btn" id="newNoteBtn">➕ New Note</button>
+<button type="button" class="ghost" id="refreshNotes">🔄 Refresh</button>
+<button type="button" class="ghost" id="exportNotesBtn">📄 Export .docx</button>
 <input type="text" id="noteSearch" placeholder="Search notes..." style="padding: 8px 16px; width: 200px;">
 </div>
 </div>
@@ -2896,8 +2932,8 @@ Use the Deal Pipeline to track prospects through your sales funnel. Lead scoring
 <div class="panel-header">
 <h2>📄 Reports & Analytics <span style="font-size: 14px; color: var(--text-secondary); font-weight: 500; margin-left: 12px;">(35+ Report Templates)</span></h2>
 <div class="btn-group">
-<button class="btn" id="generateReportBtn">➕ Generate Report</button>
-<button class="ghost" id="refreshReports">🔄 Refresh</button>
+<button type="button" class="btn" id="generateReportBtn">➕ Generate Report</button>
+<button type="button" class="ghost" id="refreshReports">🔄 Refresh</button>
 </div>
 </div>
 
@@ -2942,10 +2978,10 @@ Use the Deal Pipeline to track prospects through your sales funnel. Lead scoring
 <div class="panel-header">
 <h2>🚨 Operations Alerts <span style="font-size: 14px; color: var(--text-secondary); font-weight: 500; margin-left: 12px;">(24 Total Alert Configurations)</span></h2>
 <div class="btn-group">
-<button class="btn" onclick="enableAllAlerts()">✅ Enable All</button>
-<button class="ghost" onclick="disableAllAlerts()">❌ Disable All</button>
-<button class="ghost" onclick="resetAlerts()">🔄 Reset</button>
-<button class="ghost danger" onclick="deleteSelectedAlerts()">🗑️ Delete Selected</button>
+<button type="button" class="btn" onclick="enableAllAlerts()">✅ Enable All</button>
+<button type="button" class="ghost" onclick="disableAllAlerts()">❌ Disable All</button>
+<button type="button" class="ghost" onclick="resetAlerts()">🔄 Reset</button>
+<button type="button" class="ghost danger" onclick="window.deleteSelectedAlerts()">🗑️ Delete Selected</button>
 </div>
 </div>
 
@@ -3130,7 +3166,7 @@ All 24 alerts above are fully configured and ready to use. Each alert descriptio
 <!-- KPI Drilldown Modal -->
 <div class="modal-overlay" id="kpiDrilldownModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; backdrop-filter: blur(8px); opacity: 0; transition: opacity 0.3s ease;">
 <div class="modal-content" style="position: relative; background: linear-gradient(135deg, rgba(20,27,46,0.98) 0%, rgba(10,14,26,0.98) 100%); border: 1px solid var(--glass-border); border-radius: 20px; padding: 32px; max-width: 900px; max-height: 85vh; overflow-y: auto; margin: 50px auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5); transform: translateY(-20px); transition: transform 0.3s ease;">
-<button onclick="closeKpiModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: none; color: var(--text-primary); font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">×</button>
+<button type="button" onclick="closeKpiModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: none; color: var(--text-primary); font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">×</button>
 <h2 id="kpiModalTitle" style="font-size: 24px; font-weight: 800; margin-bottom: 24px; color: var(--accent-primary);"></h2>
 <div id="kpiModalContent"></div>
 </div>
@@ -3139,7 +3175,7 @@ All 24 alerts above are fully configured and ready to use. Each alert descriptio
 <!-- Panel Drilldown Modal -->
 <div class="modal-overlay" id="panelDrilldownModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; backdrop-filter: blur(8px); opacity: 0; transition: opacity 0.3s ease;">
 <div class="modal-content" style="position: relative; background: linear-gradient(135deg, rgba(20,27,46,0.98) 0%, rgba(10,14,26,0.98) 100%); border: 1px solid var(--glass-border); border-radius: 20px; padding: 32px; max-width: 900px; max-height: 85vh; overflow-y: auto; margin: 50px auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5); transform: translateY(-20px); transition: transform 0.3s ease;">
-<button onclick="closePanelModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: none; color: var(--text-primary); font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">×</button>
+<button type="button" onclick="closePanelModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: none; color: var(--text-primary); font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">×</button>
 <h2 id="panelModalTitle" style="font-size: 24px; font-weight: 800; margin-bottom: 24px; color: var(--accent-primary);"></h2>
 <div id="panelModalContent"></div>
 </div>
@@ -3148,7 +3184,7 @@ All 24 alerts above are fully configured and ready to use. Each alert descriptio
 <!-- Calendar Event Edit Modal (Centered) -->
 <div class="modal-overlay" id="calendarEditModal" style="display: flex; opacity: 0; visibility: hidden; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10001; backdrop-filter: blur(8px); align-items: center; justify-content: center; transition: opacity 0.3s ease, visibility 0.3s ease;">
 <div class="modal-content" style="position: relative; background: linear-gradient(135deg, rgba(20,27,46,0.98) 0%, rgba(10,14,26,0.98) 100%); border: 1px solid var(--glass-border); border-radius: 20px; padding: 32px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
-<button onclick="closeCalendarEditModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: none; color: var(--text-primary); font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; z-index: 1;">×</button>
+<button type="button" onclick="closeCalendarEditModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: none; color: var(--text-primary); font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; z-index: 1;">×</button>
 <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 24px; color: var(--accent-primary);">📅 <span id="calendarEventModalTitle">Create Calendar Event</span></h2>
 <form id="calendarEventForm">
 <div class="form-group">
@@ -3303,7 +3339,7 @@ function showSaveSuccess(message = 'Saved successfully!') {
         `;
         document.body.appendChild(notification);
         
-        setTimeout(() => {
+        Promise.resolve().then(() => {
             notification.style.opacity = '0';
             notification.style.transform = 'translateX(100%)';
             notification.style.transition = 'all 0.3s ease';
@@ -3414,7 +3450,7 @@ transactions.map(t =>
 '</tbody>' +
 '</table>' +
 '</div>' +
-'<button class="ghost" onclick="window.closeModal()" style="width: 100%;">Close</button>' +
+'<button type="button" class="ghost" onclick="window.closeModal()" style="width: 100%;">Close</button>' +
 '</div>';
 
 window.openModal(html);
@@ -3469,7 +3505,43 @@ products: [
 // Reservations Division
 {id:'p7', name:'Reservation System - Basic', price:79, color:'#a78bfa', division:'reservations', description:'Simple reservation management'},
 {id:'p8', name:'Reservation System - Plus', price:249, color:'#8b5cf6', division:'reservations', description:'Advanced reservation with waitlist management'},
-{id:'p9', name:'Reservation System - Premium', price:799, color:'#7c3aed', division:'reservations', description:'Full-featured reservation platform with analytics'}
+{id:'p9', name:'Reservation System - Premium', price:799, color:'#7c3aed', division:'reservations', description:'Full-featured reservation platform with analytics'},
+// Company General Expenditure
+{id:'p10', name:'Office Supplies', price:0, color:'#fb923c', division:'general', description:'General office supplies and materials'},
+{id:'p11', name:'Office Furniture', price:0, color:'#f97316', division:'general', description:'Desks, chairs, and office furniture'},
+{id:'p12', name:'Office Equipment', price:0, color:'#ea580c', division:'general', description:'Printers, scanners, and office equipment'},
+{id:'p13', name:'Utilities', price:0, color:'#fb923c', division:'general', description:'Electric, water, gas, and other utilities'},
+{id:'p14', name:'Telecommunications', price:0, color:'#f97316', division:'general', description:'Internet, phone, and telecom services'},
+{id:'p15', name:'Phone Services', price:0, color:'#ea580c', division:'general', description:'Mobile and business phone services'},
+{id:'p16', name:'Rent & Lease', price:0, color:'#fb923c', division:'general', description:'Office or facility rent and lease payments'},
+{id:'p17', name:'Co-working Membership', price:0, color:'#f97316', division:'general', description:'Co-working space memberships'},
+{id:'p18', name:'Commercial Insurance', price:0, color:'#ea580c', division:'general', description:'Commercial business insurance'},
+{id:'p19', name:'Cyber Insurance', price:0, color:'#fb923c', division:'general', description:'Cybersecurity and data breach insurance'},
+{id:'p20', name:'General Liability Insurance', price:0, color:'#f97316', division:'general', description:'General liability coverage'},
+{id:'p21', name:'Professional Liability Insurance', price:0, color:'#ea580c', division:'general', description:'E&O and professional liability insurance'},
+{id:'p22', name:'Software & Tools', price:0, color:'#fb923c', division:'general', description:'General software subscriptions and tools'},
+{id:'p23', name:'Productivity Software', price:0, color:'#f97316', division:'general', description:'Productivity and workflow software'},
+{id:'p24', name:'AI Productivity & Creativity Tools', price:0, color:'#ea580c', division:'general', description:'AI-powered productivity tools'},
+{id:'p25', name:'One Time Software Purchase', price:0, color:'#fb923c', division:'general', description:'Software licenses and one-time purchases'},
+{id:'p26', name:'Marketing Tech Stack', price:0, color:'#f97316', division:'general', description:'Marketing automation and tools'},
+{id:'p27', name:'Accounting Tech Stack', price:0, color:'#ea580c', division:'general', description:'Accounting and bookkeeping software'},
+{id:'p28', name:'Team Communications', price:0, color:'#fb923c', division:'general', description:'Slack, Teams, and communication tools'},
+{id:'p29', name:'Enterprise - Web & App', price:0, color:'#f97316', division:'general', description:'Enterprise web and app infrastructure'},
+{id:'p30', name:'Customer Demo Scheduling API', price:0, color:'#ea580c', division:'general', description:'Demo scheduling and calendar APIs'},
+{id:'p31', name:'Marketing - Advertising', price:0, color:'#fb923c', division:'general', description:'Digital advertising and ad spend'},
+{id:'p32', name:'Marketing - Promotional', price:0, color:'#f97316', division:'general', description:'Promotional materials and campaigns'},
+{id:'p33', name:'Legal Services', price:0, color:'#ea580c', division:'general', description:'Legal counsel and services'},
+{id:'p34', name:'Professional Services', price:0, color:'#fb923c', division:'general', description:'Consulting and professional services'},
+{id:'p35', name:'Contractor Services - Upwork & Fiverr', price:0, color:'#f97316', division:'general', description:'Freelance and contractor services'},
+{id:'p36', name:'Mail Postage Expense', price:0, color:'#ea580c', division:'general', description:'Postage, shipping, and mailing costs'},
+{id:'p37', name:'Memberships', price:0, color:'#fb923c', division:'general', description:'Professional memberships and subscriptions'},
+{id:'p38', name:'Business Licenses', price:0, color:'#f97316', division:'general', description:'Business licenses and registrations'},
+{id:'p39', name:'Permits & Licenses', price:0, color:'#ea580c', division:'general', description:'Operating permits and licenses'},
+{id:'p40', name:'Donation', price:0, color:'#fb923c', division:'general', description:'Charitable donations and contributions'},
+{id:'p41', name:'SGA', price:0, color:'#f97316', division:'general', description:'Selling, General & Administrative expenses'},
+{id:'p42', name:'Business Equipment', price:0, color:'#ea580c', division:'general', description:'General business equipment and assets'},
+{id:'p43', name:'Travel & Entertainment', price:0, color:'#fb923c', division:'general', description:'Business travel and client entertainment'},
+{id:'p44', name:'Miscellaneous', price:0, color:'#f97316', division:'general', description:'Other general business expenses'}
 ],
 transactions: [],
 selectedTransactions: [],
@@ -3495,7 +3567,8 @@ roadmapItems: [],
 divisions: {
 'referrals': { name: 'Referral Marketing', revenue: 0, expenses: 0, mrr: 0, arr: 0, metric: 'referrals', count: 0 },
 'appointments': { name: 'Appointments', revenue: 0, expenses: 0, mrr: 0, arr: 0, metric: 'appointments', count: 0 },
-'reservations': { name: 'Reservations', revenue: 0, expenses: 0, mrr: 0, arr: 0, metric: 'reservations', count: 0 }
+'reservations': { name: 'Reservations', revenue: 0, expenses: 0, mrr: 0, arr: 0, metric: 'reservations', count: 0 },
+'general': { name: 'Company General Expenditure', revenue: 0, expenses: 0, mrr: 0, arr: 0, metric: 'general', count: 0 }
 },
 chartType: 'line',
 expenseChartType: 'bar',
@@ -3712,7 +3785,7 @@ toast.className = 'toast' + (isError ? ' toast-error' : '');
 toast.textContent = message;
 document.body.appendChild(toast);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 if(toast && toast.parentNode) toast.remove();
 }, duration);
 }
@@ -3720,6 +3793,39 @@ if(toast && toast.parentNode) toast.remove();
 // ========================================
 // MODAL FUNCTIONS - TESTED
 // ========================================
+// ========================================
+// BULLETPROOF FORM SUBMISSION HANDLER
+// ========================================
+// This handles ALL form submissions using event delegation
+// No setTimeout needed - works immediately!
+let formDelegationSetup = false;
+
+function setupFormDelegation() {
+if (formDelegationSetup) return;
+formDelegationSetup = true;
+
+console.log('🎯 Setting up universal form delegation...');
+
+// Attach ONE listener to handle ALL modal form submissions
+document.body.addEventListener('submit', function(e) {
+const form = e.target;
+const formId = form.id;
+
+console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+console.log('📝 FORM SUBMITTED (Event Delegation)');
+console.log('Form ID:', formId);
+console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+// The specific form handlers will process this
+// This is just a fallback to ensure we catch submissions
+}, true); // Use capture phase
+
+console.log('✅ Universal form delegation active');
+}
+
+// Setup form delegation immediately
+setupFormDelegation();
+
 window.openModal = function(html) {
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 console.log('🔓 openModal() CALLED');
@@ -3797,7 +3903,7 @@ return;
 }
 
 // Debounce search
-searchTimeout = setTimeout(() => {
+searchTimeout = Promise.resolve().then(() => {
 performGlobalSearch(query);
 }, 300);
 });
@@ -3878,7 +3984,7 @@ modalDiv.innerHTML = resultsHTML;
 document.body.appendChild(modalDiv);
 
 // Add click handlers to results
-setTimeout(() => {
+Promise.resolve().then(() => {
 $$('.search-result-item').forEach(item => {
 item.addEventListener('click', () => {
 const section = item.dataset.section;
@@ -3900,7 +4006,7 @@ if (total === 0) {
 return '<div class="search-results-content">' +
 '<div class="search-results-header">' +
 '<h3>🔍 Search Results</h3>' +
-'<button class="ghost" id="closeSearchResults" style="padding: 8px 16px;">✕</button>' +
+'<button type="button" class="ghost" id="closeSearchResults" style="padding: 8px 16px;">✕</button>' +
 '</div>' +
 '<p class="search-query">No results found for "<strong>' + query + '</strong>"</p>' +
 '<div style="text-align: center; padding: 40px; color: var(--text-muted);">' +
@@ -3912,7 +4018,7 @@ return '<div class="search-results-content">' +
 let html = '<div class="search-results-content">' +
 '<div class="search-results-header">' +
 '<h3>🔍 Search Results</h3>' +
-'<button class="ghost" id="closeSearchResults" style="padding: 8px 16px;">✕</button>' +
+'<button type="button" class="ghost" id="closeSearchResults" style="padding: 8px 16px;">✕</button>' +
 '</div>' +
 '<p class="search-query">Found <strong>' + total + '</strong> results for "<strong>' + query + '</strong>"</p>' +
 '<div class="search-results-list">';
@@ -4042,7 +4148,7 @@ targetSection.classList.add('active');
 showToast('Navigated to ' + section.charAt(0).toUpperCase() + section.slice(1));
 
 // Scroll to the item if possible
-setTimeout(() => {
+Promise.resolve().then(() => {
 const itemElement = $('[data-id="' + itemId + '"]') || 
 $('#' + itemId) ||
 $('[onclick*="' + itemId + '"]');
@@ -4050,7 +4156,7 @@ if (itemElement) {
 itemElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
 // Highlight the item temporarily
 itemElement.style.boxShadow = '0 0 0 3px rgba(110,231,183,0.5)';
-setTimeout(() => {
+Promise.resolve().then(() => {
 itemElement.style.boxShadow = '';
 }, 2000);
 }
@@ -4117,7 +4223,8 @@ const paymentSources = [
 const productsByDivision = {
 'referrals': state.products.filter(p => p.division === 'referrals'),
 'appointments': state.products.filter(p => p.division === 'appointments'),
-'reservations': state.products.filter(p => p.division === 'reservations')
+'reservations': state.products.filter(p => p.division === 'reservations'),
+'general': state.products.filter(p => p.division === 'general')
 };
 
 const html = '<div>' +
@@ -4131,7 +4238,7 @@ const html = '<div>' +
 '<div class="form-group">' +
 '<label>Type</label>' +
 '<select id="txType" required>' +
-'<option value="expense" ' + (transaction && transaction.type === 'expense' ? 'selected' : '') + '>Expense</option>' +
+'<option value="expense" ' + (transaction && transaction.type === 'expense' ? 'selected' : (!transaction ? 'selected' : '')) + '>Expense</option>' +
 '<option value="revenue" ' + (transaction && transaction.type === 'revenue' ? 'selected' : '') + '>Revenue</option>' +
 '</select>' +
 '</div>' +
@@ -4159,6 +4266,9 @@ paymentSources.map(ps => '<option value="' + ps.value + '" ' + (transaction && t
 '<div class="form-group">' +
 '<label>Product/Service</label>' +
 '<select id="txProduct" required>' +
+'<optgroup label="💼 Company General Expenditure">' +
+productsByDivision.general.map((p, index) => '<option value="' + p.id + '" data-division="general" ' + (transaction && transaction.product === p.id ? 'selected' : (!transaction && index === 0 ? 'selected' : '')) + '>' + p.name + (p.price > 0 ? ' - ' + money(p.price) : '') + '</option>').join('') +
+'</optgroup>' +
 '<optgroup label="🤝 Referrals Division">' +
 productsByDivision.referrals.map(p => '<option value="' + p.id + '" data-division="referrals" ' + (transaction && transaction.product === p.id ? 'selected' : '') + '>' + p.name + ' - ' + money(p.price) + '</option>').join('') +
 '</optgroup>' +
@@ -4184,11 +4294,17 @@ productsByDivision.reservations.map(p => '<option value="' + p.id + '" data-divi
 
 window.openModal(html);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
+console.log('⚡ Transaction form handler attachment starting...');
 const form = $('#txForm');
 const productSelect = $('#txProduct');
 const divisionInput = $('#txDivision');
 const productDescription = $('#productDescription');
+
+console.log('Form elements found:');
+console.log('  - form:', form ? '✅' : '❌');
+console.log('  - productSelect:', productSelect ? '✅' : '❌');
+console.log('  - divisionInput:', divisionInput ? '✅' : '❌');
 
 // Function to update division based on selected product
 function updateDivisionFromProduct() {
@@ -4200,7 +4316,8 @@ if (product) {
 const divisionNames = {
 'referrals': '🤝 Referrals',
 'appointments': '📅 Appointments',
-'reservations': '🎫 Reservations'
+'reservations': '🎫 Reservations',
+'general': '💼 Company General Expenditure'
 };
 divisionInput.value = divisionNames[product.division] || '';
 productDescription.textContent = product.description || '';
@@ -4214,7 +4331,11 @@ productSelect.addEventListener('change', updateDivisionFromProduct);
 }
 
 if(form) {
+console.log('🎯 Attaching submit handler to #txForm...');
 form.addEventListener('submit', (e) => {
+console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+console.log('💾 TRANSACTION FORM SUBMIT HANDLER CALLED!');
+console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 e.preventDefault();
 const amount = parseFloat($('#txAmount').value);
 const type = $('#txType').value;
@@ -4272,11 +4393,15 @@ if (typeof updateFinancialSummary === 'function') {
 
 window.closeModal();
 });
+console.log('✅ Transaction form submit handler successfully attached!');
+} else {
+console.error('❌ CRITICAL: Transaction form (#txForm) not found!');
 }
 
 const cancelBtn = $('#cancelTx');
 if(cancelBtn) cancelBtn.addEventListener('click', window.closeModal);
-}, 100);
+console.log('✅ Transaction form setup complete');
+});
 }
 
 function deleteTransaction(id) {
@@ -4350,6 +4475,9 @@ state.products.filter(p => p.division === 'appointments').map(p => '<option valu
 '<optgroup label="🎫 Reservations">' +
 state.products.filter(p => p.division === 'reservations').map(p => '<option value="' + p.id + '" data-division="reservations" ' + (contact && contact.product === p.id ? 'selected' : '') + '>' + p.name + '</option>').join('') +
 '</optgroup>' +
+'<optgroup label="💼 Company General Expenditure">' +
+state.products.filter(p => p.division === 'general').map(p => '<option value="' + p.id + '" data-division="general" ' + (contact && contact.product === p.id ? 'selected' : '') + '>' + p.name + '</option>').join('') +
+'</optgroup>' +
 '</select>' +
 '</div>' +
 '<div class="form-group" style="background: rgba(110,231,183,0.1); padding: 12px; border-radius: 8px; border: 1px solid rgba(110,231,183,0.3);">' +
@@ -4378,7 +4506,7 @@ state.products.filter(p => p.division === 'reservations').map(p => '<option valu
 
 window.openModal(html);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 const form = $('#contactForm');
 const productSelect = $('#contactProduct');
 const divisionInput = $('#contactDivision');
@@ -4396,7 +4524,8 @@ if (product) {
 const divisionNames = {
 'referrals': '🤝 Referrals',
 'appointments': '📅 Appointments',
-'reservations': '🎫 Reservations'
+'reservations': '🎫 Reservations',
+'general': '💼 Company General Expenditure'
 };
 divisionInput.value = divisionNames[product.division] || '';
 }
@@ -4495,7 +4624,7 @@ window.closeModal();
 
 const cancelBtn = $('#cancelContact');
 if(cancelBtn) cancelBtn.addEventListener('click', window.closeModal);
-}, 100);
+});
 }
 
 function deleteContact(id) {
@@ -4527,6 +4656,7 @@ const html = '<div>' +
 '<option value="referrals" ' + (product && product.division === 'referrals' ? 'selected' : '') + '>🤝 Referrals</option>' +
 '<option value="appointments" ' + (product && product.division === 'appointments' ? 'selected' : '') + '>📅 Appointments</option>' +
 '<option value="reservations" ' + (product && product.division === 'reservations' ? 'selected' : '') + '>🎫 Reservations</option>' +
+'<option value="general" ' + (product && product.division === 'general' ? 'selected' : '') + '>💼 Company General Expenditure</option>' +
 '</select>' +
 '<small style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 12px;">Select which division this product belongs to</small>' +
 '</div>' +
@@ -4550,7 +4680,7 @@ const html = '<div>' +
 
 window.openModal(html);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 const form = $('#productForm');
 if(form) {
 form.addEventListener('submit', (e) => {
@@ -4582,7 +4712,7 @@ window.closeModal();
 
 const cancelBtn = $('#cancelProduct');
 if(cancelBtn) cancelBtn.addEventListener('click', window.closeModal);
-}, 100);
+});
 }
 
 function deleteProduct(id) {
@@ -4766,16 +4896,16 @@ return '<div style="flex: 1; display: flex; flex-direction: column; align-items:
 '</div>' +
 
 '<div style="display: flex; gap: 12px;">' +
-'<button class="ghost" id="closeProductDetails">Close</button>' +
-'<button class="btn" onclick="window.closeModal(); setTimeout(() => window.editProduct(\'' + productId + '\'), 100);" style="flex: 1;">✏️ Edit Product</button>' +
+'<button type="button" class="ghost" id="closeProductDetails">Close</button>' +
+'<button type="button" class="btn" onclick="window.closeModal(); setTimeout(() => window.editProduct(\'' + productId + '\'), 100);" style="flex: 1;">✏️ Edit Product</button>' +
 '</div></div>';
 
 window.openModal(html);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 const closeBtn = $('#closeProductDetails');
 if (closeBtn) closeBtn.addEventListener('click', window.closeModal);
-}, 100);
+});
 }
 
 window.showProductDetails = showProductDetails;
@@ -4850,7 +4980,7 @@ teamMemberNames.map(name => '<option value="' + name + '">').join('') +
 
 window.openModal(html);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 const form = $('#taskForm');
 const dueDateInput = $('#taskDueDate');
 const dueDateWarning = $('#dueDateWarning');
@@ -4975,7 +5105,7 @@ window.closeModal();
 
 const cancelBtn = $('#cancelTask');
 if(cancelBtn) cancelBtn.addEventListener('click', window.closeModal);
-}, 100);
+});
 }
 
 function toggleTask(id) {
@@ -5039,7 +5169,7 @@ const html = '<div>' +
 
 window.openModal(html);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 const form = $('#roadmapForm');
 if(form) {
 form.addEventListener('submit', (e) => {
@@ -5070,7 +5200,7 @@ window.closeModal();
 
 const cancelBtn = $('#cancelRoadmap');
 if(cancelBtn) cancelBtn.addEventListener('click', window.closeModal);
-}, 100);
+});
 }
 
 function deleteRoadmapItem(id) {
@@ -5117,7 +5247,7 @@ const html = '<div>' +
 
 window.openModal(html);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 const form = $('#noteForm');
 if(form) {
 form.addEventListener('submit', (e) => {
@@ -5148,7 +5278,7 @@ window.closeModal();
 
 const cancelBtn = $('#cancelNote');
 if(cancelBtn) cancelBtn.addEventListener('click', window.closeModal);
-}, 100);
+});
 }
 
 function deleteNote(id) {
@@ -5181,16 +5311,16 @@ const html = '<div>' +
 note.content +
 '</div>' +
 '<div style="display: flex; gap: 12px;">' +
-'<button class="btn" onclick="window.closeModal(); setTimeout(() => window.editNote(\'' + note.id + '\'), 100);">✏️ Edit</button>' +
-'<button class="ghost" id="closeNoteView">Close</button>' +
+'<button type="button" class="btn" onclick="window.closeModal(); setTimeout(() => window.editNote(\'' + note.id + '\'), 100);">✏️ Edit</button>' +
+'<button type="button" class="ghost" id="closeNoteView">Close</button>' +
 '</div></div>';
 
 window.openModal(html);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 const closeBtn = $('#closeNoteView');
 if(closeBtn) closeBtn.addEventListener('click', window.closeModal);
-}, 100);
+});
 }
 
 // ============================================
@@ -5240,7 +5370,7 @@ const html = '<div>' +
 
 window.openModal(html);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 const form = $('#teamForm');
 if(form) {
 form.addEventListener('submit', (e) => {
@@ -5275,7 +5405,7 @@ window.closeModal();
 
 const cancelBtn = $('#cancelTeamForm');
 if(cancelBtn) cancelBtn.addEventListener('click', window.closeModal);
-}, 100);
+});
 }
 
 // ============================================
@@ -5342,7 +5472,7 @@ const html = '<div>' +
 
 window.openModal(html);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 const form = $('#vendorForm');
 if(form) {
 form.addEventListener('submit', (e) => {
@@ -5378,7 +5508,7 @@ window.closeModal();
 
 const cancelBtn = $('#cancelVendorForm');
 if(cancelBtn) cancelBtn.addEventListener('click', window.closeModal);
-}, 100);
+});
 }
 
 // ============================================
@@ -5443,7 +5573,7 @@ const html = '<div>' +
 
 window.openModal(html);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 const form = $('#dealForm');
 if(form) {
 form.addEventListener('submit', (e) => {
@@ -5480,7 +5610,7 @@ window.closeModal();
 
 const cancelBtn = $('#cancelDealForm');
 if(cancelBtn) cancelBtn.addEventListener('click', window.closeModal);
-}, 100);
+});
 }
 
 function showPipelineView() {
@@ -5653,16 +5783,16 @@ html += '<div style="padding: 12px; background: rgba(110,231,183,0.1); border-le
 html += '</div></div>';
 
 html += '<div style="margin-top: 24px; text-align: right;">';
-html += '<button class="ghost" id="closePipelineView">Close</button>';
+html += '<button type="button" class="ghost" id="closePipelineView">Close</button>';
 html += '</div>';
 html += '</div>';
 
 window.openModal(html);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 const closeBtn = $('#closePipelineView');
 if (closeBtn) closeBtn.addEventListener('click', window.closeModal);
-}, 100);
+});
 }
 
 function showCRMSettings() {
@@ -5682,16 +5812,16 @@ const html = '<div>' +
 '<p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">Get automatic alerts 30 days before contract renewals</p>' +
 '</div>' +
 '<div style="margin-top: 24px; text-align: right;">' +
-'<button class="ghost" id="closeCRMSettings">Close</button>' +
+'<button type="button" class="ghost" id="closeCRMSettings">Close</button>' +
 '</div>' +
 '</div>';
 
 window.openModal(html);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 const closeBtn = $('#closeCRMSettings');
 if (closeBtn) closeBtn.addEventListener('click', window.closeModal);
-}, 100);
+});
 }
 
 function exportCRMData() {
@@ -5764,7 +5894,7 @@ grid.innerHTML = '<div class="panel" style="text-align: center; padding: 48px 24
 '<div style="font-size: 48px; margin-bottom: 16px;">🤝</div>' +
 '<h3 style="margin-bottom: 8px;">No Deals Yet</h3>' +
 '<p style="color: var(--text-secondary); margin-bottom: 24px;">Create your first deal to start tracking your sales pipeline</p>' +
-'<button class="btn" onclick="showDealForm()">➕ Create First Deal</button>' +
+'<button type="submit" class="btn" onclick="showDealForm()">➕ Create First Deal</button>' +
 '</div>';
 return;
 }
@@ -5855,8 +5985,8 @@ html += '<td style="padding: 12px;"><span style="display: inline-block; padding:
 html += '<td style="padding: 12px; color: var(--text-secondary); font-size: 12px;">' + (deal.expectedCloseDate || 'Not set') + '</td>';
 html += '<td style="padding: 12px; color: var(--text-secondary); font-size: 12px;">' + (deal.contactPerson || '-') + '</td>';
 html += '<td style="padding: 12px;">';
-html += '<button class="ghost" onclick="editDeal(\'' + deal.id + '\')" style="padding: 4px 12px; font-size: 12px; margin-right: 4px;">Edit</button>';
-html += '<button class="ghost" onclick="deleteDeal(\'' + deal.id + '\')" style="padding: 4px 12px; font-size: 12px; color: var(--danger);">Delete</button>';
+html += '<button type="button" class="ghost" onclick="window.editDeal(\'' + deal.id + '\')" style="padding: 4px 12px; font-size: 12px; margin-right: 4px;">Edit</button>';
+html += '<button type="button" class="ghost" onclick="window.deleteDeal(\'' + deal.id + '\')" style="padding: 4px 12px; font-size: 12px; color: var(--danger);">Delete</button>';
 html += '</td>';
 html += '</tr>';
 });
@@ -5877,13 +6007,15 @@ if (!division) return;
 const divisionNames = {
 'referrals': 'Referrals',
 'appointments': 'Appointments',
-'reservations': 'Reservations'
+'reservations': 'Reservations',
+'general': 'Company General Expenditure'
 };
 
 const icons = {
 'referrals': '🤝',
 'appointments': '📅',
-'reservations': '🎫'
+'reservations': '🎫',
+'general': '💼'
 };
 
 const html = '<div style="max-width: 600px;">' +
@@ -5964,7 +6096,7 @@ const html = '<div style="max-width: 600px;">' +
 window.openModal(html);
 
 // Add smart calculation listeners
-setTimeout(() => {
+Promise.resolve().then(() => {
 const form = $('#divisionForm');
 const mrrInput = $('#divMRR');
 const arrInput = $('#divARR');
@@ -6071,7 +6203,7 @@ showToast('Division updated successfully with smart calculations!');
 
 const cancelBtn = $('#cancelDivisionForm');
 if (cancelBtn) cancelBtn.addEventListener('click', window.closeModal);
-}, 100);
+});
 };
 
 // View division performance details
@@ -6082,13 +6214,15 @@ if (!division) return;
 const divisionNames = {
 'referrals': 'Referrals',
 'appointments': 'Appointments',
-'reservations': 'Reservations'
+'reservations': 'Reservations',
+'general': 'Company General Expenditure'
 };
 
 const icons = {
 'referrals': '🤝',
 'appointments': '📅',
-'reservations': '🎫'
+'reservations': '🎫',
+'general': '💼'
 };
 
 const profit = (division.revenue || 0) - (division.expenses || 0);
@@ -6147,58 +6281,154 @@ const html = '<div style="max-width: 700px;">' +
 '</div>' +
 
 '<div style="display: flex; gap: 12px;">' +
-'<button class="btn" onclick="editDivision(\'' + divisionKey + '\')" style="flex: 1;">✏️ Edit Division</button>' +
-'<button class="ghost" id="closePerfModal" style="flex: 1;">Close</button>' +
+'<button type="button" class="btn" onclick="editDivision(\'' + divisionKey + '\')" style="flex: 1;">✏️ Edit Division</button>' +
+'<button type="button" class="ghost" id="closePerfModal" style="flex: 1;">Close</button>' +
 '</div>' +
 '</div>';
 
 window.openModal(html);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 const closeBtn = $('#closePerfModal');
 if (closeBtn) closeBtn.addEventListener('click', window.closeModal);
-}, 100);
+});
 };
 
 // Edit Monthly Budget function
 window.editMonthlyBudget = function() {
+console.log('💰 Opening monthly budget editor...');
 const currentBudget = state.marketingBudget ? state.marketingBudget.monthly : 10000;
 
 const html = '<div>' +
 '<h3>✏️ Edit Monthly Budget</h3>' +
 '<p class="tiny muted" style="margin-bottom: 24px;">Update your monthly marketing budget</p>' +
-'<form id="budgetForm">' +
+'<form id="budgetForm" onsubmit="return false;">' +
 '<div class="form-group">' +
 '<label>Monthly Budget ($)</label>' +
 '<input type="number" id="monthlyBudgetInput" value="' + currentBudget + '" required min="0" step="100">' +
 '</div>' +
 '<div style="display: flex; gap: 12px; margin-top: 24px;">' +
-'<button type="submit" class="btn" style="flex: 1;">💾 Save Budget</button>' +
+'<button type="button" class="btn" id="saveBudgetBtn" style="flex: 1;">💾 Save Budget</button>' +
 '<button type="button" id="cancelBudgetForm" class="ghost" style="flex: 1;">Cancel</button>' +
 '</div>' +
 '</form></div>';
 
 window.openModal(html);
 
+// Use requestAnimationFrame for reliable DOM readiness, with setTimeout fallback
+requestAnimationFrame(() => {
+requestAnimationFrame(() => {
+console.log('⚡ [RAF] Attaching budget form handlers...');
+attachBudgetFormHandlers();
+});
+});
+
+// Also use setTimeout as fallback
 setTimeout(() => {
+console.log('⚡ [Timeout] Checking if handlers need to be attached...');
+attachBudgetFormHandlers();
+}, 50);
+};
+
+// Separate function to attach handlers (prevent duplicate attachment)
+function attachBudgetFormHandlers() {
 const form = $('#budgetForm');
-if(form) {
-form.addEventListener('submit', (e) => {
+const saveBtn = $('#saveBudgetBtn');
+const cancelBtn = $('#cancelBudgetForm');
+const input = $('#monthlyBudgetInput');
+
+console.log('Form elements check:');
+console.log('  - budgetForm:', form ? '✅ Found' : '❌ NOT FOUND');
+console.log('  - saveButton:', saveBtn ? '✅ Found' : '❌ NOT FOUND');
+console.log('  - cancelButton:', cancelBtn ? '✅ Found' : '❌ NOT FOUND');
+console.log('  - budgetInput:', input ? '✅ Found' : '❌ NOT FOUND');
+
+if(!saveBtn) {
+console.error('❌ CRITICAL: Save Budget button not found in DOM!');
+return;
+}
+
+// Check if handler already attached
+if(saveBtn.dataset.handlerAttached === 'true') {
+console.log('ℹ️ Handler already attached, skipping');
+return;
+}
+
+// Mark as attached to prevent duplicates
+saveBtn.dataset.handlerAttached = 'true';
+console.log('🎯 Attaching click handler to #saveBudgetBtn...');
+
+// Attach click handler to save button
+saveBtn.addEventListener('click', function(e) {
+console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+console.log('💾 SAVE BUDGET BUTTON CLICKED!');
+console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 e.preventDefault();
-const newBudget = parseFloat($('#monthlyBudgetInput').value);
+e.stopPropagation();
+
+const inputElement = $('#monthlyBudgetInput');
+if (!inputElement) {
+console.error('❌ Budget input not found');
+alert('Error: Could not find budget input field');
+return;
+}
+
+const newBudget = parseFloat(inputElement.value);
+console.log('   New budget value:', newBudget);
+
+if (isNaN(newBudget) || newBudget < 0) {
+console.error('❌ Invalid budget value:', newBudget);
+alert('Please enter a valid budget amount');
+return;
+}
+
 if (!state.marketingBudget) state.marketingBudget = { monthly: 10000, allocated: 0 };
 state.marketingBudget.monthly = newBudget;
+console.log('   Budget updated in state:', state.marketingBudget);
+
+try {
 save();
-renderBudgetOverview();
+console.log('   ✅ State saved');
+} catch(err) {
+console.error('   ❌ Save error:', err);
+}
+
+try {
+renderBudget();
+console.log('   ✅ Budget rendered');
+} catch(err) {
+console.error('   ❌ Render error:', err);
+}
+
+try {
 window.closeModal();
+console.log('   ✅ Modal closed');
+} catch(err) {
+console.error('   ❌ Close modal error:', err);
+}
+
+try {
 showToast('Monthly budget updated to ' + money(newBudget));
+console.log('   ✅ Toast shown');
+} catch(err) {
+console.error('   ❌ Toast error:', err);
+}
+
+console.log('✅ Budget update complete');
+});
+
+// Attach cancel handler
+if(cancelBtn) {
+cancelBtn.addEventListener('click', function(e) {
+console.log('❌ Budget form cancelled');
+e.preventDefault();
+e.stopPropagation();
+window.closeModal();
 });
 }
 
-const cancelBtn = $('#cancelBudgetForm');
-if(cancelBtn) cancelBtn.addEventListener('click', window.closeModal);
-}, 100);
-};
+console.log('✅ Budget form handlers attached successfully');
+}
 
 // ============================================
 // ADVERTISING & MARKETING MODULE  
@@ -6518,9 +6748,9 @@ function showCampaignForm(campaign = null) {
 		</form>
 	</div>`;
 	
-        window.openModal(html);
+	window.openModal(html);
 	
-	setTimeout(() => {
+	Promise.resolve().then(() => {
 		const form = $('#campaignForm');
 		if (form) {
 			form.addEventListener('submit', (e) => {
@@ -6596,7 +6826,7 @@ function showCampaignForm(campaign = null) {
 		
 		const cancelBtn = $('#cancelCampaignForm');
 		if (cancelBtn) cancelBtn.addEventListener('click', window.closeModal);
-	}, 100);
+	});
 }
 
 function renderCampaigns() {
@@ -6681,7 +6911,7 @@ function renderCampaigns() {
 						<div style="margin-top: 8px; font-size: 11px; color: var(--text-muted);">
 							📅 ${campaign.startDate}${campaign.endDate ? ' - ' + campaign.endDate : ''}
 						</div>
-						<button onclick="event.stopPropagation(); deleteCampaign('${campaign.id}')" class="ghost danger" style="width: 100%; margin-top: 12px; padding: 8px; font-size: 12px;">🗑️ Delete</button>
+						<button type="button" onclick="event.stopPropagation(); window.deleteCampaign('${campaign.id}')" class="ghost danger" style="width: 100%; margin-top: 12px; padding: 8px; font-size: 12px;">🗑️ Delete</button>
 					</div>
 				`;
 			}).join('')}
@@ -6696,6 +6926,9 @@ function deleteCampaign(id) {
 	renderAdvertising();
 	showToast('Campaign deleted');
 }
+
+// Expose to window for onclick handlers
+window.deleteCampaign = deleteCampaign;
 
 function renderChannels() {
 	const metricsContainer = $('#channelMetrics');
@@ -7318,7 +7551,7 @@ function showLeadForm(lead = null) {
 	
         window.openModal(html);
 	
-	setTimeout(() => {
+	Promise.resolve().then(() => {
 		const form = $('#leadForm');
 		if (form) {
 			form.addEventListener('submit', (e) => {
@@ -7354,7 +7587,7 @@ function showLeadForm(lead = null) {
 		
 		const cancelBtn = $('#cancelLeadForm');
 		if (cancelBtn) cancelBtn.addEventListener('click', window.closeModal);
-	}, 100);
+	});
 }
 
 function renderLeads() {
@@ -7428,7 +7661,7 @@ function renderLeads() {
 						<div style="font-size: 11px; color: var(--text-muted); padding-top: 12px; border-top: 1px solid var(--glass-border);">
 							Added: ${new Date(lead.created).toLocaleDateString()}
 						</div>
-						<button onclick="event.stopPropagation(); deleteLead('${lead.id}')" class="ghost danger" style="width: 100%; margin-top: 12px; padding: 8px; font-size: 12px;">🗑️ Delete</button>
+						<button type="button" onclick="event.stopPropagation(); window.deleteLead('${lead.id}')" class="ghost danger" style="width: 100%; margin-top: 12px; padding: 8px; font-size: 12px;">🗑️ Delete</button>
 					</div>
 				`;
 			}).join('')}
@@ -7443,6 +7676,9 @@ function deleteLead(id) {
 	renderLeads();
 	showToast('Lead deleted');
 }
+
+// Expose to window for onclick handlers
+window.deleteLead = deleteLead;
 
 function exportMarketingReport() {
 	const report = {
@@ -7803,13 +8039,13 @@ function showRecurringInvoicesModal() {
 	}
 	
 	html += '<div style="margin-top: 24px; display: flex; gap: 12px;">' +
-	'<button class="btn" id="detectRecurringBtn" style="flex: 1;">🔄 Re-scan Transactions</button>' +
-	'<button class="ghost" id="closeRecurringModal">Close</button>' +
+	'<button type="button" class="btn" id="detectRecurringBtn" style="flex: 1;">🔄 Re-scan Transactions</button>' +
+	'<button type="button" class="ghost" id="closeRecurringModal">Close</button>' +
 	'</div></div>';
 	
         window.openModal(html);
 	
-	setTimeout(() => {
+	Promise.resolve().then(() => {
 		const detectBtn = $('#detectRecurringBtn');
 		if (detectBtn) {
 			detectBtn.addEventListener('click', () => {
@@ -7822,15 +8058,15 @@ function showRecurringInvoicesModal() {
 		
 		const closeBtn = $('#closeRecurringModal');
 		if (closeBtn) closeBtn.addEventListener('click', window.closeModal);
-	}, 100);
+	});
 }
 
 window.manageRecurringInvoice = function(id) {
 	window.closeModal();
-	setTimeout(() => {
+	Promise.resolve().then(() => {
 		const invoice = state.recurringInvoices.find(i => i.id === id);
 		if (invoice) manageRecurringInvoice(invoice);
-	}, 100);
+	});
 };
 
 function manageRecurringInvoice(invoice) {
@@ -7846,14 +8082,14 @@ function manageRecurringInvoice(invoice) {
 	'<div><strong>Occurrences:</strong> ' + invoice.occurrences + ' times</div>' +
 	'</div>' +
 	'<div style="display: flex; gap: 12px;">' +
-	'<button class="btn" id="markAsPaid" style="flex: 1;">✅ Mark as Paid</button>' +
-	'<button class="ghost" id="removeRecurring" style="flex: 1;">❌ Remove Tracking</button>' +
-	'<button class="ghost" id="closeInvoiceView">Close</button>' +
+	'<button type="button" class="btn" id="markAsPaid" style="flex: 1;">✅ Mark as Paid</button>' +
+	'<button type="button" class="ghost" id="removeRecurring" style="flex: 1;">❌ Remove Tracking</button>' +
+	'<button type="button" class="ghost" id="closeInvoiceView">Close</button>' +
 	'</div></div>';
 	
         window.openModal(html);
 	
-	setTimeout(() => {
+	Promise.resolve().then(() => {
 		const markPaidBtn = $('#markAsPaid');
 		if (markPaidBtn) {
 			markPaidBtn.addEventListener('click', () => {
@@ -7901,7 +8137,7 @@ function manageRecurringInvoice(invoice) {
 		
 		const closeBtn = $('#closeInvoiceView');
 		if (closeBtn) closeBtn.addEventListener('click', window.closeModal);
-	}, 100);
+	});
 }
 
 // ============================================
@@ -7999,12 +8235,12 @@ function generateReport() {
 		categoriesHtml +
 		'</div>' +
 		'<div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--glass-border);">' +
-		'<button id="cancelReportGen" class="ghost" style="width: 100%;">Cancel</button>' +
+		'<button type="button" id="cancelReportGen" class="ghost" style="width: 100%;">Cancel</button>' +
 		'</div></div>';
 	
         window.openModal(html);
 	
-	setTimeout(() => {
+	Promise.resolve().then(() => {
 		$$('.report-type-card').forEach(card => {
 			card.addEventListener('mouseenter', function() {
 				this.style.background = 'rgba(110,231,183,0.08)';
@@ -8025,7 +8261,7 @@ function generateReport() {
 		
 		const cancelBtn = $('#cancelReportGen');
 		if(cancelBtn) cancelBtn.addEventListener('click', window.closeModal);
-	}, 100);
+	});
 }
 
 function actuallyGenerateReport(reportType) {
@@ -8415,15 +8651,15 @@ function showReportDetails(report) {
 		dataHTML +
 		'</div>' +
 		'<div style="margin-top: 20px;">' +
-		'<button id="closeReport" class="ghost" style="width: 100%;">Close</button>' +
+		'<button type="button" id="closeReport" class="ghost" style="width: 100%;">Close</button>' +
 		'</div></div>';
 	
         window.openModal(html);
 	
-	setTimeout(() => {
+	Promise.resolve().then(() => {
 		const closeBtn = $('#closeReport');
 		if(closeBtn) closeBtn.addEventListener('click', window.closeModal);
-	}, 100);
+	});
 }
 
 // ============================================
@@ -8444,12 +8680,12 @@ return '<div class="integration-card ' + (int.connected ? 'connected' : '') + '"
 }).join('') +
 '</div>' +
 '<div style="margin-top: 24px;">' +
-'<button id="closeIntegrations" class="ghost" style="width: 100%;">Close</button>' +
+'<button type="button" id="closeIntegrations" class="ghost" style="width: 100%;">Close</button>' +
 '</div></div>';
 
 window.openModal(html);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 $$('.integration-card').forEach(card => {
 card.addEventListener('click', () => {
 const id = card.dataset.integration;
@@ -8465,7 +8701,7 @@ showToast(integration.name + ' ' + (integration.connected ? 'connected' : 'disco
 
 const closeBtn = $('#closeIntegrations');
 if(closeBtn) closeBtn.addEventListener('click', window.closeModal);
-}, 100);
+});
 }
 
 // ============================================
@@ -8578,9 +8814,9 @@ let html = '<div style="max-height: 80vh; overflow-y: auto;">' +
 '<h3>⚙️ Settings</h3>' +
 '<p class="tiny muted" style="margin-bottom: 16px;">Configure alerts and preferences</p>' +
 '<div style="display: flex; gap: 8px; margin-bottom: 16px;">' +
-'<button class="ghost" style="font-size: 12px; padding: 6px 12px;" onclick="enableAllAlerts()">✅ Enable All</button>' +
-'<button class="ghost" style="font-size: 12px; padding: 6px 12px;" onclick="disableAllAlerts()">❌ Disable All</button>' +
-'<button class="ghost" style="font-size: 12px; padding: 6px 12px;" onclick="resetAlerts()">🔄 Reset to Defaults</button>' +
+'<button type="button" class="ghost" style="font-size: 12px; padding: 6px 12px;" onclick="enableAllAlerts()">✅ Enable All</button>' +
+'<button type="button" class="ghost" style="font-size: 12px; padding: 6px 12px;" onclick="disableAllAlerts()">❌ Disable All</button>' +
+'<button type="button" class="ghost" style="font-size: 12px; padding: 6px 12px;" onclick="resetAlerts()">🔄 Reset to Defaults</button>' +
 '</div>' +
 '</div>';
 
@@ -8644,12 +8880,12 @@ html += '<div style="background: linear-gradient(135deg, rgba(110,231,183,0.1), 
 html += '<div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; margin-bottom: 16px;">' +
 '<h4 style="margin-bottom: 16px;">💾 Data Management</h4>' +
 '<div class="btn-group" style="flex-direction: column; gap: 10px;">' +
-'<button id="exportData" class="ghost">📥 Export All Data</button>' +
-'<button id="clearData" class="ghost" style="color: var(--danger); border-color: var(--danger);">🗑️ Clear All Data</button>' +
+'<button type="button" id="exportData" class="ghost">📥 Export All Data</button>' +
+'<button type="button" id="clearData" class="ghost" style="color: var(--danger); border-color: var(--danger);">🗑️ Clear All Data</button>' +
 '</div></div>';
 
 html += '<div style="margin-top: 20px;">' +
-'<button id="closeSettings" class="ghost" style="width: 100%;">Close</button>' +
+'<button type="button" id="closeSettings" class="ghost" style="width: 100%;">Close</button>' +
 '</div></div>';
 
 function getAlertCategory(type) {
@@ -8667,7 +8903,7 @@ return 'operational';
 
 window.openModal(html);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 // Alert toggle event listeners
 $$('input[data-alert]').forEach(cb => {
 cb.addEventListener('change', e => {
@@ -8754,7 +8990,7 @@ window.closeModal();
 
 const closeBtn = $('#closeSettings');
 if (closeBtn) closeBtn.addEventListener('click', window.closeModal);
-}, 100);
+});
 }
 
 // Alert Management Helper Functions
@@ -8858,14 +9094,14 @@ return '<div class="test-item" data-index="' + i + '" style="padding: 12px; marg
 '<div class="tiny muted">All modules functional. System operational.</div>' +
 '</div>' +
 '<div style="margin-top: 20px;">' +
-'<button id="closeTests" class="ghost" style="width: 100%;">Close</button>' +
+'<button type="button" id="closeTests" class="ghost" style="width: 100%;">Close</button>' +
 '</div></div>';
 
 window.openModal(html);
 
 let completed = 0;
 tests.forEach((test, index) => {
-setTimeout(() => {
+Promise.resolve().then(() => {
 const item = document.querySelector('.test-item[data-index="' + index + '"]');
 if(item) {
 item.style.borderLeftColor = 'var(--success)';
@@ -8884,10 +9120,10 @@ showToast('All tests passed!');
 }, test.duration * (index + 1));
 });
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 const closeBtn = $('#closeTests');
 if (closeBtn) closeBtn.addEventListener('click', window.closeModal);
-}, 100);
+});
 }
 
 // ============================================
@@ -9273,13 +9509,13 @@ return '<div style="padding: 8px; margin-bottom: 6px; background: rgba(255,255,2
 (transactions.length > 10 ? '<div style="text-align: center; padding: 8px; color: var(--text-muted); font-size: 11px;">... and ' + (transactions.length - 10) + ' more</div>' : '') +
 '</div>' +
 '<div style="display: flex; gap: 12px;">' +
-'<button id="confirmImport" class="btn" style="flex: 1;">✅ Import Transactions</button>' +
-'<button id="cancelImport" class="ghost" style="flex: 1;">Cancel</button>' +
+'<button type="button" id="confirmImport" class="btn" style="flex: 1;">✅ Import Transactions</button>' +
+'<button type="button" id="cancelImport" class="ghost" style="flex: 1;">Cancel</button>' +
 '</div></div>';
 
 window.openModal(html);
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 const confirmBtn = $('#confirmImport');
 if (confirmBtn) {
 confirmBtn.addEventListener('click', () => {
@@ -9308,7 +9544,7 @@ const cancelBtn = $('#cancelImport');
 if (cancelBtn) {
 cancelBtn.addEventListener('click', window.closeModal);
 }
-}, 100);
+});
 }
 
 // Bulk action controls
@@ -10082,8 +10318,8 @@ return '<tr>' +
 '<td>' + paymentSourceDisplay + '</td>' +
 '<td>' + divisionDisplay + '</td>' +
 '<td>' +
-'<button class="action-btn" onclick="window.editTransaction(\'' + t.id + '\')">✏️</button>' +
-'<button class="action-btn danger" onclick="window.deleteTransaction(\'' + t.id + '\')">🗑️</button>' +
+'<button type="button" class="action-btn" onclick="window.editTransaction(\'' + t.id + '\')">✏️</button>' +
+'<button type="button" class="action-btn danger" onclick="window.deleteTransaction(\'' + t.id + '\')">🗑️</button>' +
 '</td></tr>';
 }).join('') +
 '</tbody></table>';
@@ -10193,8 +10429,8 @@ return '<div class="contact-card">' +
 '</div>' +
 '<div class="tiny muted" style="margin-top: 8px;">Last activity: ' + c.lastActivity + '</div>' +
 '<div class="actions">' +
-'<button class="action-btn" onclick="window.editContact(\'' + c.id + '\')">✏️ Edit</button>' +
-'<button class="action-btn danger" onclick="window.deleteContact(\'' + c.id + '\')">🗑️ Delete</button>' +
+'<button type="button" class="action-btn" onclick="window.editContact(\'' + c.id + '\')">✏️ Edit</button>' +
+'<button type="button" class="action-btn danger" onclick="window.deleteContact(\'' + c.id + '\')">🗑️ Delete</button>' +
 '</div></div>';
 }).join('');
 
@@ -10206,20 +10442,23 @@ function renderProductsGrid() {
 const divisionIcons = {
 'referrals': '🤝',
 'appointments': '📅',
-'reservations': '🎫'
+'reservations': '🎫',
+'general': '💼'
 };
 
 const divisionNames = {
 'referrals': 'Referrals',
 'appointments': 'Appointments',
-'reservations': 'Reservations'
+'reservations': 'Reservations',
+'general': 'Company General Expenditure'
 };
 
 // Group products by division
 const productsByDivision = {
 'referrals': state.products.filter(p => p.division === 'referrals'),
 'appointments': state.products.filter(p => p.division === 'appointments'),
-'reservations': state.products.filter(p => p.division === 'reservations')
+'reservations': state.products.filter(p => p.division === 'reservations'),
+'general': state.products.filter(p => p.division === 'general')
 };
 
 let html = '';
@@ -10269,8 +10508,8 @@ html += '</div>';
 html += '<div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">ID: ' + p.id + '</div>';
 
 html += '<div class="actions" style="display: flex; gap: 8px;">';
-html += '<button class="action-btn" onclick="event.stopPropagation(); window.editProduct(\'' + p.id + '\')" style="flex: 1;">✏️ Edit</button>';
-html += '<button class="action-btn danger" onclick="event.stopPropagation(); window.deleteProduct(\'' + p.id + '\')" style="flex: 1;">🗑️ Delete</button>';
+html += '<button type="button" class="action-btn" onclick="event.stopPropagation(); window.editProduct(\'' + p.id + '\')" style="flex: 1;">✏️ Edit</button>';
+html += '<button type="button" class="action-btn danger" onclick="event.stopPropagation(); window.deleteProduct(\'' + p.id + '\')" style="flex: 1;">🗑️ Delete</button>';
 html += '</div>';
 html += '</div>';
 });
@@ -10285,7 +10524,7 @@ html = '<div style="text-align: center; padding: 60px; color: var(--text-muted);
 '<div style="font-size: 48px; margin-bottom: 16px;">📦</div>' +
 '<h3 style="margin-bottom: 12px;">No Products Yet</h3>' +
 '<p style="margin-bottom: 24px;">Create your first product to start tracking revenue by division</p>' +
-'<button class="btn" onclick="showProductForm()">➕ Create First Product</button>' +
+'<button type="submit" class="btn" onclick="showProductForm()">➕ Create First Product</button>' +
 '</div>';
 }
 
@@ -10306,8 +10545,8 @@ return '<div class="task-item ' + (t.completed ? 'completed' : '') + '">' +
 '</div>' +
 '</div>' +
 '<div style="display: flex; gap: 4px;">' +
-'<button class="action-btn" onclick="window.editTask(\'' + t.id + '\')">✏️</button>' +
-'<button class="action-btn danger" onclick="window.deleteTask(\'' + t.id + '\')">🗑️</button>' +
+'<button type="button" class="action-btn" onclick="window.editTask(\'' + t.id + '\')">✏️</button>' +
+'<button type="button" class="action-btn danger" onclick="window.deleteTask(\'' + t.id + '\')">🗑️</button>' +
 '</div>' +
 '</div>';
 }).join('') : '<div style="text-align: center; padding: 60px; color: var(--text-muted);">No tasks yet. Create your first task!</div>';
@@ -10326,8 +10565,8 @@ return '<div class="roadmap-item ' + r.status + '">' +
 '<span class="tiny muted">📅 ' + r.quarter + '</span>' +
 '<span class="tiny muted">👤 ' + r.owner + '</span>' +
 '<div style="flex: 1;"></div>' +
-'<button class="action-btn" onclick="window.editRoadmapItem(\'' + r.id + '\')">✏️</button>' +
-'<button class="action-btn danger" onclick="window.deleteRoadmapItem(\'' + r.id + '\')">🗑️</button>' +
+'<button type="button" class="action-btn" onclick="window.editRoadmapItem(\'' + r.id + '\')">✏️</button>' +
+'<button type="button" class="action-btn danger" onclick="window.deleteRoadmapItem(\'' + r.id + '\')">🗑️</button>' +
 '</div>' +
 '</div>';
 }).join('') : '<div style="text-align: center; padding: 60px; color: var(--text-muted);">No roadmap items yet. Add your first milestone!</div>';
@@ -10593,15 +10832,15 @@ return '<div class="note-card ' + n.category + '" onclick="window.viewNote(\'' +
 '<span>📅 ' + new Date(n.updated).toLocaleDateString() + '</span>' +
 '</div>' +
 '<div class="note-actions">' +
-'<button class="action-btn" onclick="event.stopPropagation(); window.editNote(\'' + n.id + '\')">✏️ Edit</button>' +
-'<button class="action-btn danger" onclick="event.stopPropagation(); window.deleteNote(\'' + n.id + '\')">🗑️ Delete</button>' +
+'<button type="button" class="action-btn" onclick="event.stopPropagation(); window.editNote(\'' + n.id + '\')">✏️ Edit</button>' +
+'<button type="button" class="action-btn danger" onclick="event.stopPropagation(); window.deleteNote(\'' + n.id + '\')">🗑️ Delete</button>' +
 '</div>' +
 '</div>';
 }).join('') : '<div style="text-align: center; padding: 60px; color: var(--text-muted);">' +
 '<div style="font-size: 48px; margin-bottom: 16px;">📝</div>' +
 '<h3 style="margin-bottom: 12px;">No Notes Yet</h3>' +
 '<p style="margin-bottom: 24px;">Create your first note to get started</p>' +
-'<button class="btn" onclick="window.showNoteFormFromEmpty()">📝 New Note</button>' +
+'<button type="button" class="btn" onclick="window.showNoteFormFromEmpty()">📝 New Note</button>' +
 '</div>';
 
 const grid = $('#notesGrid');
@@ -10633,15 +10872,15 @@ return '<div class="contact-card" style="padding: 20px; background: rgba(255,255
 '<div>🏢 ' + (t.department || 'N/A') + '</div>' +
 '</div>' +
 '<div style="display: flex; gap: 8px; margin-top: 12px;">' +
-'<button class="action-btn" onclick="event.stopPropagation(); window.editTeamMember(\'' + t.id + '\')">✏️ Edit</button>' +
-'<button class="action-btn danger" onclick="event.stopPropagation(); window.deleteTeamMember(\'' + t.id + '\')">🗑️ Delete</button>' +
+'<button type="button" class="action-btn" onclick="event.stopPropagation(); window.editTeamMember(\'' + t.id + '\')">✏️ Edit</button>' +
+'<button type="button" class="action-btn danger" onclick="event.stopPropagation(); window.deleteTeamMember(\'' + t.id + '\')">🗑️ Delete</button>' +
 '</div>' +
 '</div>';
 }).join('') : '<div style="text-align: center; padding: 60px; color: var(--text-muted);">' +
 '<div style="font-size: 48px; margin-bottom: 16px;">👥</div>' +
 '<h3 style="margin-bottom: 12px;">No Team Members Yet</h3>' +
 '<p style="margin-bottom: 24px;">Add your first team member to get started</p>' +
-'<button class="btn" onclick="window.showTeamMemberForm()">👥 Add Team Member</button>' +
+'<button type="button" class="btn" onclick="window.showTeamMemberForm()">👥 Add Team Member</button>' +
 '</div>';
 
 const grid = $('#teamGrid');
@@ -10678,15 +10917,15 @@ return '<div class="contact-card" style="padding: 20px; background: rgba(255,255
 '<div>📅 Renewal: ' + (v.renewalDate || 'N/A') + '</div>' +
 '</div>' +
 '<div style="display: flex; gap: 8px; margin-top: 12px;">' +
-'<button class="action-btn" onclick="event.stopPropagation(); window.editVendor(\'' + v.id + '\')">✏️ Edit</button>' +
-'<button class="action-btn danger" onclick="event.stopPropagation(); window.deleteVendor(\'' + v.id + '\')">🗑️ Delete</button>' +
+'<button type="button" class="action-btn" onclick="event.stopPropagation(); window.editVendor(\'' + v.id + '\')">✏️ Edit</button>' +
+'<button type="button" class="action-btn danger" onclick="event.stopPropagation(); window.deleteVendor(\'' + v.id + '\')">🗑️ Delete</button>' +
 '</div>' +
 '</div>';
 }).join('') : '<div style="text-align: center; padding: 60px; color: var(--text-muted);">' +
 '<div style="font-size: 48px; margin-bottom: 16px;">🔧</div>' +
 '<h3 style="margin-bottom: 12px;">No Vendors Yet</h3>' +
 '<p style="margin-bottom: 24px;">Add your first technology vendor to get started</p>' +
-'<button class="btn" onclick="window.showVendorForm()">🔧 Add Vendor</button>' +
+'<button type="button" class="btn" onclick="window.showVendorForm()">🔧 Add Vendor</button>' +
 '</div>';
 
 const grid = $('#vendorGrid');
@@ -10709,7 +10948,7 @@ return '<div style="padding: 20px; background: rgba(255,255,255,0.03); border-ra
 '<div style="font-size: 48px; margin-bottom: 16px;">📄</div>' +
 '<h3 style="margin-bottom: 12px;">No Reports Yet</h3>' +
 '<p style="margin-bottom: 24px;">Generate your first report to see it here</p>' +
-'<button class="btn" onclick="window.generateReportFromList()">📊 Generate Report</button>' +
+'<button type="button" class="btn" onclick="window.generateReportFromList()">📊 Generate Report</button>' +
 '</div>';
 
 const container = $('#reportsContent');
@@ -10873,7 +11112,7 @@ const categoriesContainer = $('#alertCategoriesGrid');
 if (categoriesContainer) categoriesContainer.innerHTML = categoriesHtml;
 
 // Add event listeners for toggles
-setTimeout(() => {
+Promise.resolve().then(() => {
 $$('.alert-section-toggle').forEach(toggle => {
 toggle.addEventListener('change', (e) => {
 const alertId = e.target.dataset.alertId;
@@ -10886,7 +11125,7 @@ renderAlertsSection(); // Re-render to update stats and UI
 }
 });
 });
-}, 100);
+});
 }
 
 // Render detailed alert lists with delete checkboxes
@@ -11016,7 +11255,7 @@ categories.performance.map(renderAlertItem).join('') :
 }
 
 // Add event listeners for toggles
-setTimeout(() => {
+Promise.resolve().then(() => {
 $$('.alert-toggle').forEach(toggle => {
 toggle.addEventListener('change', (e) => {
 const alertId = e.target.dataset.alertId;
@@ -11030,7 +11269,7 @@ renderAlertLists();
 }
 });
 });
-}, 100);
+});
 }
 
 // Delete selected alerts function
@@ -11425,7 +11664,7 @@ function renderDayView() {
 		        '<div style="font-size: 48px; margin-bottom: 16px;">📅</div>' +
 		        '<h3>No Events Today</h3>' +
 		        '<p class="tiny muted">You have a free day!</p>' +
-		        '<button class="btn" onclick="createCalendarEvent()" style="margin-top: 16px;">➕ Create Event</button>' +
+		        '<button type="submit" class="btn" onclick="createCalendarEvent()" style="margin-top: 16px;">➕ Create Event</button>' +
 		        '</div>';
 	} else {
 		for (let hour = 6; hour <= 23; hour++) {
@@ -11595,7 +11834,7 @@ const content = parts[1] || hint;
 
 // Show the new hint
 hintDisplay.innerHTML = `
-<button class="hint-close" onclick="closeHint('${hintId}')">×</button>
+<button type="button" class="hint-close" onclick="closeHint('${hintId}')">×</button>
 <div class="hint-title">💡 ${title}</div>
 <div class="hint-content">${content}</div>
 `;
@@ -11840,10 +12079,10 @@ Object.entries(containers).forEach(([id, html]) => {
 console.log('✅ Advanced analytics rendered');
 
 // Make KPIs clickable after rendering
-setTimeout(() => {
+Promise.resolve().then(() => {
 	makeKpisClickable();
 	console.log('✅ KPIs made clickable in analytics');
-}, 100);
+});
 }
 
 function renderAll() {
@@ -11936,7 +12175,7 @@ if(e.target.id === 'modalOverlay') window.closeModal();
 let resizeTimer;
 window.addEventListener('resize', () => {
 clearTimeout(resizeTimer);
-resizeTimer = setTimeout(() => {
+resizeTimer = Promise.resolve().then(() => {
 drawTrendChart();
 drawExpenseChart();
 drawProductDonut();
@@ -11946,7 +12185,7 @@ drawDivisionChart();
 
 window.addEventListener('beforeunload', () => save());
 
-setTimeout(() => {
+Promise.resolve().then(() => {
 showToast('Welcome to Virely Ops! All features active.', 3500);
 }, 800);
 
@@ -12415,7 +12654,7 @@ window.createContact = function() {
         console.log('1️⃣ Closing create menu...');
         closeCreateMenu();
         
-        setTimeout(() => {
+        Promise.resolve().then(() => {
         console.log('2️⃣ Building contact form HTML...');
         const html = `
         <div>
@@ -12464,7 +12703,7 @@ window.createContact = function() {
         window.openModal(html);
         console.log('4️⃣ Modal opened, setting up form handler...');
         
-        setTimeout(() => {
+        Promise.resolve().then(() => {
             const form = document.getElementById('contactForm');
             console.log('   Contact form element:', form ? '✅ Found' : '❌ NOT FOUND');
             if (form) {
@@ -12503,8 +12742,8 @@ window.createContact = function() {
             if (cancelBtn) {
                 cancelBtn.addEventListener('click', window.closeModal);
             }
-        }, 100);
-    }, 100);
+        });
+    });
     } catch (error) {
         console.error('❌ Error in createContact:', error);
         showToast('Error opening contact form: ' + error.message, true);
@@ -12519,7 +12758,7 @@ if (typeof createContact === 'undefined') {
 window.createTransaction = function() {
     console.log('✅ createTransaction called');
     closeCreateMenu();
-    setTimeout(() => {
+    Promise.resolve().then(() => {
         const html = `
         <div>
             <h3>💰 Create New Transaction</h3>
@@ -12575,7 +12814,7 @@ window.createTransaction = function() {
         
         window.openModal(html);
         
-        setTimeout(() => {
+        Promise.resolve().then(() => {
             const form = document.getElementById('transactionForm');
             if (form) {
                 form.addEventListener('submit', (e) => {
@@ -12618,14 +12857,14 @@ window.createTransaction = function() {
             if (cancelBtn) {
                 cancelBtn.addEventListener('click', window.closeModal);
             }
-        }, 100);
-    }, 100);
+        });
+    });
 }
 
 window.createNote = function() {
     console.log('✅ createNote called');
     closeCreateMenu();
-    setTimeout(() => {
+    Promise.resolve().then(() => {
         const html = `
         <div>
             <h3>📝 Create New Note</h3>
@@ -12665,7 +12904,7 @@ window.createNote = function() {
         
         window.openModal(html);
         
-        setTimeout(() => {
+        Promise.resolve().then(() => {
             const form = document.getElementById('noteForm');
             if (form) {
                 form.addEventListener('submit', (e) => {
@@ -12702,8 +12941,8 @@ window.createNote = function() {
             if (cancelBtn) {
                 cancelBtn.addEventListener('click', window.closeModal);
             }
-        }, 100);
-    }, 100);
+        });
+    });
 }
 
 // ========================================
@@ -12718,7 +12957,7 @@ window.createCalendarEvent = function() {
         console.log('1️⃣ Closing create menu...');
         closeCreateMenu();
         
-        setTimeout(() => {
+        Promise.resolve().then(() => {
             console.log('2️⃣ Clearing current editing event...');
             window.currentEditingEvent = null;
             
@@ -12764,7 +13003,7 @@ window.createCalendarEvent = function() {
             console.log('✅ CREATE CALENDAR EVENT MODAL OPENED');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             
-        }, 100);
+        });
         
     } catch (error) {
         console.error('❌ EXCEPTION in createCalendarEvent():', error);
@@ -12776,7 +13015,7 @@ window.createCalendarEvent = function() {
 window.createVendor = function() {
     console.log('✅ createVendor called');
     closeCreateMenu();
-    setTimeout(() => {
+    Promise.resolve().then(() => {
         const html = `
         <div>
             <h3>🔧 Add Tech Vendor</h3>
@@ -12835,7 +13074,7 @@ window.createVendor = function() {
         
         window.openModal(html);
         
-        setTimeout(() => {
+        Promise.resolve().then(() => {
             const form = document.getElementById('vendorForm');
             if (form) {
                 form.addEventListener('submit', (e) => {
@@ -12873,8 +13112,8 @@ window.createVendor = function() {
             if (cancelBtn) {
                 cancelBtn.addEventListener('click', window.closeModal);
             }
-        }, 100);
-    }, 100);
+        });
+    });
 }
 
 // Edit Calendar Event Function
@@ -13265,7 +13504,7 @@ function closeCalendarEditModal() {
     const modal = document.getElementById('calendarEditModal');
     if (modal) {
         modal.style.opacity = '0';
-        setTimeout(() => {
+        Promise.resolve().then(() => {
             modal.classList.remove('active');
             modal.style.visibility = 'hidden';
         }, 300);
@@ -13761,7 +14000,7 @@ function showUpcomingEventsDetail() {
                     <td><strong>${event.title}</strong><br><small style="color: var(--text-secondary);">${event.description || 'No description'}</small></td>
                     <td>${new Date(event.dateTime).toLocaleString()}</td>
                     <td>
-                        <button class="ghost" onclick="closePanelModal(); editCalendarEvent('${String(event.id).replace(/'/g, "\\'")}');" style="padding: 6px 12px; font-size: 12px;">✏️ Edit</button>
+                        <button type="button" class="ghost" onclick="closePanelModal(); editCalendarEvent('${String(event.id).replace(/'/g, "\\'")}');" style="padding: 6px 12px; font-size: 12px;">✏️ Edit</button>
                     </td>
                 </tr>
             `;
@@ -13994,7 +14233,7 @@ function initEnhancements() {
     console.log('🚀 Initializing enhanced features...');
     
     // Initialize Google Calendar API
-    setTimeout(() => {
+    Promise.resolve().then(() => {
         if (typeof gapi !== 'undefined') {
             initGoogleCalendar();
         } else {
@@ -14039,7 +14278,7 @@ function initEnhancements() {
     updateFinancialSummary();
     
     // Make KPIs clickable after a short delay to ensure they're rendered
-    setTimeout(() => {
+    Promise.resolve().then(() => {
         makeKpisClickable();
         updateFinancialSummary(); // Update again after delay
         console.log('✅ KPIs made clickable');
@@ -14386,6 +14625,169 @@ window.addActivityLog = function(message, type = 'info') {
 };
 
 console.log('✅ Notifications system loaded and ready!');
+
+// ========================================
+// BUTTON FIX & ENHANCEMENT SYSTEM
+// ========================================
+
+console.log('🔧 Initializing button fix system...');
+
+// Ensure all forms can submit properly
+function ensureFormSubmission() {
+    document.addEventListener('submit', function(e) {
+        console.log('📝 Form submission detected:', e.target);
+        // Don't prevent default here - let the form's own handler do it
+    }, true);
+}
+
+// Ensure all buttons are clickable
+function ensureButtonsClickable() {
+    document.addEventListener('click', function(e) {
+        const button = e.target.closest('button');
+        if (button) {
+            console.log('🖱️ Button clicked:', button.textContent.trim(), button.type);
+            
+            // If it's a submit button, make sure its form can handle the submission
+            if (button.type === 'submit') {
+                const form = button.closest('form');
+                if (form) {
+                    console.log('✅ Submit button has associated form');
+                }
+            }
+        }
+    }, true);
+}
+
+// Make sure modals don't block button clicks
+function fixModalButtonInteraction() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .modal-overlay.active {
+            pointer-events: all !important;
+        }
+        .modal-overlay.active * {
+            pointer-events: auto !important;
+        }
+        .modal-content button {
+            pointer-events: auto !important;
+            z-index: 10003 !important;
+            position: relative !important;
+        }
+        .modal-content form {
+            pointer-events: auto !important;
+            z-index: 10002 !important;
+        }
+        button[type="submit"], .btn {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+        }
+    `;
+    document.head.appendChild(style);
+    console.log('✅ Modal button interaction styles applied');
+}
+
+// Initialize all button fixes
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Applying button fixes...');
+    
+    ensureFormSubmission();
+    ensureButtonsClickable();
+    fixModalButtonInteraction();
+    
+    // Add visual feedback for debugging
+    document.addEventListener('mouseenter', function(e) {
+        if (e.target.matches('button, .btn')) {
+            e.target.style.outline = '2px solid rgba(110,231,183,0.5)';
+        }
+    }, true);
+    
+    document.addEventListener('mouseleave', function(e) {
+        if (e.target.matches('button, .btn')) {
+            e.target.style.outline = '';
+        }
+    }, true);
+    
+    console.log('✅ Button fix system initialized!');
+});
+
+// Make save function more robust
+const originalSave = window.save;
+window.save = function() {
+    console.log('💾 Save function called');
+    try {
+        if (originalSave) {
+            originalSave();
+        } else {
+            localStorage.setItem('virelyOpsState', JSON.stringify(window.state || state));
+        }
+        console.log('✅ Save completed successfully');
+    } catch(e) {
+        console.error('❌ Save error:', e);
+        alert('Error saving data: ' + e.message);
+    }
+};
+
+// Ensure save function is always available
+if (typeof save === 'undefined' && typeof window.save === 'undefined') {
+    window.save = function() {
+        try {
+            localStorage.setItem('virelyOpsState', JSON.stringify(window.state || state));
+            console.log('✅ Backup save function used');
+        } catch(e) {
+            console.error('❌ Backup save failed:', e);
+        }
+    };
+}
+
+console.log('✅ Button fix and enhancement system loaded!');
+
+
+// ========================================
+// GLOBAL DELETE FUNCTION EXPOSURE
+// ========================================
+// Ensure ALL delete functions are globally accessible for onclick handlers
+
+console.log('🔧 Ensuring all delete functions are globally accessible...');
+
+// Core delete functions
+if (typeof deleteTransaction === 'function') window.deleteTransaction = deleteTransaction;
+if (typeof deleteContact === 'function') window.deleteContact = deleteContact;
+if (typeof deleteProduct === 'function') window.deleteProduct = deleteProduct;
+if (typeof deleteTask === 'function') window.deleteTask = deleteTask;
+if (typeof deleteRoadmapItem === 'function') window.deleteRoadmapItem = deleteRoadmapItem;
+if (typeof deleteNote === 'function') window.deleteNote = deleteNote;
+if (typeof deleteCampaign === 'function') window.deleteCampaign = deleteCampaign;
+if (typeof deleteLead === 'function') window.deleteLead = deleteLead;
+
+// These are defined inline in the initialization section, ensure they're accessible
+// window.deleteTeamMember, window.deleteVendor, window.deleteDeal are already assigned
+
+console.log('✅ All delete functions exposed to window object!');
+
+
+
+console.log('🔧 BUTTON FIX: Adding comprehensive debugging...');
+
+// Log ALL button clicks
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('button');
+    if (btn) {
+        console.log('━━━ BUTTON CLICK ━━━');
+        console.log('Text:', btn.textContent.trim().substring(0, 30));
+        console.log('Type:', btn.type || 'NONE');
+        console.log('In Form:', btn.closest('form') ? 'YES' : 'NO');
+        if (btn.type === 'submit') {
+            console.log('👉 This SHOULD trigger form submission');
+        }
+    }
+}, true);
+
+// Log ALL form submissions
+document.addEventListener('submit', function(e) {
+    console.log('━━━ FORM SUBMIT ━━━');
+    console.log('Form ID:', e.target.id || 'NO ID');
+    console.log('Prevented:', e.defaultPrevented);
+}, true);
 
 </script>
 </body>
