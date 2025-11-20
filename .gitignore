@@ -9095,16 +9095,18 @@ Are you absolutely sure you want to delete this campaign?`;
 
                 <div class="card" style="margin-bottom: 24px;">
                     <div style="position: relative;">
-                        <input type="text" id="globalSearchInput" placeholder="Search everything... (team members, contacts, divisions, tasks, notes, etc.)" 
+                        <input type="text" id="globalSearchInput" placeholder="Start typing to search... (works from first letter/number)" 
                                oninput="performGlobalSearch(this.value)"
+                               autocomplete="off"
                                style="width: 100%; padding: 20px 20px 20px 60px; background: var(--bg-glass); border: 2px solid var(--glass-border); 
                                border-radius: 16px; color: var(--text-primary); font-size: 16px; transition: all 0.3s ease;"
                                onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 20px rgba(110,231,183,0.3)'"
                                onblur="this.style.borderColor='var(--glass-border)'; this.style.boxShadow='none'">
                         <div style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 24px;">🔍</div>
                     </div>
-                    <div style="margin-top: 16px; font-size: 13px; color: var(--text-muted);">
-                        💡 <strong>Quick tip:</strong> Search by name, email, phone, description, status, or any text field across the entire platform
+                    <div style="margin-top: 16px; font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+                        <span>⚡</span>
+                        <strong>Instant Search:</strong> Results appear from the first letter or number you type • Searches all platform data in real-time
                     </div>
                 </div>
 
@@ -9121,23 +9123,42 @@ Are you absolutely sure you want to delete this campaign?`;
                     </div>
                 </div>
             `;
+            
+            // Auto-focus the search input for immediate use
+            setTimeout(() => {
+                const searchInput = document.getElementById('globalSearchInput');
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            }, 100);
         }
 
         function performGlobalSearch(query) {
             const searchResults = document.getElementById('searchResults');
             
+            if (!searchResults) {
+                console.error('Search results container not found');
+                return;
+            }
+            
+            // Show welcome state if query is empty
             if (!query || query.trim() === '') {
                 searchResults.innerHTML = `
                     <div style="text-align: center; padding: 60px 20px;">
                         <div style="font-size: 72px; margin-bottom: 20px; opacity: 0.3;">🔍</div>
                         <h3 style="color: var(--text-muted); font-weight: 600; margin-bottom: 12px;">Start Searching</h3>
                         <p style="color: var(--text-secondary); font-size: 14px;">Type in the search box above to find anything in your platform</p>
+                        <div style="margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;">
+                            ${['Team Members', 'Contacts', 'Divisions', 'Tasks', 'Campaigns', 'Deals', 'Notes', 'Events', 'Transactions', 'Vendors'].map(category => 
+                                `<span class="badge badge-info" style="font-size: 13px; padding: 8px 16px;">${category}</span>`
+                            ).join('')}
+                        </div>
                     </div>
                 `;
                 return;
             }
 
-            const searchTerm = query.toLowerCase();
+            const searchTerm = query.toLowerCase().trim();
             let results = {
                 team: [],
                 contacts: [],
@@ -9151,102 +9172,169 @@ Are you absolutely sure you want to delete this campaign?`;
                 vendors: []
             };
 
-            // Search Team Members
-            appState.data.team.forEach(member => {
-                if (member.name.toLowerCase().includes(searchTerm) ||
-                    member.email.toLowerCase().includes(searchTerm) ||
-                    member.role.toLowerCase().includes(searchTerm) ||
-                    member.department.toLowerCase().includes(searchTerm) ||
-                    (member.phone && member.phone.toLowerCase().includes(searchTerm)) ||
-                    (member.location && member.location.toLowerCase().includes(searchTerm))) {
-                    results.team.push(member);
-                }
-            });
+            // Search Team Members - with null/undefined checks
+            if (appState.data.team && Array.isArray(appState.data.team)) {
+                appState.data.team.forEach(member => {
+                    try {
+                        if ((member.name && member.name.toLowerCase().includes(searchTerm)) ||
+                            (member.email && member.email.toLowerCase().includes(searchTerm)) ||
+                            (member.role && member.role.toLowerCase().includes(searchTerm)) ||
+                            (member.department && member.department.toLowerCase().includes(searchTerm)) ||
+                            (member.phone && member.phone.toLowerCase().includes(searchTerm)) ||
+                            (member.location && member.location.toLowerCase().includes(searchTerm)) ||
+                            (member.status && member.status.toLowerCase().includes(searchTerm))) {
+                            results.team.push(member);
+                        }
+                    } catch (e) {
+                        console.warn('Error searching team member:', e);
+                    }
+                });
+            }
 
-            // Search Contacts
-            appState.data.contacts.forEach(contact => {
-                if (contact.name.toLowerCase().includes(searchTerm) ||
-                    contact.email.toLowerCase().includes(searchTerm) ||
-                    (contact.company && contact.company.toLowerCase().includes(searchTerm)) ||
-                    (contact.phone && contact.phone.toLowerCase().includes(searchTerm)) ||
-                    (contact.status && contact.status.toLowerCase().includes(searchTerm))) {
-                    results.contacts.push(contact);
-                }
-            });
+            // Search Contacts - with null/undefined checks
+            if (appState.data.contacts && Array.isArray(appState.data.contacts)) {
+                appState.data.contacts.forEach(contact => {
+                    try {
+                        if ((contact.name && contact.name.toLowerCase().includes(searchTerm)) ||
+                            (contact.email && contact.email.toLowerCase().includes(searchTerm)) ||
+                            (contact.company && contact.company.toLowerCase().includes(searchTerm)) ||
+                            (contact.phone && contact.phone.toLowerCase().includes(searchTerm)) ||
+                            (contact.status && contact.status.toLowerCase().includes(searchTerm)) ||
+                            (contact.source && contact.source.toLowerCase().includes(searchTerm))) {
+                            results.contacts.push(contact);
+                        }
+                    } catch (e) {
+                        console.warn('Error searching contact:', e);
+                    }
+                });
+            }
 
-            // Search Divisions
-            appState.data.divisions.forEach(division => {
-                if (division.name.toLowerCase().includes(searchTerm) ||
-                    (division.fullName && division.fullName.toLowerCase().includes(searchTerm)) ||
-                    (division.description && division.description.toLowerCase().includes(searchTerm)) ||
-                    division.type.toLowerCase().includes(searchTerm)) {
-                    results.divisions.push(division);
-                }
-            });
+            // Search Divisions - with null/undefined checks
+            if (appState.data.divisions && Array.isArray(appState.data.divisions)) {
+                appState.data.divisions.forEach(division => {
+                    try {
+                        if ((division.name && division.name.toLowerCase().includes(searchTerm)) ||
+                            (division.fullName && division.fullName.toLowerCase().includes(searchTerm)) ||
+                            (division.description && division.description.toLowerCase().includes(searchTerm)) ||
+                            (division.type && division.type.toLowerCase().includes(searchTerm)) ||
+                            (division.status && division.status.toLowerCase().includes(searchTerm))) {
+                            results.divisions.push(division);
+                        }
+                    } catch (e) {
+                        console.warn('Error searching division:', e);
+                    }
+                });
+            }
 
-            // Search Tasks
-            appState.data.tasks.forEach(task => {
-                if (task.title.toLowerCase().includes(searchTerm) ||
-                    (task.description && task.description.toLowerCase().includes(searchTerm)) ||
-                    (task.assignee && task.assignee.toLowerCase().includes(searchTerm)) ||
-                    task.status.toLowerCase().includes(searchTerm)) {
-                    results.tasks.push(task);
-                }
-            });
+            // Search Tasks - with null/undefined checks
+            if (appState.data.tasks && Array.isArray(appState.data.tasks)) {
+                appState.data.tasks.forEach(task => {
+                    try {
+                        if ((task.title && task.title.toLowerCase().includes(searchTerm)) ||
+                            (task.description && task.description.toLowerCase().includes(searchTerm)) ||
+                            (task.assignee && task.assignee.toLowerCase().includes(searchTerm)) ||
+                            (task.status && task.status.toLowerCase().includes(searchTerm)) ||
+                            (task.priority && task.priority.toLowerCase().includes(searchTerm))) {
+                            results.tasks.push(task);
+                        }
+                    } catch (e) {
+                        console.warn('Error searching task:', e);
+                    }
+                });
+            }
 
-            // Search Campaigns
-            appState.data.campaigns.forEach(campaign => {
-                if (campaign.name.toLowerCase().includes(searchTerm) ||
-                    (campaign.channel && campaign.channel.toLowerCase().includes(searchTerm)) ||
-                    campaign.status.toLowerCase().includes(searchTerm)) {
-                    results.campaigns.push(campaign);
-                }
-            });
+            // Search Campaigns - with null/undefined checks
+            if (appState.data.campaigns && Array.isArray(appState.data.campaigns)) {
+                appState.data.campaigns.forEach(campaign => {
+                    try {
+                        if ((campaign.name && campaign.name.toLowerCase().includes(searchTerm)) ||
+                            (campaign.channel && campaign.channel.toLowerCase().includes(searchTerm)) ||
+                            (campaign.status && campaign.status.toLowerCase().includes(searchTerm))) {
+                            results.campaigns.push(campaign);
+                        }
+                    } catch (e) {
+                        console.warn('Error searching campaign:', e);
+                    }
+                });
+            }
 
-            // Search Deals
-            appState.data.deals.forEach(deal => {
-                if (deal.name.toLowerCase().includes(searchTerm) ||
-                    (deal.company && deal.company.toLowerCase().includes(searchTerm)) ||
-                    deal.status.toLowerCase().includes(searchTerm)) {
-                    results.deals.push(deal);
-                }
-            });
+            // Search Deals - with null/undefined checks
+            if (appState.data.deals && Array.isArray(appState.data.deals)) {
+                appState.data.deals.forEach(deal => {
+                    try {
+                        if ((deal.name && deal.name.toLowerCase().includes(searchTerm)) ||
+                            (deal.company && deal.company.toLowerCase().includes(searchTerm)) ||
+                            (deal.status && deal.status.toLowerCase().includes(searchTerm))) {
+                            results.deals.push(deal);
+                        }
+                    } catch (e) {
+                        console.warn('Error searching deal:', e);
+                    }
+                });
+            }
 
-            // Search Notes
-            appState.data.notes.forEach(note => {
-                if (note.title.toLowerCase().includes(searchTerm) ||
-                    note.content.toLowerCase().includes(searchTerm) ||
-                    (note.category && note.category.toLowerCase().includes(searchTerm))) {
-                    results.notes.push(note);
-                }
-            });
+            // Search Notes - with null/undefined checks
+            if (appState.data.notes && Array.isArray(appState.data.notes)) {
+                appState.data.notes.forEach(note => {
+                    try {
+                        if ((note.title && note.title.toLowerCase().includes(searchTerm)) ||
+                            (note.content && note.content.toLowerCase().includes(searchTerm)) ||
+                            (note.category && note.category.toLowerCase().includes(searchTerm)) ||
+                            (note.author && note.author.toLowerCase().includes(searchTerm))) {
+                            results.notes.push(note);
+                        }
+                    } catch (e) {
+                        console.warn('Error searching note:', e);
+                    }
+                });
+            }
 
-            // Search Events
-            appState.data.events.forEach(event => {
-                if (event.title.toLowerCase().includes(searchTerm) ||
-                    (event.location && event.location.toLowerCase().includes(searchTerm)) ||
-                    (event.description && event.description.toLowerCase().includes(searchTerm))) {
-                    results.events.push(event);
-                }
-            });
+            // Search Events - with null/undefined checks
+            if (appState.data.events && Array.isArray(appState.data.events)) {
+                appState.data.events.forEach(event => {
+                    try {
+                        if ((event.title && event.title.toLowerCase().includes(searchTerm)) ||
+                            (event.location && event.location.toLowerCase().includes(searchTerm)) ||
+                            (event.description && event.description.toLowerCase().includes(searchTerm))) {
+                            results.events.push(event);
+                        }
+                    } catch (e) {
+                        console.warn('Error searching event:', e);
+                    }
+                });
+            }
 
-            // Search Transactions
-            appState.data.transactions.forEach(transaction => {
-                if (transaction.description.toLowerCase().includes(searchTerm) ||
-                    (transaction.vendor && transaction.vendor.toLowerCase().includes(searchTerm)) ||
-                    transaction.category.toLowerCase().includes(searchTerm)) {
-                    results.transactions.push(transaction);
-                }
-            });
+            // Search Transactions - with null/undefined checks
+            if (appState.data.transactions && Array.isArray(appState.data.transactions)) {
+                appState.data.transactions.forEach(transaction => {
+                    try {
+                        if ((transaction.description && transaction.description.toLowerCase().includes(searchTerm)) ||
+                            (transaction.vendor && transaction.vendor.toLowerCase().includes(searchTerm)) ||
+                            (transaction.category && transaction.category.toLowerCase().includes(searchTerm)) ||
+                            (transaction.amount && transaction.amount.toString().includes(searchTerm))) {
+                            results.transactions.push(transaction);
+                        }
+                    } catch (e) {
+                        console.warn('Error searching transaction:', e);
+                    }
+                });
+            }
 
-            // Search Vendors
-            appState.data.vendors.forEach(vendor => {
-                if (vendor.name.toLowerCase().includes(searchTerm) ||
-                    vendor.type.toLowerCase().includes(searchTerm) ||
-                    (vendor.contact && vendor.contact.toLowerCase().includes(searchTerm))) {
-                    results.vendors.push(vendor);
-                }
-            });
+            // Search Vendors - with null/undefined checks
+            if (appState.data.vendors && Array.isArray(appState.data.vendors)) {
+                appState.data.vendors.forEach(vendor => {
+                    try {
+                        if ((vendor.name && vendor.name.toLowerCase().includes(searchTerm)) ||
+                            (vendor.type && vendor.type.toLowerCase().includes(searchTerm)) ||
+                            (vendor.contact && vendor.contact.toLowerCase().includes(searchTerm)) ||
+                            (vendor.status && vendor.status.toLowerCase().includes(searchTerm))) {
+                            results.vendors.push(vendor);
+                        }
+                    } catch (e) {
+                        console.warn('Error searching vendor:', e);
+                    }
+                });
+            }
 
             // Calculate total results
             const totalResults = Object.values(results).reduce((sum, arr) => sum + arr.length, 0);
@@ -9256,7 +9344,8 @@ Are you absolutely sure you want to delete this campaign?`;
                     <div style="text-align: center; padding: 60px 20px;">
                         <div style="font-size: 72px; margin-bottom: 20px; opacity: 0.3;">🔍</div>
                         <h3 style="color: var(--text-muted); font-weight: 600; margin-bottom: 12px;">No Results Found</h3>
-                        <p style="color: var(--text-secondary); font-size: 14px;">Try searching with different keywords or check your spelling</p>
+                        <p style="color: var(--text-secondary); font-size: 14px;">No matches for "<strong>${query}</strong>"</p>
+                        <p style="color: var(--text-muted); font-size: 13px; margin-top: 12px;">Try different keywords or check your spelling</p>
                     </div>
                 `;
                 return;
@@ -9264,9 +9353,12 @@ Are you absolutely sure you want to delete this campaign?`;
 
             // Display Results
             let resultsHTML = `
-                <div style="margin-bottom: 20px; padding: 16px; background: var(--bg-glass); border-radius: 12px; border: 1px solid var(--glass-border);">
+                <div style="margin-bottom: 20px; padding: 16px; background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(124,92,255,0.1)); border-radius: 12px; border: 1px solid var(--glass-border);">
                     <div style="font-size: 18px; font-weight: 700; color: var(--accent-primary);">
                         Found ${totalResults} result${totalResults !== 1 ? 's' : ''} for "${query}"
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+                        Searching from first character • Real-time results
                     </div>
                 </div>
             `;
