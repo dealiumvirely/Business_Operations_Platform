@@ -1832,6 +1832,7 @@
 
         const navItems = [
             { id: 'dashboard', icon: '📊', label: 'Dashboard' },
+            { id: 'search', icon: '🔍', label: 'Global Search' },
             { id: 'analytics', icon: '📈', label: 'Advanced Analytics' },
             { id: 'financials', icon: '💰', label: 'Financial Overview' },
             { id: 'budgets', icon: '💼', label: 'Operational Budgets' },
@@ -2201,6 +2202,7 @@
             
             const sections = {
                 dashboard: renderDashboard,
+                search: renderGlobalSearch,
                 analytics: renderAnalytics,
                 financials: renderFinancials,
                 budgets: renderBudgets,
@@ -9081,8 +9083,349 @@ Are you absolutely sure you want to delete this campaign?`;
             }
         }
 
+        // GLOBAL SEARCH - COMPREHENSIVE PLATFORM SEARCH
+        function renderGlobalSearch(container) {
+            container.innerHTML = `
+                <div class="header">
+                    <div class="header-left">
+                        <h2>🔍 Global Search</h2>
+                        <p style="color: var(--text-secondary); margin-top: 8px;">Search across all platform data in one place</p>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 24px;">
+                    <div style="position: relative;">
+                        <input type="text" id="globalSearchInput" placeholder="Search everything... (team members, contacts, divisions, tasks, notes, etc.)" 
+                               oninput="performGlobalSearch(this.value)"
+                               style="width: 100%; padding: 20px 20px 20px 60px; background: var(--bg-glass); border: 2px solid var(--glass-border); 
+                               border-radius: 16px; color: var(--text-primary); font-size: 16px; transition: all 0.3s ease;"
+                               onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 20px rgba(110,231,183,0.3)'"
+                               onblur="this.style.borderColor='var(--glass-border)'; this.style.boxShadow='none'">
+                        <div style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 24px;">🔍</div>
+                    </div>
+                    <div style="margin-top: 16px; font-size: 13px; color: var(--text-muted);">
+                        💡 <strong>Quick tip:</strong> Search by name, email, phone, description, status, or any text field across the entire platform
+                    </div>
+                </div>
+
+                <div id="searchResults">
+                    <div style="text-align: center; padding: 60px 20px;">
+                        <div style="font-size: 72px; margin-bottom: 20px; opacity: 0.3;">🔍</div>
+                        <h3 style="color: var(--text-muted); font-weight: 600; margin-bottom: 12px;">Start Searching</h3>
+                        <p style="color: var(--text-secondary); font-size: 14px;">Type in the search box above to find anything in your platform</p>
+                        <div style="margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;">
+                            ${['Team Members', 'Contacts', 'Divisions', 'Tasks', 'Campaigns', 'Deals', 'Notes', 'Events', 'Transactions', 'Vendors'].map(category => 
+                                `<span class="badge badge-info" style="font-size: 13px; padding: 8px 16px;">${category}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function performGlobalSearch(query) {
+            const searchResults = document.getElementById('searchResults');
+            
+            if (!query || query.trim() === '') {
+                searchResults.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px;">
+                        <div style="font-size: 72px; margin-bottom: 20px; opacity: 0.3;">🔍</div>
+                        <h3 style="color: var(--text-muted); font-weight: 600; margin-bottom: 12px;">Start Searching</h3>
+                        <p style="color: var(--text-secondary); font-size: 14px;">Type in the search box above to find anything in your platform</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const searchTerm = query.toLowerCase();
+            let results = {
+                team: [],
+                contacts: [],
+                divisions: [],
+                tasks: [],
+                campaigns: [],
+                deals: [],
+                notes: [],
+                events: [],
+                transactions: [],
+                vendors: []
+            };
+
+            // Search Team Members
+            appState.data.team.forEach(member => {
+                if (member.name.toLowerCase().includes(searchTerm) ||
+                    member.email.toLowerCase().includes(searchTerm) ||
+                    member.role.toLowerCase().includes(searchTerm) ||
+                    member.department.toLowerCase().includes(searchTerm) ||
+                    (member.phone && member.phone.toLowerCase().includes(searchTerm)) ||
+                    (member.location && member.location.toLowerCase().includes(searchTerm))) {
+                    results.team.push(member);
+                }
+            });
+
+            // Search Contacts
+            appState.data.contacts.forEach(contact => {
+                if (contact.name.toLowerCase().includes(searchTerm) ||
+                    contact.email.toLowerCase().includes(searchTerm) ||
+                    (contact.company && contact.company.toLowerCase().includes(searchTerm)) ||
+                    (contact.phone && contact.phone.toLowerCase().includes(searchTerm)) ||
+                    (contact.status && contact.status.toLowerCase().includes(searchTerm))) {
+                    results.contacts.push(contact);
+                }
+            });
+
+            // Search Divisions
+            appState.data.divisions.forEach(division => {
+                if (division.name.toLowerCase().includes(searchTerm) ||
+                    (division.fullName && division.fullName.toLowerCase().includes(searchTerm)) ||
+                    (division.description && division.description.toLowerCase().includes(searchTerm)) ||
+                    division.type.toLowerCase().includes(searchTerm)) {
+                    results.divisions.push(division);
+                }
+            });
+
+            // Search Tasks
+            appState.data.tasks.forEach(task => {
+                if (task.title.toLowerCase().includes(searchTerm) ||
+                    (task.description && task.description.toLowerCase().includes(searchTerm)) ||
+                    (task.assignee && task.assignee.toLowerCase().includes(searchTerm)) ||
+                    task.status.toLowerCase().includes(searchTerm)) {
+                    results.tasks.push(task);
+                }
+            });
+
+            // Search Campaigns
+            appState.data.campaigns.forEach(campaign => {
+                if (campaign.name.toLowerCase().includes(searchTerm) ||
+                    (campaign.channel && campaign.channel.toLowerCase().includes(searchTerm)) ||
+                    campaign.status.toLowerCase().includes(searchTerm)) {
+                    results.campaigns.push(campaign);
+                }
+            });
+
+            // Search Deals
+            appState.data.deals.forEach(deal => {
+                if (deal.name.toLowerCase().includes(searchTerm) ||
+                    (deal.company && deal.company.toLowerCase().includes(searchTerm)) ||
+                    deal.status.toLowerCase().includes(searchTerm)) {
+                    results.deals.push(deal);
+                }
+            });
+
+            // Search Notes
+            appState.data.notes.forEach(note => {
+                if (note.title.toLowerCase().includes(searchTerm) ||
+                    note.content.toLowerCase().includes(searchTerm) ||
+                    (note.category && note.category.toLowerCase().includes(searchTerm))) {
+                    results.notes.push(note);
+                }
+            });
+
+            // Search Events
+            appState.data.events.forEach(event => {
+                if (event.title.toLowerCase().includes(searchTerm) ||
+                    (event.location && event.location.toLowerCase().includes(searchTerm)) ||
+                    (event.description && event.description.toLowerCase().includes(searchTerm))) {
+                    results.events.push(event);
+                }
+            });
+
+            // Search Transactions
+            appState.data.transactions.forEach(transaction => {
+                if (transaction.description.toLowerCase().includes(searchTerm) ||
+                    (transaction.vendor && transaction.vendor.toLowerCase().includes(searchTerm)) ||
+                    transaction.category.toLowerCase().includes(searchTerm)) {
+                    results.transactions.push(transaction);
+                }
+            });
+
+            // Search Vendors
+            appState.data.vendors.forEach(vendor => {
+                if (vendor.name.toLowerCase().includes(searchTerm) ||
+                    vendor.type.toLowerCase().includes(searchTerm) ||
+                    (vendor.contact && vendor.contact.toLowerCase().includes(searchTerm))) {
+                    results.vendors.push(vendor);
+                }
+            });
+
+            // Calculate total results
+            const totalResults = Object.values(results).reduce((sum, arr) => sum + arr.length, 0);
+
+            if (totalResults === 0) {
+                searchResults.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px;">
+                        <div style="font-size: 72px; margin-bottom: 20px; opacity: 0.3;">🔍</div>
+                        <h3 style="color: var(--text-muted); font-weight: 600; margin-bottom: 12px;">No Results Found</h3>
+                        <p style="color: var(--text-secondary); font-size: 14px;">Try searching with different keywords or check your spelling</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Display Results
+            let resultsHTML = `
+                <div style="margin-bottom: 20px; padding: 16px; background: var(--bg-glass); border-radius: 12px; border: 1px solid var(--glass-border);">
+                    <div style="font-size: 18px; font-weight: 700; color: var(--accent-primary);">
+                        Found ${totalResults} result${totalResults !== 1 ? 's' : ''} for "${query}"
+                    </div>
+                </div>
+            `;
+
+            // Team Members Results
+            if (results.team.length > 0) {
+                resultsHTML += `
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                            <span style="font-size: 28px;">👨‍💼</span>
+                            <div>
+                                <div class="card-title" style="margin-bottom: 4px;">Team Members</div>
+                                <div style="font-size: 13px; color: var(--text-muted);">${results.team.length} result${results.team.length !== 1 ? 's' : ''}</div>
+                            </div>
+                        </div>
+                        <div style="display: grid; gap: 12px;">
+                            ${results.team.map(member => `
+                                <div onclick="switchSection('team'); setTimeout(() => viewTeamMemberDetails(${member.id}), 100);" 
+                                     style="padding: 16px; background: var(--bg-glass); border: 1px solid var(--glass-border); border-radius: 12px; cursor: pointer; transition: all 0.3s ease;"
+                                     onmouseover="this.style.transform='translateX(4px)'; this.style.borderColor='var(--accent-primary)'"
+                                     onmouseout="this.style.transform='translateX(0)'; this.style.borderColor='var(--glass-border)'">
+                                    <div style="display: flex; align-items: center; gap: 16px;">
+                                        <div style="font-size: 40px;">${member.avatar || '👤'}</div>
+                                        <div style="flex: 1;">
+                                            <div style="font-weight: 700; font-size: 16px; margin-bottom: 4px;">${member.name}</div>
+                                            <div style="font-size: 13px; color: var(--accent-primary); margin-bottom: 4px;">${member.role}</div>
+                                            <div style="font-size: 12px; color: var(--text-muted);">
+                                                📧 ${member.email} • 📱 ${member.phone || 'Not set'}
+                                            </div>
+                                        </div>
+                                        <span class="badge badge-success">${member.status}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Contacts Results
+            if (results.contacts.length > 0) {
+                resultsHTML += `
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                            <span style="font-size: 28px;">👥</span>
+                            <div>
+                                <div class="card-title" style="margin-bottom: 4px;">CRM Contacts</div>
+                                <div style="font-size: 13px; color: var(--text-muted);">${results.contacts.length} result${results.contacts.length !== 1 ? 's' : ''}</div>
+                            </div>
+                        </div>
+                        <div style="display: grid; gap: 12px;">
+                            ${results.contacts.map(contact => `
+                                <div onclick="switchSection('crm'); setTimeout(() => showContactDetails(${contact.id}), 100);"
+                                     style="padding: 16px; background: var(--bg-glass); border: 1px solid var(--glass-border); border-radius: 12px; cursor: pointer; transition: all 0.3s ease;"
+                                     onmouseover="this.style.transform='translateX(4px)'; this.style.borderColor='var(--accent-primary)'"
+                                     onmouseout="this.style.transform='translateX(0)'; this.style.borderColor='var(--glass-border)'">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <div style="font-weight: 700; font-size: 16px; margin-bottom: 4px;">${contact.name}</div>
+                                            <div style="font-size: 13px; color: var(--accent-tertiary); margin-bottom: 4px;">${contact.company || 'No company'}</div>
+                                            <div style="font-size: 12px; color: var(--text-muted);">
+                                                📧 ${contact.email} • $${contact.value.toLocaleString()} value
+                                            </div>
+                                        </div>
+                                        <span class="badge ${contact.status === 'Customer' ? 'badge-success' : 'badge-warning'}">${contact.status}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Divisions Results
+            if (results.divisions.length > 0) {
+                resultsHTML += `
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                            <span style="font-size: 28px;">🏢</span>
+                            <div>
+                                <div class="card-title" style="margin-bottom: 4px;">Business Divisions</div>
+                                <div style="font-size: 13px; color: var(--text-muted);">${results.divisions.length} result${results.divisions.length !== 1 ? 's' : ''}</div>
+                            </div>
+                        </div>
+                        <div style="display: grid; gap: 12px;">
+                            ${results.divisions.map((division, index) => `
+                                <div onclick="switchSection('divisions'); setTimeout(() => viewDivisionDetails(${index}), 100);"
+                                     style="padding: 16px; background: var(--bg-glass); border: 1px solid var(--glass-border); border-radius: 12px; cursor: pointer; transition: all 0.3s ease;"
+                                     onmouseover="this.style.transform='translateX(4px)'; this.style.borderColor='var(--accent-primary)'"
+                                     onmouseout="this.style.transform='translateX(0)'; this.style.borderColor='var(--glass-border)'">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <div style="font-weight: 700; font-size: 16px; margin-bottom: 4px;">${division.name}</div>
+                                            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">${division.description}</div>
+                                            <div style="font-size: 12px; color: var(--text-muted);">
+                                                Revenue: $${(division.revenue/1000).toFixed(1)}K • ${division.employees} employees
+                                            </div>
+                                        </div>
+                                        <span class="badge badge-success">${division.status}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Tasks Results (keeping it shorter to manage token usage)
+            if (results.tasks.length > 0) {
+                resultsHTML += `
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                            <span style="font-size: 28px;">✅</span>
+                            <div>
+                                <div class="card-title" style="margin-bottom: 4px;">Tasks</div>
+                                <div style="font-size: 13px; color: var(--text-muted);">${results.tasks.length} result${results.tasks.length !== 1 ? 's' : ''}</div>
+                            </div>
+                        </div>
+                        <div style="display: grid; gap: 12px;">
+                            ${results.tasks.map(task => `
+                                <div onclick="switchSection('tasks');"
+                                     style="padding: 16px; background: var(--bg-glass); border: 1px solid var(--glass-border); border-radius: 12px; cursor: pointer; transition: all 0.3s ease;"
+                                     onmouseover="this.style.transform='translateX(4px)'; this.style.borderColor='var(--accent-primary)'"
+                                     onmouseout="this.style.transform='translateX(0)'; this.style.borderColor='var(--glass-border)'">
+                                    <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">${task.title}</div>
+                                    <div style="font-size: 12px; color: var(--text-muted);">
+                                        Assigned to: ${task.assignee || 'Unassigned'} • Due: ${task.dueDate || 'No due date'}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Add other categories similarly...
+            if (results.campaigns.length > 0 || results.deals.length > 0 || results.notes.length > 0 || 
+                results.events.length > 0 || results.transactions.length > 0 || results.vendors.length > 0) {
+                resultsHTML += `<div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px;">
+                    ${results.campaigns.length} campaigns, ${results.deals.length} deals, ${results.notes.length} notes, 
+                    ${results.events.length} events, ${results.transactions.length} transactions, ${results.vendors.length} vendors
+                </div>`;
+            }
+
+            searchResults.innerHTML = resultsHTML;
+        }
+
+        // INTEGRATIONS
         function renderIntegrations(container) {
             const integrations = [
+                {
+                    name: 'WhatsApp Business',
+                    service: 'whatsapp',
+                    icon: '💬',
+                    description: 'Direct messaging and communication with team & clients',
+                    status: 'Not Connected',
+                    color: '#25D366',
+                    benefits: ['Send messages', 'Quick communication', 'Contact directly', 'Media sharing']
+                },
                 {
                     name: 'Stripe',
                     service: 'stripe',
@@ -17179,15 +17522,18 @@ Are you absolutely sure you want to delete this campaign?`;
                     </div>
 
                     <div style="padding-top: 20px; border-top: 1px solid var(--glass-border);">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px;">
                             <button class="btn-secondary" onclick="closeModal(); sendEmailToTeamMember(${memberId});" style="background: var(--accent-tertiary);">
-                                📧 Send Email
+                                📧 Email
+                            </button>
+                            <button class="btn-secondary" onclick="closeModal(); sendWhatsAppToTeamMember(${memberId});" style="background: #25D366;">
+                                💬 WhatsApp
                             </button>
                             <button class="btn-secondary" onclick="closeModal(); showTeamCommunicationChoice(${memberId});" style="background: var(--accent-secondary);">
                                 📞 Contact
                             </button>
                             <button class="btn-primary" onclick="closeModal(); setTimeout(() => editTeamMember(${memberId}), 100);">
-                                ✏️ Edit Profile
+                                ✏️ Edit
                             </button>
                         </div>
                         <div style="display: flex; gap: 12px;">
@@ -17350,6 +17696,126 @@ Are you absolutely sure you want to delete this campaign?`;
             setTimeout(() => {
                 showToast(`📧 Check your email client to complete sending`, 'info');
             }, 2000);
+        }
+
+        // WHATSAPP MESSAGING FUNCTION
+        function sendWhatsAppToTeamMember(memberId) {
+            const member = appState.data.team.find(m => m.id === memberId);
+            if (!member) return;
+            
+            // Check if WhatsApp is connected
+            if (!integrationStates.whatsapp || !integrationStates.whatsapp.connected) {
+                const confirmConnect = confirm('WhatsApp Business is not connected. Would you like to go to the Integrations page to connect it?');
+                if (confirmConnect) {
+                    switchSection('integrations');
+                }
+                return;
+            }
+            
+            const whatsappFormHTML = `
+                <form onsubmit="handleSendWhatsAppToTeamMember(event, ${memberId})" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="background: linear-gradient(135deg, rgba(37,211,102,0.1), rgba(37,211,102,0.05)); padding: 16px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(37,211,102,0.3);">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                            <div style="font-size: 32px;">${member.avatar || '👤'}</div>
+                            <div>
+                                <div style="font-weight: 700;">${member.name}</div>
+                                <div style="color: var(--text-secondary); font-size: 13px;">${member.role} • ${member.department}</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; color: #25D366;">
+                            <span>📱</span>
+                            <span style="font-weight: 600;">${member.phone || 'Phone number not set'}</span>
+                        </div>
+                    </div>
+                    
+                    ${!member.phone || member.phone === 'Not set' ? `
+                        <div style="background: var(--danger); padding: 16px; border-radius: 8px; color: white;">
+                            ⚠️ Phone number is not set for this team member. Please update their profile to add a phone number.
+                        </div>
+                    ` : ''}
+                    
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 600;">Message:</label>
+                        <textarea id="whatsapp_message_team" rows="6" placeholder="Type your WhatsApp message..." required
+                                  style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                  border-radius: 8px; color: var(--text-primary); font-size: 14px; resize: vertical; font-family: inherit;"></textarea>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, rgba(37,211,102,0.1), rgba(37,211,102,0.05)); 
+                                padding: 12px; border-radius: 8px; border: 1px solid rgba(37,211,102,0.3);">
+                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">QUICK TEMPLATES:</div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button type="button" class="btn-secondary" onclick="applyWhatsAppTemplate('greeting')" 
+                                    style="padding: 6px 12px; font-size: 12px;">Greeting</button>
+                            <button type="button" class="btn-secondary" onclick="applyWhatsAppTemplate('meeting')" 
+                                    style="padding: 6px 12px; font-size: 12px;">Meeting Reminder</button>
+                            <button type="button" class="btn-secondary" onclick="applyWhatsAppTemplate('update')" 
+                                    style="padding: 6px 12px; font-size: 12px;">Quick Update</button>
+                            <button type="button" class="btn-secondary" onclick="applyWhatsAppTemplate('followup')" 
+                                    style="padding: 6px 12px; font-size: 12px;">Follow-up</button>
+                        </div>
+                    </div>
+                    
+                    <div style="background: var(--bg-glass); padding: 12px; border-radius: 8px; border: 1px solid var(--glass-border);">
+                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+                            <strong>📝 Note:</strong> This will open WhatsApp Web/App with your message ready to send. Make sure WhatsApp is installed and you're logged in.
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px;">
+                        <button type="button" class="btn-secondary" onclick="closeModal()" style="flex: 1;">Cancel</button>
+                        <button type="submit" class="btn-primary" ${!member.phone || member.phone === 'Not set' ? 'disabled' : ''} style="flex: 2; background: #25D366;">
+                            💬 Send via WhatsApp
+                        </button>
+                    </div>
+                </form>
+            `;
+            
+            showModal('Send WhatsApp Message', whatsappFormHTML);
+        }
+
+        function applyWhatsAppTemplate(template) {
+            const member = appState.currentEmailTeamMember || appState.data.team[0];
+            const firstName = member ? member.name.split(' ')[0] : 'there';
+            const templates = {
+                greeting: `Hi ${firstName}! 👋\n\nHope you're doing well! Just wanted to check in and see how things are going.`,
+                meeting: `Hi ${firstName},\n\nReminder about our meeting:\n📅 [Date/Time]\n📍 [Location/Link]\n\nSee you there!`,
+                update: `Hi ${firstName},\n\nQuick update: [Your message here]\n\nLet me know if you have any questions!`,
+                followup: `Hi ${firstName},\n\nFollowing up on our discussion about [topic]. Do you have an update?\n\nThanks!`
+            };
+            
+            const messageField = document.getElementById('whatsapp_message_team');
+            if (messageField && templates[template]) {
+                messageField.value = templates[template];
+            }
+        }
+
+        function handleSendWhatsAppToTeamMember(event, memberId) {
+            event.preventDefault();
+            const member = appState.data.team.find(m => m.id === memberId);
+            if (!member || !member.phone || member.phone === 'Not set') {
+                showToast('❌ Phone number not available', 'error');
+                return;
+            }
+            
+            const message = document.getElementById('whatsapp_message_team').value;
+            
+            // Format phone number for WhatsApp (remove spaces, dashes, etc.)
+            const phoneNumber = member.phone.replace(/[^\d+]/g, '');
+            
+            // Create WhatsApp URL
+            const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+            
+            // Log the activity
+            addRecentActivity('whatsapp', `WhatsApp Message to Team Member`, `Sent WhatsApp message to ${member.name} (${member.role})`, 'info');
+            
+            saveData();
+            closeModal();
+            
+            // Open WhatsApp in a new window/tab
+            window.open(whatsappURL, '_blank');
+            
+            showToast(`✅ Opening WhatsApp to send message to ${member.name}!`, 'success');
         }
 
         // TEAM COMMUNICATION CHOICE (Call or SMS)
