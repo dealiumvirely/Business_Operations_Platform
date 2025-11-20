@@ -1937,6 +1937,44 @@
             }
         }
 
+        function resetMockData() {
+            if (confirm('⚠️ Are you sure you want to reset all data? This will remove all custom entries and restore the default mock data. This action cannot be undone.')) {
+                // Clear localStorage
+                localStorage.removeItem('virelyOpsData');
+                
+                // Reset appState to empty arrays
+                appState.data.transactions = [];
+                appState.data.divisions = [];
+                appState.data.contacts = [];
+                appState.data.campaigns = [];
+                appState.data.vendors = [];
+                appState.data.tasks = [];
+                appState.data.notes = [];
+                appState.data.team = [];
+                appState.data.events = [];
+                appState.data.deals = [];
+                appState.data.invoices = [];
+                appState.data.alerts = [];
+                appState.data.recentActivity = [];
+                
+                // Reset financial metrics to default
+                appState.data.mrr = { current: 0, growth: 0, target: 0 };
+                appState.data.subscriptions = { active: 0, growth: 0, churned: 0 };
+                appState.data.customers = { total: 0, new: 0, churned: 0, churn_rate: 0 };
+                appState.data.revenue = { monthly: 0, yearly: 0, forecast: 0 };
+                appState.data.cashflow = { incoming: 0, outgoing: 0, net: 0, runway: 0 };
+                appState.data.budget = { monthly: 0, spent: 0, remaining: 0 };
+                
+                // Show success message
+                showToast('✓ All mock data has been reset successfully!', 'success');
+                
+                // Reload the current section
+                setTimeout(() => {
+                    switchSection(appState.currentSection || 'dashboard');
+                }, 500);
+            }
+        }
+
         function init() {
             initializeDefaultData();
             loadData();
@@ -2089,9 +2127,14 @@
                         <h2 id="greetingMessage">Good morning, Brenton!</h2>
                         <p>Welcome back to your business intelligence dashboard</p>
                     </div>
-                    <div class="time-display">
-                        <div class="current-time" id="currentTime">--:--:--</div>
-                        <div class="current-date" id="currentDate">Loading...</div>
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <button onclick="resetMockData()" class="btn-secondary" style="padding: 10px 20px; display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+                            <span>🔄</span> Reset Mock Data
+                        </button>
+                        <div class="time-display">
+                            <div class="current-time" id="currentTime">--:--:--</div>
+                            <div class="current-date" id="currentDate">Loading...</div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -2968,6 +3011,74 @@
         }
 
         // DASHBOARD
+        function calculateLTVCACRatio() {
+            // Calculate average revenue per customer across divisions
+            const totalRevenue = appState.data.divisions.reduce((sum, d) => sum + d.revenue, 0);
+            const totalCustomers = appState.data.divisions.reduce((sum, d) => sum + d.customers, 0);
+            
+            if (totalCustomers === 0) return '0:1';
+            
+            // Calculate average revenue per customer
+            const avgRevenuePerCustomer = totalRevenue / totalCustomers;
+            
+            // Calculate marketing spend (assuming 15% of revenue for CAC)
+            const marketingSpend = appState.data.campaigns.reduce((sum, c) => sum + c.spent, 0);
+            const newCustomers = appState.data.customers.new || 1;
+            const cac = marketingSpend / newCustomers;
+            
+            // Assume 24 month average customer lifetime
+            const avgLifetimeMonths = 24;
+            const ltv = avgRevenuePerCustomer * avgLifetimeMonths;
+            
+            if (cac === 0) return 'N/A';
+            
+            const ratio = ltv / cac;
+            return `${ratio.toFixed(1)}:1`;
+        }
+
+        function getLTVCACStatus() {
+            const ratio = parseFloat(calculateLTVCACRatio().split(':')[0]);
+            if (ratio >= 3) return 'Healthy ratio (>3:1)';
+            if (ratio >= 2) return 'Acceptable ratio (2-3:1)';
+            return 'Needs improvement (<2:1)';
+        }
+
+        function calculateCACPayback() {
+            const marketingSpend = appState.data.campaigns.reduce((sum, c) => sum + c.spent, 0);
+            const newCustomers = appState.data.customers.new || 1;
+            const cac = marketingSpend / newCustomers;
+            
+            const totalRevenue = appState.data.divisions.reduce((sum, d) => sum + d.revenue, 0);
+            const totalCustomers = appState.data.divisions.reduce((sum, d) => sum + d.customers, 0);
+            
+            if (totalCustomers === 0 || cac === 0) return '0';
+            
+            const monthlyRevenuePerCustomer = totalRevenue / totalCustomers;
+            const paybackMonths = cac / monthlyRevenuePerCustomer;
+            
+            return paybackMonths.toFixed(1);
+        }
+
+        function calculateGrossMargin() {
+            const totalRevenue = appState.data.divisions.reduce((sum, d) => sum + d.revenue, 0);
+            const totalExpenses = appState.data.divisions.reduce((sum, d) => sum + d.expenses, 0);
+            
+            if (totalRevenue === 0) return '0%';
+            
+            const grossProfit = totalRevenue - totalExpenses;
+            const margin = (grossProfit / totalRevenue) * 100;
+            
+            return `${margin.toFixed(0)}%`;
+        }
+
+        function getGrossMarginStatus() {
+            const margin = parseFloat(calculateGrossMargin());
+            if (margin >= 70) return 'Strong margins';
+            if (margin >= 50) return 'Healthy margins';
+            if (margin >= 30) return 'Moderate margins';
+            return 'Low margins';
+        }
+
         function renderDashboard(container) {
             container.innerHTML = `
                 ${renderGreetingSection()}
@@ -3038,18 +3149,18 @@
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px;">
                             <div style="background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(124,92,255,0.05)); padding: 20px; border-radius: 12px; border: 1px solid var(--glass-border); cursor: pointer; transition: all 0.3s ease;" onclick="showLTVCACDrillDown()">
                                 <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 8px; text-transform: uppercase;">LTV:CAC Ratio</div>
-                                <div style="font-weight: 800; font-size: 32px; color: var(--accent-primary); margin-bottom: 4px;">3.2:1</div>
-                                <div style="font-size: 12px; color: var(--text-secondary);">Healthy ratio (>3:1)</div>
+                                <div style="font-weight: 800; font-size: 32px; color: var(--accent-primary); margin-bottom: 4px;">${calculateLTVCACRatio()}</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">${getLTVCACStatus()}</div>
                             </div>
                             <div style="background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(124,92,255,0.05)); padding: 20px; border-radius: 12px; border: 1px solid var(--glass-border); cursor: pointer; transition: all 0.3s ease;" onclick="showPaybackDrillDown()">
                                 <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 8px; text-transform: uppercase;">CAC Payback Period</div>
-                                <div style="font-weight: 800; font-size: 32px; color: var(--accent-secondary); margin-bottom: 4px;">8.2</div>
+                                <div style="font-weight: 800; font-size: 32px; color: var(--accent-secondary); margin-bottom: 4px;">${calculateCACPayback()}</div>
                                 <div style="font-size: 12px; color: var(--text-secondary);">months to recover CAC</div>
                             </div>
                             <div style="background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(124,92,255,0.05)); padding: 20px; border-radius: 12px; border: 1px solid var(--glass-border); cursor: pointer; transition: all 0.3s ease;" onclick="showGrossMarginDrillDown()">
                                 <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 8px; text-transform: uppercase;">Gross Margin</div>
-                                <div style="font-weight: 800; font-size: 32px; color: var(--accent-gold); margin-bottom: 4px;">76%</div>
-                                <div style="font-size: 12px; color: var(--text-secondary);">Strong margins</div>
+                                <div style="font-weight: 800; font-size: 32px; color: var(--accent-gold); margin-bottom: 4px;">${calculateGrossMargin()}</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">${getGrossMarginStatus()}</div>
                             </div>
                         </div>
                     </div>
@@ -4466,7 +4577,16 @@
                     </div>
                 </div>
 
-                <button class="btn-secondary" onclick="closeModal()" style="width: 100%; margin-top: 24px;">Close</button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px;">
+                    <button class="btn-primary" onclick="editDivision(${appState.data.divisions.findIndex(d => d.id === divisionId)})" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span>✏️</span> Edit Division
+                    </button>
+                    <button class="btn-secondary" onclick="toggleDivisionStatus(${appState.data.divisions.findIndex(d => d.id === divisionId)})" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span>${division.status === 'Active' ? '⏸️' : '▶️'}</span> 
+                        ${division.status === 'Active' ? 'Disable' : 'Enable'}
+                    </button>
+                </div>
+                <button class="btn-secondary" onclick="closeModal()" style="width: 100%; margin-top: 12px;">Close</button>
             `;
 
             showModal(`${division.fullName} - Strategic Overview`, modalContent);
@@ -4936,9 +5056,121 @@
                             </div>
                         </div>
                     </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px;">
+                        <button class="btn-primary" onclick="editDivision(${index})" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <span>✏️</span> Edit Division
+                        </button>
+                        <button class="btn-secondary" onclick="toggleDivisionStatus(${index})" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <span>${division.status === 'Active' ? '⏸️' : '▶️'}</span> 
+                            ${division.status === 'Active' ? 'Disable' : 'Enable'}
+                        </button>
+                    </div>
                 </div>
             `;
             showModal(`${division.name} - Detailed Analytics`, modalContent);
+        }
+
+        function editDivision(index) {
+            const division = appState.data.divisions[index];
+            
+            const formHTML = `
+                <form onsubmit="saveDivisionEdit(event, ${index})" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">Short Name</label>
+                            <input type="text" id="edit_division_name" value="${division.name}" required
+                                   style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                   border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">Full Name</label>
+                            <input type="text" id="edit_division_fullName" value="${division.fullName}" required
+                                   style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                   border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">Description</label>
+                        <input type="text" id="edit_division_description" value="${division.description}" required
+                               style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                               border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">Monthly Revenue ($)</label>
+                            <input type="number" id="edit_division_revenue" value="${division.revenue}" required min="0"
+                                   style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                   border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">Monthly Expenses ($)</label>
+                            <input type="number" id="edit_division_expenses" value="${division.expenses}" required min="0"
+                                   style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                   border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">MRR ($)</label>
+                            <input type="number" id="edit_division_mrr" value="${division.mrr}" required min="0"
+                                   style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                   border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">Employees</label>
+                            <input type="number" id="edit_division_employees" value="${division.employees}" required min="1"
+                                   style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                   border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">Customers</label>
+                            <input type="number" id="edit_division_customers" value="${division.customers}" required min="0"
+                                   style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                   border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">Growth Rate (%)</label>
+                            <input type="number" id="edit_division_growth" value="${division.growth}" required step="0.1"
+                                   style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                   border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                </form>
+            `;
+            
+            showModal(`Edit ${division.name}`, formHTML);
+        }
+
+        function saveDivisionEdit(event, index) {
+            event.preventDefault();
+            const division = appState.data.divisions[index];
+            
+            division.name = document.getElementById('edit_division_name').value;
+            division.fullName = document.getElementById('edit_division_fullName').value;
+            division.description = document.getElementById('edit_division_description').value;
+            division.revenue = parseInt(document.getElementById('edit_division_revenue').value);
+            division.expenses = parseInt(document.getElementById('edit_division_expenses').value);
+            division.mrr = parseInt(document.getElementById('edit_division_mrr').value);
+            division.employees = parseInt(document.getElementById('edit_division_employees').value);
+            division.customers = parseInt(document.getElementById('edit_division_customers').value);
+            division.growth = parseFloat(document.getElementById('edit_division_growth').value);
+            
+            saveData();
+            closeModal();
+            showToast('✓ Division updated successfully!', 'success');
+            setTimeout(() => switchSection('divisions'), 100);
+        }
+
+        function toggleDivisionStatus(index) {
+            const division = appState.data.divisions[index];
+            division.status = division.status === 'Active' ? 'Disabled' : 'Active';
+            
+            saveData();
+            closeModal();
+            showToast(`✓ Division ${division.status === 'Active' ? 'enabled' : 'disabled'} successfully!`, 'success');
+            setTimeout(() => switchSection('divisions'), 100);
         }
 
         // CRM
@@ -6031,10 +6263,25 @@
                     <div>
                         <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">Icon (Emoji)</label>
                         <input type="text" id="new_source_icon" required 
-                               placeholder="e.g., 🎯, 🎪, 📞, 💼"
+                               placeholder="Click an emoji below or type your own"
                                maxlength="2"
                                style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
-                               border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                               border-radius: 8px; color: var(--text-primary); font-size: 14px; margin-bottom: 12px;">
+                        <div style="background: var(--bg-tertiary); padding: 16px; border-radius: 8px; border: 1px solid var(--glass-border);">
+                            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; text-transform: uppercase;">
+                                Popular Emojis - Click to Select
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 8px;">
+                                ${['🎯', '🎪', '📞', '💼', '🌐', '📧', '📱', '🤝', '💡', '🚀', '⭐', '🎁', '🏆', '📊', '💰', '🎉', '👥', '🔗', '📣', '🎓', '🏢', '💻', '📈', '🌟', '🎨', '📝', '🔔', '💬', '🎤', '📺'].map(emoji => 
+                                    `<button type="button" onclick="document.getElementById('new_source_icon').value='${emoji}'" 
+                                            style="padding: 10px; font-size: 24px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                            border-radius: 8px; cursor: pointer; transition: all 0.2s; text-align: center;
+                                            hover:transform: scale(1.1);"
+                                            onmouseover="this.style.background='var(--accent-primary)'; this.style.transform='scale(1.1)'"
+                                            onmouseout="this.style.background='var(--bg-glass)'; this.style.transform='scale(1)'">${emoji}</button>`
+                                ).join('')}
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">Description</label>
