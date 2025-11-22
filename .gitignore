@@ -244,6 +244,9 @@
             padding: 32px;
             position: relative;
             transition: margin-right 0.3s ease;
+            min-width: 0;
+            max-width: calc(100vw - 260px - 420px);
+            overflow-x: hidden;
         }
 
         .ai-insights-sidebar {
@@ -414,12 +417,17 @@
             margin-bottom: 32px;
             padding-bottom: 24px;
             border-bottom: 1px solid var(--glass-border);
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
         .header-left {
             display: flex;
             flex-direction: column;
             gap: 8px;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .greeting-message {
@@ -440,6 +448,9 @@
             font-size: 32px;
             font-weight: 800;
             margin-bottom: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .header-subtitle {
@@ -450,6 +461,8 @@
         .header-actions {
             display: flex;
             gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
         }
 
         .btn {
@@ -847,6 +860,9 @@
             border-radius: 16px;
             padding: 28px;
             margin-bottom: 24px;
+            overflow: hidden;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .card-title {
@@ -1346,6 +1362,7 @@
             }
             .main-content {
                 margin-right: 360px;
+                max-width: calc(100vw - 260px - 360px);
             }
             .calendar-grid {
                 gap: 6px;
@@ -1362,6 +1379,7 @@
             }
             .main-content {
                 margin-right: 0;
+                max-width: calc(100vw - 260px);
             }
             .calendar-grid {
                 gap: 8px;
@@ -1378,6 +1396,7 @@
             }
             .main-content {
                 margin-left: 0;
+                max-width: 100vw;
             }
         }
     </style>
@@ -1607,6 +1626,11 @@
                 invoices: [],
                 alerts: [],
                 recentActivity: [], // Track all platform activities
+                budgetTransactionHistory: {}, // NEW: Track transaction history for budget items
+                channelLogins: {}, // NEW: Store login credentials for marketing channels
+                channelBudgetHistory: {}, // NEW: Track budget spend history for marketing channels
+                mediaEvents: [], // NEW: Media & Events opportunities
+                launchPlans: [], // NEW: Launch plans by state/DMA
                 mrr: { current: 284750, growth: 12.4, target: 300000 },
                 subscriptions: { active: 1847, growth: 8.3, churned: 23 },
                 customers: { total: 3245, new: 187, churned: 23, churn_rate: 2.8 },
@@ -1841,6 +1865,8 @@
             { id: 'crm', icon: '👥', label: 'CRM & Contacts' },
             { id: 'deals', icon: '🤝', label: 'Sales Pipeline' },
             { id: 'marketing', icon: '📢', label: 'Marketing Hub' },
+            { id: 'media-events', icon: '📺', label: 'Media & Events' },
+            { id: 'launch-plan', icon: '🚀', label: 'Launch Plan' },
             { id: 'strategic-planning', icon: '🎯', label: 'Strategic Planning' },
             { id: 'vendors', icon: '🔧', label: 'Vendor Management' },
             { id: 'tasks', icon: '✅', label: 'Task Management' },
@@ -2211,6 +2237,8 @@
                 crm: renderCRM,
                 deals: renderDeals,
                 marketing: renderMarketing,
+                'media-events': renderMediaEvents,
+                'launch-plan': renderLaunchPlan,
                 'strategic-planning': renderStrategicPlanning,
                 vendors: renderVendors,
                 tasks: renderTasks,
@@ -3934,7 +3962,11 @@
                                     <div style="background: linear-gradient(135deg, rgba(20,27,46,0.4), rgba(10,14,26,0.2)); border: 1px solid var(--glass-border); border-radius: 12px; padding: 16px; transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--accent-primary)'" onmouseout="this.style.borderColor='var(--glass-border)'">
                                         <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 100px 80px; gap: 16px; align-items: center;">
                                             <div>
-                                                <div style="font-weight: 600; font-size: 15px; color: var(--text-primary); margin-bottom: 4px;">${item.name}</div>
+                                                <div style="font-weight: 600; font-size: 15px; color: var(--text-primary); margin-bottom: 4px;">
+                                                    <span style="cursor: pointer; color: var(--accent-tertiary); text-decoration: underline;" onclick="showBudgetTransactionHistory('${categoryKey}', ${index}, '${item.name}')" title="Click to view transaction history">
+                                                        ${item.name} 🔍
+                                                    </span>
+                                                </div>
                                                 <div style="font-size: 12px; color: var(--text-muted);">${item.description || 'No description'}</div>
                                             </div>
                                             <div style="text-align: center;">
@@ -4319,6 +4351,141 @@
             addRecentActivity('budget', `Replenished ${categoryNames[category]}`, `Added $${amount.toLocaleString()}`, 'success');
         }
 
+        // Budget Drill-Down Functions
+        function showBudgetTransactionHistory(categoryKey, itemIndex, itemName) {
+            if (!appState.data.budgetTransactionHistory) {
+                appState.data.budgetTransactionHistory = {};
+            }
+            
+            const historyKey = `${categoryKey}_${itemIndex}`;
+            const history = appState.data.budgetTransactionHistory[historyKey] || [];
+            
+            const totalSpent = history.reduce((sum, h) => sum + h.amount, 0);
+            
+            const historyHTML = `
+                <div style="margin-bottom: 20px; padding: 16px; background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(124,92,255,0.1)); border-radius: 12px; border: 1px solid var(--glass-border);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px;">TOTAL SPENT</div>
+                            <div style="font-size: 32px; font-weight: 800; color: var(--danger);">$${totalSpent.toLocaleString()}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px;">TRANSACTIONS</div>
+                            <div style="font-size: 32px; font-weight: 800; color: var(--accent-primary);">${history.length}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                ${history.length > 0 ? `
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${history.map(h => `
+                                    <tr>
+                                        <td>${h.date}</td>
+                                        <td>${h.description}</td>
+                                        <td style="color: var(--danger); font-weight: 700; font-size: 16px;">$${h.amount.toLocaleString()}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                ` : '<p style="color: var(--text-secondary); text-align: center; padding: 40px; font-style: italic;">No transaction history yet for this budget item.</p>'}
+                
+                <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <button class="btn btn-primary" onclick="addBudgetExpense('${categoryKey}', ${itemIndex}, '${itemName}')">➕ Record Expense</button>
+                    <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+                </div>
+            `;
+            
+            showModal(`📊 Transaction History: ${itemName}`, historyHTML);
+        }
+
+        function addBudgetExpense(categoryKey, itemIndex, itemName) {
+            const formHTML = `
+                <div style="display: grid; gap: 16px;">
+                    <div style="background: rgba(110,231,183,0.1); padding: 16px; border-radius: 8px; border: 1px solid var(--glass-border);">
+                        <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 4px;">Recording expense for:</div>
+                        <div style="font-size: 20px; font-weight: 700; color: var(--accent-primary);">${itemName}</div>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 600;">Expense Date *</label>
+                        <input type="date" id="expense_date" value="${new Date().toISOString().split('T')[0]}"
+                               style="width: 100%; padding: 12px; background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-primary);">
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 600;">Description *</label>
+                        <input type="text" id="expense_description" placeholder="What was purchased or paid for?"
+                               style="width: 100%; padding: 12px; background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-primary);">
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 600;">Amount ($) *</label>
+                        <input type="number" id="expense_amount" step="0.01" min="0" placeholder="0.00"
+                               style="width: 100%; padding: 12px; background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-primary); font-size: 18px; font-weight: 600;">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="saveBudgetExpense('${categoryKey}', ${itemIndex}, '${itemName}')" style="margin-top: 8px; font-size: 16px;">
+                        💰 Record Expense
+                    </button>
+                </div>
+            `;
+            
+            showModal(`💰 Record Expense: ${itemName}`, formHTML);
+        }
+
+        function saveBudgetExpense(categoryKey, itemIndex, itemName) {
+            const date = document.getElementById('expense_date').value;
+            const description = document.getElementById('expense_description').value.trim();
+            const amount = parseFloat(document.getElementById('expense_amount').value);
+
+            if (!date || !description || isNaN(amount) || amount <= 0) {
+                showToast('❌ Please fill all required fields');
+                return;
+            }
+
+            // Initialize if needed
+            if (!appState.data.budgetTransactionHistory) {
+                appState.data.budgetTransactionHistory = {};
+            }
+            
+            const historyKey = `${categoryKey}_${itemIndex}`;
+            if (!appState.data.budgetTransactionHistory[historyKey]) {
+                appState.data.budgetTransactionHistory[historyKey] = [];
+            }
+
+            // Add to transaction history
+            appState.data.budgetTransactionHistory[historyKey].push({
+                date,
+                description,
+                amount
+            });
+
+            // Update the budget item's spent amount
+            const category = categoryKey.split('_')[0]; // Extract category from key
+            if (appState.data.budgets && appState.data.budgets[category]) {
+                const item = appState.data.budgets[category][itemIndex];
+                if (item) {
+                    item.spent = (item.spent || 0) + amount;
+                }
+            }
+
+            saveData();
+            closeModal();
+            switchSection('budgets');
+            showToast(`✅ Expense of $${amount.toLocaleString()} recorded for ${itemName}!`);
+            addRecentActivity('budget', `Budget expense recorded`, `$${amount.toLocaleString()} - ${itemName}`, 'warning');
+        }
+
         // TRANSACTIONS
         function renderTransactions(container) {
             const revenues = appState.data.transactions.filter(t => t.amount > 0);
@@ -4358,9 +4525,9 @@
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-title">Expenses by Category</div>
+                        <div class="card-title">💰 Expenses by Category (Pie Chart)</div>
                         <div style="margin-top: 20px;">
-                            <canvas id="expenseBarChart"></canvas>
+                            <canvas id="expensePieChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -4374,6 +4541,7 @@
                                     <th>Description</th>
                                     <th>Type</th>
                                     <th>Sub-Category</th>
+                                    <th>Budget Category</th>
                                     <th>Amount</th>
                                     <th>Actions</th>
                                 </tr>
@@ -4385,6 +4553,7 @@
                                         <td><strong>${t.description}</strong></td>
                                         <td><span class="badge ${t.amount > 0 || (t.type && t.type === 'Revenue') ? 'badge-success' : 'badge-danger'}">${t.type || (t.amount > 0 ? 'Revenue' : 'Expenses')}</span></td>
                                         <td><span class="badge badge-info">${t.category}</span></td>
+                                        <td>${t.budgetCategoryName ? `<span class="badge" style="background: rgba(110,231,183,0.2); color: var(--accent-primary);">💼 ${t.budgetCategoryName}</span>` : '<span style="color: var(--text-muted); font-size: 12px;">—</span>'}</td>
                                         <td style="color: ${t.amount > 0 ? 'var(--success)' : 'var(--danger)'}; font-weight: 700;">
                                             ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toLocaleString()}
                                         </td>
@@ -4499,31 +4668,54 @@
                     });
                 }
 
-                // Render expense bar chart
-                const expenseBarCtx = document.getElementById('expenseBarChart');
-                if (expenseBarCtx) {
+                // Render expense PIE chart
+                const expensePieCtx = document.getElementById('expensePieChart');
+                if (expensePieCtx) {
                     const expenseByCategory = {};
                     expenses.forEach(t => {
                         expenseByCategory[t.category] = (expenseByCategory[t.category] || 0) + Math.abs(t.amount);
                     });
                     
-                    new Chart(expenseBarCtx, {
-                        type: 'bar',
+                    const colors = [
+                        '#ff6b6b', '#ffb86b', '#fbbf24', '#60a5fa', 
+                        '#7c5cff', '#6ee7b7', '#ec4899', '#8b5cf6',
+                        '#f43f5e', '#06b6d4', '#14b8a6', '#84cc16'
+                    ];
+                    
+                    new Chart(expensePieCtx, {
+                        type: 'pie',
                         data: {
                             labels: Object.keys(expenseByCategory),
                             datasets: [{
-                                label: 'Expenses',
                                 data: Object.values(expenseByCategory),
-                                backgroundColor: 'rgba(255, 107, 107, 0.8)'
+                                backgroundColor: colors.slice(0, Object.keys(expenseByCategory).length),
+                                borderColor: '#0a0e1a',
+                                borderWidth: 2
                             }]
                         },
                         options: {
                             responsive: true,
                             maintainAspectRatio: true,
-                            plugins: { legend: { display: false } },
-                            scales: {
-                                y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                                x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                    labels: { 
+                                        color: '#94a3b8', 
+                                        font: { size: 12, family: 'Inter' },
+                                        padding: 12
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.parsed;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = ((value / total) * 100).toFixed(1);
+                                            return `${label}: $${value.toLocaleString()} (${percentage}%)`;
+                                        }
+                                    }
+                                }
                             }
                         }
                     });
@@ -9760,6 +9952,882 @@ Are you absolutely sure you want to delete this campaign?`;
             `;
         }
 
+        // MEDIA & EVENTS OPPORTUNITIES
+        function renderMediaEvents(container) {
+            if (!appState.data.mediaEvents) {
+                appState.data.mediaEvents = [];
+            }
+
+            container.innerHTML = `
+                <div class="header">
+                    <div class="header-left">
+                        <h2>📺 Media & Events Opportunities</h2>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="addMediaEventRow()">➕ Add Event</button>
+                        <button class="btn btn-secondary" onclick="exportMediaEvents()">📥 Export CSV</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Media & Events Participation Canvas</div>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px; line-height: 1.6;">
+                        Track and plan media opportunities, event participation, sponsorships, speaking engagements, and PR activities. 
+                        Use this spreadsheet-style canvas to organize all your media and events strategy.
+                    </p>
+                    
+                    <div style="width: 100%; overflow-x: auto; overflow-y: auto;">
+                        <div style="background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: 12px; max-height: 600px; overflow: auto;">
+                            <table style="width: max-content; min-width: 100%; border-collapse: collapse; table-layout: fixed;">
+                                <thead style="position: sticky; top: 0; z-index: 10; background: linear-gradient(135deg, rgba(110,231,183,0.15), rgba(124,92,255,0.15)); backdrop-filter: blur(10px);">
+                                    <tr>
+                                        <th style="width: 120px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Date</th>
+                                        <th style="width: 200px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Event/Media Name</th>
+                                        <th style="width: 150px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Type</th>
+                                        <th style="width: 180px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Location/Platform</th>
+                                        <th style="width: 120px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Budget ($)</th>
+                                        <th style="width: 140px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Expected Reach</th>
+                                        <th style="width: 130px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Status</th>
+                                        <th style="width: 250px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Notes</th>
+                                        <th style="width: 80px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: center; border: 1px solid var(--glass-border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${appState.data.mediaEvents.length === 0 ? `
+                                        <tr>
+                                            <td colspan="9" style="text-align: center; padding: 60px; color: var(--text-muted); font-size: 16px;">
+                                                📺 No media events yet. Click "Add Event" to start tracking opportunities.
+                                            </td>
+                                        </tr>
+                                ` : appState.data.mediaEvents.map((event, idx) => `
+                                    <tr style="transition: background 0.2s ease;" onmouseover="this.style.background='rgba(110,231,183,0.05)'" onmouseout="this.style.background=''">
+                                        <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                            <input type="date" value="${event.date || ''}" 
+                                                   onchange="updateMediaEvent(${idx}, 'date', this.value)"
+                                                   style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px;">
+                                        </td>
+                                        <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                            <input type="text" value="${event.name || ''}" placeholder="Event/Media name" 
+                                                   onchange="updateMediaEvent(${idx}, 'name', this.value)"
+                                                   style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; font-weight: 600;">
+                                        </td>
+                                        <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                            <select onchange="updateMediaEvent(${idx}, 'type', this.value)" 
+                                                    style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; cursor: pointer;">
+                                                <option value="Conference" ${event.type === 'Conference' ? 'selected' : ''}>Conference</option>
+                                                <option value="Webinar" ${event.type === 'Webinar' ? 'selected' : ''}>Webinar</option>
+                                                <option value="Podcast" ${event.type === 'Podcast' ? 'selected' : ''}>Podcast</option>
+                                                <option value="TV/Radio" ${event.type === 'TV/Radio' ? 'selected' : ''}>TV/Radio</option>
+                                                <option value="Sponsorship" ${event.type === 'Sponsorship' ? 'selected' : ''}>Sponsorship</option>
+                                                <option value="Trade Show" ${event.type === 'Trade Show' ? 'selected' : ''}>Trade Show</option>
+                                                <option value="Speaking" ${event.type === 'Speaking' ? 'selected' : ''}>Speaking</option>
+                                                <option value="Press Release" ${event.type === 'Press Release' ? 'selected' : ''}>Press Release</option>
+                                                <option value="Interview" ${event.type === 'Interview' ? 'selected' : ''}>Interview</option>
+                                                <option value="Other" ${event.type === 'Other' ? 'selected' : ''}>Other</option>
+                                            </select>
+                                        </td>
+                                        <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                            <input type="text" value="${event.location || ''}" placeholder="Location/Platform" 
+                                                   onchange="updateMediaEvent(${idx}, 'location', this.value)"
+                                                   style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px;">
+                                        </td>
+                                        <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                            <input type="number" value="${event.budget || ''}" placeholder="0" 
+                                                   onchange="updateMediaEvent(${idx}, 'budget', this.value)"
+                                                   style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; font-weight: 600;">
+                                        </td>
+                                        <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                            <input type="text" value="${event.reach || ''}" placeholder="e.g., 10,000" 
+                                                   onchange="updateMediaEvent(${idx}, 'reach', this.value)"
+                                                   style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px;">
+                                        </td>
+                                        <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                            <select onchange="updateMediaEvent(${idx}, 'status', this.value)" 
+                                                    style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; cursor: pointer;">
+                                                <option value="Planning" ${event.status === 'Planning' ? 'selected' : ''}>Planning</option>
+                                                <option value="Confirmed" ${event.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                                                <option value="In Progress" ${event.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                                <option value="Completed" ${event.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                                                <option value="Cancelled" ${event.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                            </select>
+                                        </td>
+                                        <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                            <input type="text" value="${event.notes || ''}" placeholder="Notes..." 
+                                                   onchange="updateMediaEvent(${idx}, 'notes', this.value)"
+                                                   style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px;">
+                                        </td>
+                                        <td style="border: 1px solid var(--glass-border); padding: 8px; text-align: center;">
+                                            <button onclick="deleteMediaEvent(${idx})" 
+                                                    style="background: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;"
+                                                    onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                                                🗑️
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
+
+                    <div style="margin-top: 20px; padding: 16px; background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(124,92,255,0.1)); border-radius: 12px; border: 1px solid var(--glass-border);">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">TOTAL EVENTS</div>
+                                <div style="font-size: 28px; font-weight: 800; color: var(--accent-primary);">${appState.data.mediaEvents.length}</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">TOTAL BUDGET</div>
+                                <div style="font-size: 28px; font-weight: 800; color: var(--accent-secondary);">$${appState.data.mediaEvents.reduce((sum, e) => sum + (parseFloat(e.budget) || 0), 0).toLocaleString()}</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">CONFIRMED</div>
+                                <div style="font-size: 28px; font-weight: 800; color: var(--success);">${appState.data.mediaEvents.filter(e => e.status === 'Confirmed' || e.status === 'In Progress').length}</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">COMPLETED</div>
+                                <div style="font-size: 28px; font-weight: 800; color: var(--text-muted);">${appState.data.mediaEvents.filter(e => e.status === 'Completed').length}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function addMediaEventRow() {
+            appState.data.mediaEvents.push({
+                date: new Date().toISOString().split('T')[0],
+                name: '',
+                type: 'Conference',
+                location: '',
+                budget: 0,
+                reach: '',
+                status: 'Planning',
+                notes: ''
+            });
+            saveData(true);
+            switchSection('media-events');
+        }
+
+        function updateMediaEvent(idx, field, value) {
+            if (appState.data.mediaEvents[idx]) {
+                appState.data.mediaEvents[idx][field] = value;
+                saveData(true);
+            }
+        }
+
+        function deleteMediaEvent(idx) {
+            if (confirm('Delete this media event?')) {
+                appState.data.mediaEvents.splice(idx, 1);
+                saveData();
+                switchSection('media-events');
+            }
+        }
+
+        function exportMediaEvents() {
+            const csv = [
+                ['Date', 'Event/Media Name', 'Type', 'Location/Platform', 'Budget', 'Expected Reach', 'Status', 'Notes'],
+                ...appState.data.mediaEvents.map(e => [
+                    e.date, e.name, e.type, e.location, e.budget, e.reach, e.status, e.notes
+                ])
+            ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'media-events-' + new Date().toISOString().split('T')[0] + '.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('✅ Media events exported successfully!');
+        }
+
+        // LAUNCH PLAN
+        function renderLaunchPlan(container) {
+            if (!appState.data.launchPlans) {
+                appState.data.launchPlans = [];
+            }
+
+            const usStates = [
+                { code: 'CA', name: 'California', population: 39538223, dmas: ['Los Angeles', 'San Francisco', 'Sacramento', 'San Diego', 'Fresno', 'Bakersfield'] },
+                { code: 'TX', name: 'Texas', population: 29145505, dmas: ['Dallas-Fort Worth', 'Houston', 'San Antonio', 'Austin', 'El Paso'] },
+                { code: 'FL', name: 'Florida', population: 21538187, dmas: ['Miami', 'Tampa', 'Orlando', 'Jacksonville', 'Fort Myers'] },
+                { code: 'NY', name: 'New York', population: 20201249, dmas: ['New York City', 'Buffalo', 'Albany', 'Rochester', 'Syracuse'] },
+                { code: 'PA', name: 'Pennsylvania', population: 13002700, dmas: ['Philadelphia', 'Pittsburgh', 'Harrisburg', 'Wilkes-Barre'] },
+                { code: 'IL', name: 'Illinois', population: 12812508, dmas: ['Chicago', 'Springfield', 'Peoria', 'Rockford'] },
+                { code: 'OH', name: 'Ohio', population: 11799448, dmas: ['Cleveland', 'Columbus', 'Cincinnati', 'Toledo', 'Dayton'] },
+                { code: 'GA', name: 'Georgia', population: 10711908, dmas: ['Atlanta', 'Savannah', 'Augusta', 'Columbus', 'Macon'] },
+                { code: 'NC', name: 'North Carolina', population: 10439388, dmas: ['Charlotte', 'Raleigh-Durham', 'Greensboro', 'Wilmington'] },
+                { code: 'MI', name: 'Michigan', population: 10077331, dmas: ['Detroit', 'Grand Rapids', 'Lansing', 'Flint'] },
+                { code: 'NJ', name: 'New Jersey', population: 9288994, dmas: ['Newark', 'Jersey City', 'Atlantic City', 'Trenton'] },
+                { code: 'VA', name: 'Virginia', population: 8631393, dmas: ['Richmond', 'Norfolk', 'Roanoke', 'Virginia Beach'] },
+                { code: 'WA', name: 'Washington', population: 7705281, dmas: ['Seattle', 'Spokane', 'Tacoma', 'Vancouver'] },
+                { code: 'AZ', name: 'Arizona', population: 7151502, dmas: ['Phoenix', 'Tucson', 'Flagstaff', 'Yuma'] },
+                { code: 'MA', name: 'Massachusetts', population: 7029917, dmas: ['Boston', 'Springfield', 'Worcester', 'Cambridge'] },
+                { code: 'TN', name: 'Tennessee', population: 6910840, dmas: ['Nashville', 'Memphis', 'Knoxville', 'Chattanooga'] },
+                { code: 'IN', name: 'Indiana', population: 6785528, dmas: ['Indianapolis', 'Fort Wayne', 'Evansville', 'South Bend'] },
+                { code: 'MD', name: 'Maryland', population: 6177224, dmas: ['Baltimore', 'Annapolis', 'Frederick', 'Hagerstown'] },
+                { code: 'MO', name: 'Missouri', population: 6154913, dmas: ['Kansas City', 'St. Louis', 'Springfield', 'Columbia'] },
+                { code: 'WI', name: 'Wisconsin', population: 5893718, dmas: ['Milwaukee', 'Madison', 'Green Bay', 'Kenosha'] },
+                { code: 'CO', name: 'Colorado', population: 5773714, dmas: ['Denver', 'Colorado Springs', 'Boulder', 'Fort Collins'] },
+                { code: 'MN', name: 'Minnesota', population: 5706494, dmas: ['Minneapolis', 'St. Paul', 'Rochester', 'Duluth'] },
+                { code: 'SC', name: 'South Carolina', population: 5118425, dmas: ['Columbia', 'Charleston', 'Greenville', 'Myrtle Beach'] },
+                { code: 'AL', name: 'Alabama', population: 5024279, dmas: ['Birmingham', 'Montgomery', 'Mobile', 'Huntsville'] },
+                { code: 'LA', name: 'Louisiana', population: 4657757, dmas: ['New Orleans', 'Baton Rouge', 'Shreveport', 'Lafayette'] },
+                { code: 'KY', name: 'Kentucky', population: 4505836, dmas: ['Louisville', 'Lexington', 'Bowling Green', 'Owensboro'] },
+                { code: 'OR', name: 'Oregon', population: 4237256, dmas: ['Portland', 'Eugene', 'Salem', 'Bend'] },
+                { code: 'OK', name: 'Oklahoma', population: 3959353, dmas: ['Oklahoma City', 'Tulsa', 'Norman', 'Lawton'] },
+                { code: 'CT', name: 'Connecticut', population: 3605944, dmas: ['Hartford', 'New Haven', 'Stamford', 'Bridgeport'] },
+                { code: 'NV', name: 'Nevada', population: 3104614, dmas: ['Las Vegas', 'Reno', 'Henderson', 'Carson City'] }
+            ];
+
+            // Get list of states that have launch plans
+            const activePlanStates = appState.data.launchPlans.map(p => p.state);
+
+            container.innerHTML = `
+                <div class="header">
+                    <div class="header-left">
+                        <h2>🚀 Launch Plan Strategy</h2>
+                    </div>
+                    <div class="header-actions" style="display: flex; gap: 12px;">
+                        <button class="btn btn-secondary" onclick="clearAllLaunchPlans()" style="background: var(--danger); color: white;">🗑️ Clear All</button>
+                        <button class="btn btn-primary" onclick="exportLaunchPlanSpreadsheet()">📥 Export CSV</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🗺️ Select States to Add to Launch Plan</div>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px; line-height: 1.6;">
+                        Click on states below to add them to your launch plan spreadsheet. Each state can have multiple market entries (DMAs, strategies, budgets).
+                    </p>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 24px;">
+                        ${usStates.map(state => {
+                            const isActive = activePlanStates.includes(state.code);
+                            return `
+                                <div onclick="openStateDetailModal('${state.code}', '${state.name}', ${JSON.stringify(state.dmas).replace(/"/g, '&quot;')}, ${state.population})" 
+                                     style="background: linear-gradient(135deg, ${isActive ? 'rgba(110,231,183,0.15)' : 'rgba(20,27,46,0.8)'}, ${isActive ? 'rgba(124,92,255,0.1)' : 'rgba(10,14,26,0.6)'}); 
+                                            border: 2px solid ${isActive ? 'var(--accent-primary)' : 'var(--glass-border)'}; 
+                                            border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.3s ease;"
+                                     onmouseover="if (!${isActive}) { this.style.borderColor='var(--accent-tertiary)'; this.style.transform='translateY(-2px)'; }"
+                                     onmouseout="if (!${isActive}) { this.style.borderColor='var(--glass-border)'; this.style.transform=''; }">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <div style="font-size: 24px; font-weight: 900; color: ${isActive ? 'var(--accent-primary)' : 'var(--text-secondary)'};">${state.code}</div>
+                                        <div style="font-size: 20px;">${isActive ? '✅' : '🎯'}</div>
+                                    </div>
+                                    <div style="font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--text-primary);">${state.name}</div>
+                                    <div style="font-size: 10px; color: var(--text-muted);">${(state.population / 1000000).toFixed(1)}M • ${state.dmas.length} DMAs</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                ${appState.data.launchPlans.length > 0 ? `
+                    <div class="card">
+                        <div class="card-title">📋 Launch Strategy Spreadsheet</div>
+                        <p style="color: var(--text-secondary); margin-bottom: 20px; line-height: 1.6;">
+                            Edit your launch plan details below. Each row represents a market entry - add multiple rows per state for different DMAs or strategies.
+                        </p>
+                        
+                        <div style="margin-bottom: 16px; display: flex; gap: 12px;">
+                            <button class="btn btn-secondary" onclick="addLaunchPlanRow()" style="flex: 1;">➕ Add New Row</button>
+                            <button class="btn btn-secondary" onclick="duplicateSelectedRows()" style="flex: 1;">📋 Duplicate Selected</button>
+                        </div>
+
+                        <div style="background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: 12px; overflow-x: auto; overflow-y: auto; max-height: 700px;">
+                            <table style="width: 100%; border-collapse: collapse; table-layout: auto;">
+                                <thead style="position: sticky; top: 0; z-index: 10; background: linear-gradient(135deg, rgba(110,231,183,0.15), rgba(124,92,255,0.15)); backdrop-filter: blur(10px);">
+                                    <tr>
+                                        <th style="width: 40px; padding: 14px 8px; font-weight: 700; color: var(--accent-primary); text-align: center; border: 1px solid var(--glass-border); font-size: 11px;">
+                                            <input type="checkbox" id="selectAllRows" onchange="toggleAllRows(this.checked)" style="cursor: pointer; width: 16px; height: 16px; accent-color: var(--accent-primary);">
+                                        </th>
+                                        <th style="min-width: 100px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">State</th>
+                                        <th style="min-width: 160px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">DMA / Market</th>
+                                        <th style="min-width: 130px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">Launch Date</th>
+                                        <th style="min-width: 120px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">Budget ($)</th>
+                                        <th style="min-width: 250px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">Strategy & Tactics</th>
+                                        <th style="min-width: 220px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">Marketing Plans</th>
+                                        <th style="min-width: 200px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">Key Partners</th>
+                                        <th style="min-width: 180px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">Success Metrics</th>
+                                        <th style="min-width: 200px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">Notes</th>
+                                        <th style="min-width: 80px; padding: 14px; font-weight: 700; color: var(--accent-primary); text-align: center; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${appState.data.launchPlans.map((plan, idx) => {
+                                        const stateInfo = usStates.find(s => s.code === plan.state);
+                                        return `
+                                            <tr style="transition: background 0.2s ease;" onmouseover="this.style.background='rgba(110,231,183,0.03)'" onmouseout="this.style.background=''">
+                                                <td style="border: 1px solid var(--glass-border); padding: 8px; text-align: center;">
+                                                    <input type="checkbox" class="row-checkbox" data-idx="${idx}" style="cursor: pointer; width: 16px; height: 16px; accent-color: var(--accent-primary);">
+                                                </td>
+                                                <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                                    <select onchange="updateLaunchPlanRow(${idx}, 'state', this.value); updateLaunchPlanRow(${idx}, 'stateName', this.options[this.selectedIndex].text);" 
+                                                            style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; font-weight: 700; cursor: pointer;">
+                                                        ${usStates.map(s => `<option value="${s.code}" ${plan.state === s.code ? 'selected' : ''}>${s.code} - ${s.name}</option>`).join('')}
+                                                    </select>
+                                                </td>
+                                                <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                                    <input type="text" value="${plan.dma || ''}" placeholder="DMA or market area" 
+                                                           onchange="updateLaunchPlanRow(${idx}, 'dma', this.value)"
+                                                           onfocus="showDmaOptions(${idx}, '${plan.state}')"
+                                                           style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; font-weight: 600;">
+                                                </td>
+                                                <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                                    <input type="date" value="${plan.launchDate || ''}" 
+                                                           onchange="updateLaunchPlanRow(${idx}, 'launchDate', this.value)"
+                                                           style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px;">
+                                                </td>
+                                                <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                                    <input type="number" value="${plan.budget || ''}" placeholder="0" 
+                                                           onchange="updateLaunchPlanRow(${idx}, 'budget', this.value)"
+                                                           style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; font-weight: 700;">
+                                                </td>
+                                                <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                                    <textarea rows="2" 
+                                                              onchange="updateLaunchPlanRow(${idx}, 'tactics', this.value)" 
+                                                              placeholder="Marketing tactics and strategy..."
+                                                              style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; resize: vertical; line-height: 1.4;">${plan.tactics || ''}</textarea>
+                                                </td>
+                                                <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                                    <textarea rows="2" 
+                                                              onchange="updateLaunchPlanRow(${idx}, 'marketingPlans', this.value)" 
+                                                              placeholder="Detailed marketing plans..."
+                                                              style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; resize: vertical; line-height: 1.4;">${plan.marketingPlans || ''}</textarea>
+                                                </td>
+                                                <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                                    <textarea rows="2" 
+                                                              onchange="updateLaunchPlanRow(${idx}, 'partners', this.value)" 
+                                                              placeholder="Key partners and vendors..."
+                                                              style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; resize: vertical; line-height: 1.4;">${plan.partners || ''}</textarea>
+                                                </td>
+                                                <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                                    <textarea rows="2" 
+                                                              onchange="updateLaunchPlanRow(${idx}, 'metrics', this.value)" 
+                                                              placeholder="KPIs and success metrics..."
+                                                              style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; resize: vertical; line-height: 1.4;">${plan.metrics || ''}</textarea>
+                                                </td>
+                                                <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                                    <textarea rows="2" 
+                                                              onchange="updateLaunchPlanRow(${idx}, 'notes', this.value)" 
+                                                              placeholder="Additional notes..."
+                                                              style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; resize: vertical; line-height: 1.4;">${plan.notes || ''}</textarea>
+                                                </td>
+                                                <td style="border: 1px solid var(--glass-border); padding: 8px; text-align: center;">
+                                                    <button onclick="deleteLaunchPlanRow(${idx})" 
+                                                            style="background: var(--danger); color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;"
+                                                            onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                                                        🗑️
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="margin-top: 20px; padding: 16px; background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(124,92,255,0.1)); border-radius: 12px; border: 1px solid var(--glass-border);">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">TOTAL ENTRIES</div>
+                                    <div style="font-size: 28px; font-weight: 800; color: var(--accent-primary);">${appState.data.launchPlans.length}</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">UNIQUE STATES</div>
+                                    <div style="font-size: 28px; font-weight: 800; color: var(--accent-secondary);">${new Set(appState.data.launchPlans.map(p => p.state)).size}</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">TOTAL BUDGET</div>
+                                    <div style="font-size: 28px; font-weight: 800; color: var(--success);">$${appState.data.launchPlans.reduce((sum, p) => sum + (parseFloat(p.budget) || 0), 0).toLocaleString()}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ` : `
+                    <div class="card" style="text-align: center; padding: 60px;">
+                        <div style="font-size: 64px; margin-bottom: 20px;">🚀</div>
+                        <h3 style="color: var(--text-primary); margin-bottom: 12px;">No Launch Plans Yet</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 24px;">
+                            Click on states above to start building your launch strategy spreadsheet.
+                        </p>
+                    </div>
+                `}
+            `;
+        }
+
+        function addStateToLaunchPlan(stateCode, stateName, dmasJson) {
+            const dmas = JSON.parse(dmasJson.replace(/&quot;/g, '"'));
+            
+            // Add first entry for this state with first DMA
+            appState.data.launchPlans.push({
+                state: stateCode,
+                stateName: stateName,
+                dma: dmas[0] || '',
+                launchDate: '',
+                budget: 0,
+                tactics: '',
+                partners: '',
+                metrics: '',
+                notes: ''
+            });
+            
+            saveData(true);
+            switchSection('launch-plan');
+            showToast(`✅ Added ${stateName} to launch plan!`);
+        }
+
+        // NEW: Open detailed state planning modal
+        function openStateDetailModal(stateCode, stateName, dmasJson, population) {
+            const dmas = JSON.parse(dmasJson.replace(/&quot;/g, '"'));
+            
+            // Get existing plans for this state
+            const statePlans = appState.data.launchPlans.filter(p => p.state === stateCode);
+            
+            const modalContent = `
+                <div style="max-height: 70vh; overflow-y: auto;">
+                    <div style="background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(124,92,255,0.1)); 
+                                padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--glass-border);">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                            <div>
+                                <h3 style="font-size: 28px; font-weight: 900; color: var(--accent-primary); margin-bottom: 8px;">
+                                    ${stateCode} • ${stateName}
+                                </h3>
+                                <div style="font-size: 14px; color: var(--text-secondary);">
+                                    Population: ${(population / 1000000).toFixed(2)}M • ${dmas.length} Major DMAs
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">ACTIVE PLANS</div>
+                                <div style="font-size: 32px; font-weight: 800; color: var(--accent-secondary);">${statePlans.length}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <button class="btn btn-primary" onclick="addDMARow('${stateCode}', '${stateName}', ${JSON.stringify(dmas).replace(/"/g, '&quot;')}); closeModal();" 
+                                style="width: 100%;">
+                            ➕ Add New DMA / Market Entry
+                        </button>
+                    </div>
+
+                    <div style="background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: 12px; overflow: auto; max-height: 500px;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead style="position: sticky; top: 0; z-index: 10; background: linear-gradient(135deg, rgba(110,231,183,0.15), rgba(124,92,255,0.15)); backdrop-filter: blur(10px);">
+                                <tr>
+                                    <th style="min-width: 160px; padding: 12px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">DMA / Market</th>
+                                    <th style="min-width: 120px; padding: 12px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">Launch Date</th>
+                                    <th style="min-width: 110px; padding: 12px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">Budget ($)</th>
+                                    <th style="min-width: 250px; padding: 12px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">Strategy & Tactics</th>
+                                    <th style="min-width: 200px; padding: 12px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">Marketing Plans</th>
+                                    <th style="min-width: 200px; padding: 12px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">Key Partners</th>
+                                    <th style="min-width: 180px; padding: 12px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">Success Metrics</th>
+                                    <th style="min-width: 200px; padding: 12px; font-weight: 700; color: var(--accent-primary); text-align: left; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">Notes</th>
+                                    <th style="min-width: 80px; padding: 12px; font-weight: 700; color: var(--accent-primary); text-align: center; border: 1px solid var(--glass-border); font-size: 11px; text-transform: uppercase;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${statePlans.length === 0 ? `
+                                    <tr>
+                                        <td colspan="9" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                            🎯 No market entries yet. Click "Add New DMA" to start planning.
+                                        </td>
+                                    </tr>
+                                ` : statePlans.map((plan, idx) => {
+                                    const globalIdx = appState.data.launchPlans.findIndex(p => p === plan);
+                                    return `
+                                        <tr style="transition: background 0.2s ease;" onmouseover="this.style.background='rgba(110,231,183,0.05)'" onmouseout="this.style.background=''">
+                                            <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                                <select onchange="updateLaunchPlanRow(${globalIdx}, 'dma', this.value)"
+                                                        style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; font-weight: 600;">
+                                                    ${dmas.map(dma => `<option value="${dma}" ${plan.dma === dma ? 'selected' : ''}>${dma}</option>`).join('')}
+                                                </select>
+                                            </td>
+                                            <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                                <input type="date" value="${plan.launchDate || ''}" 
+                                                       onchange="updateLaunchPlanRow(${globalIdx}, 'launchDate', this.value)"
+                                                       style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px;">
+                                            </td>
+                                            <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                                <input type="number" value="${plan.budget || 0}" 
+                                                       onchange="updateLaunchPlanRow(${globalIdx}, 'budget', this.value)"
+                                                       style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; font-weight: 600;">
+                                            </td>
+                                            <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                                <textarea onchange="updateLaunchPlanRow(${globalIdx}, 'tactics', this.value)" 
+                                                          placeholder="e.g., Digital ads, local partnerships, influencer outreach"
+                                                          style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; min-height: 60px; resize: vertical;">${plan.tactics || ''}</textarea>
+                                            </td>
+                                            <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                                <textarea onchange="updateLaunchPlanRow(${globalIdx}, 'marketingPlans', this.value)" 
+                                                          placeholder="e.g., Social media campaign, email series, events"
+                                                          style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; min-height: 60px; resize: vertical;">${plan.marketingPlans || ''}</textarea>
+                                            </td>
+                                            <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                                <textarea onchange="updateLaunchPlanRow(${globalIdx}, 'partners', this.value)" 
+                                                          placeholder="e.g., Local businesses, media outlets"
+                                                          style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; min-height: 60px; resize: vertical;">${plan.partners || ''}</textarea>
+                                            </td>
+                                            <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                                <textarea onchange="updateLaunchPlanRow(${globalIdx}, 'metrics', this.value)" 
+                                                          placeholder="e.g., 1000 sign-ups, 50% awareness"
+                                                          style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; min-height: 60px; resize: vertical;">${plan.metrics || ''}</textarea>
+                                            </td>
+                                            <td style="border: 1px solid var(--glass-border); padding: 8px;">
+                                                <textarea onchange="updateLaunchPlanRow(${globalIdx}, 'notes', this.value)" 
+                                                          placeholder="Additional notes..."
+                                                          style="width: 100%; background: transparent; border: none; color: var(--text-primary); padding: 4px; font-size: 13px; min-height: 60px; resize: vertical;">${plan.notes || ''}</textarea>
+                                            </td>
+                                            <td style="border: 1px solid var(--glass-border); padding: 8px; text-align: center;">
+                                                <button onclick="deleteLaunchPlanRow(${globalIdx}); closeModal(); setTimeout(() => openStateDetailModal('${stateCode}', '${stateName}', ${JSON.stringify(dmas).replace(/"/g, '&quot;')}, ${population}), 100);" 
+                                                        style="background: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;"
+                                                        onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                                                    🗑️
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    ${statePlans.length > 0 ? `
+                        <div style="margin-top: 20px; padding: 16px; background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(124,92,255,0.1)); border-radius: 12px; border: 1px solid var(--glass-border);">
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">MARKET ENTRIES</div>
+                                    <div style="font-size: 24px; font-weight: 800; color: var(--accent-primary);">${statePlans.length}</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">TOTAL BUDGET</div>
+                                    <div style="font-size: 24px; font-weight: 800; color: var(--success);">$${statePlans.reduce((sum, p) => sum + (parseFloat(p.budget) || 0), 0).toLocaleString()}</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">AVG PER DMA</div>
+                                    <div style="font-size: 24px; font-weight: 800; color: var(--accent-secondary);">$${(statePlans.reduce((sum, p) => sum + (parseFloat(p.budget) || 0), 0) / statePlans.length).toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            showModal(`🎯 ${stateName} Launch Planning`, modalContent, 'large');
+        }
+
+        function addDMARow(stateCode, stateName, dmasJson) {
+            const dmas = JSON.parse(dmasJson.replace(/&quot;/g, '"'));
+            
+            appState.data.launchPlans.push({
+                state: stateCode,
+                stateName: stateName,
+                dma: dmas[0] || '',
+                launchDate: '',
+                budget: 0,
+                tactics: '',
+                marketingPlans: '',
+                partners: '',
+                metrics: '',
+                notes: ''
+            });
+            
+            saveData(true);
+            switchSection('launch-plan');
+            showToast(`✅ Added new market entry for ${stateName}!`);
+        }
+
+        function addLaunchPlanRow() {
+            // Open smart planning modal for adding new launch plan entry
+            showLaunchPlanCreationModal();
+        }
+
+        function showLaunchPlanCreationModal() {
+            const usStates = [
+                { code: 'CA', name: 'California', dmas: ['Los Angeles', 'San Francisco', 'Sacramento', 'San Diego', 'Fresno'] },
+                { code: 'TX', name: 'Texas', dmas: ['Dallas-Fort Worth', 'Houston', 'San Antonio', 'Austin', 'El Paso'] },
+                { code: 'FL', name: 'Florida', dmas: ['Miami', 'Tampa', 'Orlando', 'Jacksonville', 'Fort Myers'] },
+                { code: 'NY', name: 'New York', dmas: ['New York City', 'Buffalo', 'Albany', 'Rochester', 'Syracuse'] },
+                { code: 'PA', name: 'Pennsylvania', dmas: ['Philadelphia', 'Pittsburgh', 'Harrisburg', 'Wilkes-Barre'] },
+                { code: 'IL', name: 'Illinois', dmas: ['Chicago', 'Springfield', 'Peoria', 'Rockford'] },
+                { code: 'OH', name: 'Ohio', dmas: ['Cleveland', 'Columbus', 'Cincinnati', 'Toledo', 'Dayton'] },
+                { code: 'GA', name: 'Georgia', dmas: ['Atlanta', 'Savannah', 'Augusta', 'Columbus', 'Macon'] },
+                { code: 'NC', name: 'North Carolina', dmas: ['Charlotte', 'Raleigh-Durham', 'Greensboro', 'Wilmington'] },
+                { code: 'MI', name: 'Michigan', dmas: ['Detroit', 'Grand Rapids', 'Lansing', 'Flint'] },
+                { code: 'NJ', name: 'New Jersey', dmas: ['Newark', 'Jersey City', 'Atlantic City', 'Trenton'] },
+                { code: 'VA', name: 'Virginia', dmas: ['Richmond', 'Norfolk', 'Roanoke', 'Virginia Beach'] },
+                { code: 'WA', name: 'Washington', dmas: ['Seattle', 'Spokane', 'Tacoma', 'Vancouver'] },
+                { code: 'AZ', name: 'Arizona', dmas: ['Phoenix', 'Tucson', 'Flagstaff', 'Yuma'] },
+                { code: 'MA', name: 'Massachusetts', dmas: ['Boston', 'Springfield', 'Worcester', 'Cambridge'] },
+                { code: 'TN', name: 'Tennessee', dmas: ['Nashville', 'Memphis', 'Knoxville', 'Chattanooga'] },
+                { code: 'IN', name: 'Indiana', dmas: ['Indianapolis', 'Fort Wayne', 'Evansville', 'South Bend'] },
+                { code: 'MD', name: 'Maryland', dmas: ['Baltimore', 'Annapolis', 'Frederick', 'Hagerstown'] },
+                { code: 'MO', name: 'Missouri', dmas: ['Kansas City', 'St. Louis', 'Springfield', 'Columbia'] },
+                { code: 'WI', name: 'Wisconsin', dmas: ['Milwaukee', 'Madison', 'Green Bay', 'Kenosha'] },
+                { code: 'CO', name: 'Colorado', dmas: ['Denver', 'Colorado Springs', 'Boulder', 'Fort Collins'] },
+                { code: 'MN', name: 'Minnesota', dmas: ['Minneapolis', 'St. Paul', 'Rochester', 'Duluth'] },
+                { code: 'SC', name: 'South Carolina', dmas: ['Columbia', 'Charleston', 'Greenville', 'Myrtle Beach'] },
+                { code: 'AL', name: 'Alabama', dmas: ['Birmingham', 'Montgomery', 'Mobile', 'Huntsville'] },
+                { code: 'LA', name: 'Louisiana', dmas: ['New Orleans', 'Baton Rouge', 'Shreveport', 'Lafayette'] },
+                { code: 'KY', name: 'Kentucky', dmas: ['Louisville', 'Lexington', 'Bowling Green', 'Owensboro'] },
+                { code: 'OR', name: 'Oregon', dmas: ['Portland', 'Eugene', 'Salem', 'Bend'] },
+                { code: 'OK', name: 'Oklahoma', dmas: ['Oklahoma City', 'Tulsa', 'Norman', 'Lawton'] },
+                { code: 'CT', name: 'Connecticut', dmas: ['Hartford', 'New Haven', 'Stamford', 'Bridgeport'] },
+                { code: 'NV', name: 'Nevada', dmas: ['Las Vegas', 'Reno', 'Henderson', 'Carson City'] }
+            ];
+
+            const modalContent = `
+                <div style="max-height: 70vh; overflow-y: auto;">
+                    <div style="background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(124,92,255,0.1)); 
+                                padding: 24px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--glass-border);">
+                        <h3 style="font-size: 20px; font-weight: 700; color: var(--accent-primary); margin-bottom: 12px;">
+                            🎯 Create New Launch Plan Entry
+                        </h3>
+                        <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">
+                            Select a state and DMA, then provide detailed planning information for your market launch strategy.
+                        </p>
+                    </div>
+
+                    <form id="launchPlanForm" style="display: flex; flex-direction: column; gap: 20px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 600; font-size: 13px;">
+                                    🗺️ State
+                                </label>
+                                <select id="newplan_state" required
+                                        style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                        border-radius: 8px; color: var(--text-primary); font-size: 14px; font-weight: 600;">
+                                    ${usStates.map(s => `<option value="${s.code}" data-name="${s.name}" data-dmas='${JSON.stringify(s.dmas)}'>${s.code} - ${s.name}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 600; font-size: 13px;">
+                                    📍 DMA / Market
+                                </label>
+                                <select id="newplan_dma" required
+                                        style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                        border-radius: 8px; color: var(--text-primary); font-size: 14px; font-weight: 600;">
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 600; font-size: 13px;">
+                                    📅 Launch Date
+                                </label>
+                                <input type="date" id="newplan_launchDate"
+                                       style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                       border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 600; font-size: 13px;">
+                                    💰 Budget ($)
+                                </label>
+                                <input type="number" id="newplan_budget" placeholder="0" step="100"
+                                       style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                       border-radius: 8px; color: var(--text-primary); font-size: 14px; font-weight: 600;">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 600; font-size: 13px;">
+                                🎯 Strategy & Tactics
+                            </label>
+                            <textarea id="newplan_tactics" rows="3" placeholder="e.g., Digital marketing focus, partnerships with local businesses, influencer collaborations..."
+                                      style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                      border-radius: 8px; color: var(--text-primary); font-size: 14px; line-height: 1.5; resize: vertical;"></textarea>
+                        </div>
+
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 600; font-size: 13px;">
+                                📢 Marketing Plans
+                            </label>
+                            <textarea id="newplan_marketingPlans" rows="3" placeholder="e.g., Social media campaign, email marketing series, local events sponsorship..."
+                                      style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                      border-radius: 8px; color: var(--text-primary); font-size: 14px; line-height: 1.5; resize: vertical;"></textarea>
+                        </div>
+
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 600; font-size: 13px;">
+                                🤝 Key Partners & Vendors
+                            </label>
+                            <textarea id="newplan_partners" rows="2" placeholder="e.g., Local agencies, media outlets, distribution partners..."
+                                      style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                      border-radius: 8px; color: var(--text-primary); font-size: 14px; line-height: 1.5; resize: vertical;"></textarea>
+                        </div>
+
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 600; font-size: 13px;">
+                                📊 Success Metrics & KPIs
+                            </label>
+                            <textarea id="newplan_metrics" rows="2" placeholder="e.g., 1,000 new customers, 50% market awareness, $100K revenue in Q1..."
+                                      style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                      border-radius: 8px; color: var(--text-primary); font-size: 14px; line-height: 1.5; resize: vertical;"></textarea>
+                        </div>
+
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 600; font-size: 13px;">
+                                📝 Additional Notes
+                            </label>
+                            <textarea id="newplan_notes" rows="2" placeholder="Any other important information..."
+                                      style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                      border-radius: 8px; color: var(--text-primary); font-size: 14px; line-height: 1.5; resize: vertical;"></textarea>
+                        </div>
+
+                        <div style="display: flex; gap: 12px; margin-top: 8px;">
+                            <button type="submit" class="btn btn-primary" style="flex: 1; padding: 14px; font-size: 15px; font-weight: 600;">
+                                ✅ Create Launch Plan Entry
+                            </button>
+                            <button type="button" onclick="closeModal()" class="btn btn-secondary" style="flex: 0 0 140px; padding: 14px; font-size: 15px; font-weight: 600;">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+            showModal('🚀 New Launch Plan Entry', modalContent, 'large');
+            
+            // Set up event handlers after modal is shown
+            setTimeout(() => {
+                const stateSelect = document.getElementById('newplan_state');
+                const dmaSelect = document.getElementById('newplan_dma');
+                const form = document.getElementById('launchPlanForm');
+                
+                if (!stateSelect || !dmaSelect || !form) return;
+                
+                // Function to update DMA options based on selected state
+                function updateDMAOptions() {
+                    const selectedOption = stateSelect.options[stateSelect.selectedIndex];
+                    const dmas = JSON.parse(selectedOption.getAttribute('data-dmas'));
+                    
+                    dmaSelect.innerHTML = dmas.map(dma => 
+                        '<option value="' + dma + '">' + dma + '</option>'
+                    ).join('');
+                }
+                
+                // Initialize DMA options
+                updateDMAOptions();
+                
+                // Update DMAs when state changes
+                stateSelect.addEventListener('change', updateDMAOptions);
+                
+                // Handle form submission
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const selectedOption = stateSelect.options[stateSelect.selectedIndex];
+                    
+                    const newPlan = {
+                        state: stateSelect.value,
+                        stateName: selectedOption.getAttribute('data-name'),
+                        dma: document.getElementById('newplan_dma').value,
+                        launchDate: document.getElementById('newplan_launchDate').value,
+                        budget: parseFloat(document.getElementById('newplan_budget').value) || 0,
+                        tactics: document.getElementById('newplan_tactics').value,
+                        marketingPlans: document.getElementById('newplan_marketingPlans').value,
+                        partners: document.getElementById('newplan_partners').value,
+                        metrics: document.getElementById('newplan_metrics').value,
+                        notes: document.getElementById('newplan_notes').value
+                    };
+                    
+                    appState.data.launchPlans.push(newPlan);
+                    saveData(true);
+                    closeModal();
+                    switchSection('launch-plan');
+                    showToast('✅ Launch plan entry created successfully!');
+                });
+            }, 100);
+        }
+
+
+        function updateLaunchPlanRow(idx, field, value) {
+            if (appState.data.launchPlans[idx]) {
+                appState.data.launchPlans[idx][field] = value;
+                saveData(true);
+            }
+        }
+
+        function deleteLaunchPlanRow(idx) {
+            if (confirm('Delete this launch plan entry?')) {
+                appState.data.launchPlans.splice(idx, 1);
+                saveData();
+                switchSection('launch-plan');
+            }
+        }
+
+        function toggleAllRows(checked) {
+            document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = checked);
+        }
+
+        function duplicateSelectedRows() {
+            const selectedIndexes = [];
+            document.querySelectorAll('.row-checkbox:checked').forEach(cb => {
+                selectedIndexes.push(parseInt(cb.dataset.idx));
+            });
+            
+            if (selectedIndexes.length === 0) {
+                showToast('⚠️ Please select rows to duplicate');
+                return;
+            }
+            
+            selectedIndexes.forEach(idx => {
+                const original = appState.data.launchPlans[idx];
+                appState.data.launchPlans.push({...original});
+            });
+            
+            saveData();
+            switchSection('launch-plan');
+            showToast(`✅ Duplicated ${selectedIndexes.length} row(s)`);
+        }
+
+        function clearAllLaunchPlans() {
+            if (confirm('Clear ALL launch plan entries? This cannot be undone.')) {
+                appState.data.launchPlans = [];
+                saveData();
+                switchSection('launch-plan');
+                showToast('✅ All launch plans cleared');
+            }
+        }
+
+        function showDmaOptions(idx, stateCode) {
+            // This could be enhanced to show a dropdown of DMAs for the selected state
+            // For now, users can type freely
+        }
+
+        function exportLaunchPlanSpreadsheet() {
+            if (appState.data.launchPlans.length === 0) {
+                showToast('⚠️ No launch plans to export');
+                return;
+            }
+            
+            const csv = [
+                ['State', 'State Name', 'DMA/Market', 'Launch Date', 'Budget', 'Strategy & Tactics', 'Key Partners', 'Success Metrics', 'Notes'],
+                ...appState.data.launchPlans.map(p => [
+                    p.state, 
+                    p.stateName, 
+                    p.dma,
+                    p.launchDate, 
+                    p.budget, 
+                    p.tactics, 
+                    p.partners, 
+                    p.metrics,
+                    p.notes
+                ])
+            ].map(row => row.map(cell => `"${(cell || '').toString().replace(/"/g, '""')}"`).join(',')).join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'launch-plan-spreadsheet-' + new Date().toISOString().split('T')[0] + '.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('✅ Launch plan spreadsheet exported!');
+        }
+
         // SETTINGS - NOW FULLY IMPLEMENTED
         function renderSettings(container) {
             container.innerHTML = `
@@ -13324,12 +14392,22 @@ Are you absolutely sure you want to delete this campaign?`;
         
         
         function showModal(title, content, maxWidth = '900px') {
+            // Handle size keywords
+            const sizeMap = {
+                'small': '600px',
+                'medium': '900px',
+                'large': '1200px',
+                'xlarge': '1400px'
+            };
+            
+            const width = sizeMap[maxWidth] || maxWidth;
+            
             document.getElementById('modalTitle').textContent = title;
             document.getElementById('modalContent').innerHTML = content;
             const modal = document.getElementById('modal');
             const modalBox = modal.querySelector('.modal');
             if (modalBox) {
-                modalBox.style.maxWidth = maxWidth;
+                modalBox.style.maxWidth = width;
             }
             modal.classList.add('active');
             
@@ -13343,8 +14421,80 @@ Are you absolutely sure you want to delete this campaign?`;
             document.getElementById('modal').classList.remove('active');
         }
 
+        // SMART VENDOR SUGGESTION SYSTEM
+        function getVendorSuggestions(category) {
+            if (!appState.data.transactions) return [];
+            
+            // Get all unique vendors used for this category
+            const vendors = new Set();
+            appState.data.transactions.forEach(txn => {
+                if (txn.category === category && txn.vendor && txn.vendor.trim()) {
+                    vendors.add(txn.vendor.trim());
+                }
+            });
+            
+            // Return as array, sorted alphabetically
+            return Array.from(vendors).sort();
+        }
+
+        function updateVendorSuggestions(category, inputId) {
+            const suggestions = getVendorSuggestions(category);
+            const inputElement = document.getElementById(inputId);
+            
+            if (!inputElement) return;
+            
+            // Remove old datalist if exists
+            const oldDatalist = document.getElementById('vendorSuggestions');
+            if (oldDatalist) oldDatalist.remove();
+            
+            // Create new datalist with suggestions
+            if (suggestions.length > 0) {
+                const datalist = document.createElement('datalist');
+                datalist.id = 'vendorSuggestions';
+                suggestions.forEach(vendor => {
+                    const option = document.createElement('option');
+                    option.value = vendor;
+                    datalist.appendChild(option);
+                });
+                inputElement.setAttribute('list', 'vendorSuggestions');
+                inputElement.parentNode.appendChild(datalist);
+            } else {
+                inputElement.removeAttribute('list');
+            }
+        }
+
         function showAddTransaction() {
             const today = new Date().toISOString().split('T')[0];
+            
+            // Get all budget items from all categories
+            let budgetOptions = '<option value="">None (General Transaction)</option>';
+            
+            if (appState.data.budgets) {
+                if (appState.data.budgets.operational) {
+                    budgetOptions += '<optgroup label="💻 Operational Expenses">';
+                    appState.data.budgets.operational.forEach((item, idx) => {
+                        budgetOptions += `<option value="operational_${idx}">${item.name}</option>`;
+                    });
+                    budgetOptions += '</optgroup>';
+                }
+                
+                if (appState.data.budgets.marketing) {
+                    budgetOptions += '<optgroup label="📢 Marketing Expenses">';
+                    appState.data.budgets.marketing.forEach((item, idx) => {
+                        budgetOptions += `<option value="marketing_${idx}">${item.name}</option>`;
+                    });
+                    budgetOptions += '</optgroup>';
+                }
+                
+                if (appState.data.budgets.sga) {
+                    budgetOptions += '<optgroup label="🏢 Selling, General & Administrative (SG&A)">';
+                    appState.data.budgets.sga.forEach((item, idx) => {
+                        budgetOptions += `<option value="sga_${idx}">${item.name}</option>`;
+                    });
+                    budgetOptions += '</optgroup>';
+                }
+            }
+            
             const formHTML = `
                 <form onsubmit="handleTransactionSubmit(event)" style="display: flex; flex-direction: column; gap: 16px;">
                     <div>
@@ -13372,9 +14522,22 @@ Are you absolutely sure you want to delete this campaign?`;
                             </select>
                         </div>
                     </div>
+                    
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 600;">
+                            💼 Operational Budget Category
+                            <span style="font-size: 11px; font-weight: 400; color: var(--text-muted); margin-left: 8px;">(Optional - links to budget tracking)</span>
+                        </label>
+                        <select id="txn_budget_category"
+                                style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                            ${budgetOptions}
+                        </select>
+                    </div>
+                    
                     <div>
                         <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">Sub-Category</label>
-                        <select id="txn_category" required
+                        <select id="txn_category" required onchange="updateVendorSuggestions(this.value, 'txn_vendor')"
                                 style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
                                 border-radius: 8px; color: var(--text-primary); font-size: 14px;">
                                 <option value="Revenue">Revenue</option>
@@ -13425,7 +14588,10 @@ Are you absolutely sure you want to delete this campaign?`;
                                    border-radius: 8px; color: var(--text-primary); font-size: 14px;">
                         </div>
                         <div>
-                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">Vendor (Optional)</label>
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">
+                                Vendor (Optional)
+                                <span style="font-size: 11px; color: var(--accent-primary); margin-left: 4px;">💡 Auto-suggests based on category</span>
+                            </label>
                             <input type="text" id="txn_vendor" 
                                    placeholder="Vendor name"
                                    style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
@@ -13442,10 +14608,21 @@ Are you absolutely sure you want to delete this campaign?`;
             event.preventDefault();
             const txnType = document.getElementById('txn_type').value;
             let amount = parseFloat(document.getElementById('txn_amount').value);
+            const budgetCategory = document.getElementById('txn_budget_category').value;
             
             // Make amount negative for expenses
             if ((txnType === 'Expense' || txnType === 'Expenses') && amount > 0) {
                 amount = -amount;
+            }
+            
+            // Get budget category name if selected
+            let budgetCategoryName = '';
+            if (budgetCategory) {
+                const [category, indexStr] = budgetCategory.split('_');
+                const index = parseInt(indexStr);
+                if (appState.data.budgets && appState.data.budgets[category] && appState.data.budgets[category][index]) {
+                    budgetCategoryName = appState.data.budgets[category][index].name;
+                }
             }
             
             const newTransaction = {
@@ -13455,17 +14632,44 @@ Are you absolutely sure you want to delete this campaign?`;
                 amount: amount,
                 type: txnType,
                 category: document.getElementById('txn_category').value,
+                budgetCategory: budgetCategory, // Store the budget category key
+                budgetCategoryName: budgetCategoryName, // Store the budget category name for display
                 vendor: document.getElementById('txn_vendor').value || '',
                 recurring: false
             };
             appState.data.transactions.unshift(newTransaction);
             
+            // Update budget if a budget category is selected and it's an expense
+            if (budgetCategory && amount < 0) {
+                const [category, indexStr] = budgetCategory.split('_');
+                const index = parseInt(indexStr);
+                
+                if (appState.data.budgets && appState.data.budgets[category] && appState.data.budgets[category][index]) {
+                    const budgetItem = appState.data.budgets[category][index];
+                    budgetItem.spent = (budgetItem.spent || 0) + Math.abs(amount);
+                    
+                    // Add to budget transaction history
+                    if (!appState.data.budgetTransactionHistory) {
+                        appState.data.budgetTransactionHistory = {};
+                    }
+                    const historyKey = `${category}_${index}`;
+                    if (!appState.data.budgetTransactionHistory[historyKey]) {
+                        appState.data.budgetTransactionHistory[historyKey] = [];
+                    }
+                    appState.data.budgetTransactionHistory[historyKey].push({
+                        date: newTransaction.date,
+                        description: newTransaction.description,
+                        amount: Math.abs(amount)
+                    });
+                }
+            }
+            
             // Log activity
-            addRecentActivity('transaction', `Added transaction: ${newTransaction.description}`, `${newTransaction.amount > 0 ? '+' : ''}$${Math.abs(newTransaction.amount).toLocaleString()} • ${newTransaction.category}`, 'info');
+            addRecentActivity('transaction', `Added transaction: ${newTransaction.description}`, `${newTransaction.amount > 0 ? '+' : ''}$${Math.abs(newTransaction.amount).toLocaleString()} • ${newTransaction.category}${budgetCategoryName ? ' • ' + budgetCategoryName : ''}`, 'info');
             
             saveData();
             closeModal();
-            showToast('Transaction added successfully!');
+            showToast('Transaction added successfully!' + (budgetCategory && amount < 0 ? ' Budget updated.' : ''));
             switchSection('transactions');
         }
         
@@ -13476,6 +14680,46 @@ Are you absolutely sure you want to delete this campaign?`;
             // Determine type and absolute amount
             const txnType = txn.type || (txn.amount > 0 ? 'Revenue' : 'Expense');
             const absAmount = Math.abs(txn.amount);
+            
+            // Get all budget items from all categories for the dropdown
+            let budgetOptions = '<option value="">None (General Transaction)</option>';
+            
+            if (appState.data.budgets) {
+                if (appState.data.budgets.operational) {
+                    budgetOptions += '<optgroup label="💻 Operational Expenses">';
+                    appState.data.budgets.operational.forEach((item, idx) => {
+                        const isSelected = txn.budgetCategory === `operational_${idx}`;
+                        budgetOptions += `<option value="operational_${idx}" ${isSelected ? 'selected' : ''}>${item.name}</option>`;
+                    });
+                    budgetOptions += '</optgroup>';
+                }
+                
+                if (appState.data.budgets.marketing) {
+                    budgetOptions += '<optgroup label="📢 Marketing Expenses">';
+                    appState.data.budgets.marketing.forEach((item, idx) => {
+                        const isSelected = txn.budgetCategory === `marketing_${idx}`;
+                        budgetOptions += `<option value="marketing_${idx}" ${isSelected ? 'selected' : ''}>${item.name}</option>`;
+                    });
+                    budgetOptions += '</optgroup>';
+                }
+                
+                if (appState.data.budgets.sga) {
+                    budgetOptions += '<optgroup label="🏢 Selling, General & Administrative (SG&A)">';
+                    appState.data.budgets.sga.forEach((item, idx) => {
+                        const isSelected = txn.budgetCategory === `sga_${idx}`;
+                        budgetOptions += `<option value="sga_${idx}" ${isSelected ? 'selected' : ''}>${item.name}</option>`;
+                    });
+                    budgetOptions += '</optgroup>';
+                }
+            }
+            
+            // Get vendor suggestions based on category
+            const vendorSuggestions = getVendorSuggestions(txn.category);
+            const vendorDatalist = vendorSuggestions.length > 0 ? `
+                <datalist id="vendorSuggestions">
+                    ${vendorSuggestions.map(v => `<option value="${v}">`).join('')}
+                </datalist>
+            ` : '';
             
             const formHTML = `
                 <form onsubmit="handleTransactionEdit(event, ${id})" style="display: flex; flex-direction: column; gap: 16px;">
@@ -13504,9 +14748,22 @@ Are you absolutely sure you want to delete this campaign?`;
                             </select>
                         </div>
                     </div>
+                    
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 600;">
+                            💼 Operational Budget Category
+                            <span style="font-size: 11px; font-weight: 400; color: var(--text-muted); margin-left: 8px;">(Optional - links to budget tracking)</span>
+                        </label>
+                        <select id="txn_budget_category"
+                                style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                            ${budgetOptions}
+                        </select>
+                    </div>
+                    
                     <div>
                         <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">Sub-Category</label>
-                        <select id="txn_category" required
+                        <select id="txn_category" required onchange="updateVendorSuggestions(this.value, 'txn_vendor')"
                                 style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
                                 border-radius: 8px; color: var(--text-primary); font-size: 14px;">
                             <option value="Office Supplies" ${txn.category === 'Office Supplies' ? 'selected' : ''}>Office Supplies</option>
@@ -13551,9 +14808,19 @@ Are you absolutely sure you want to delete this campaign?`;
                             </select>
                         </div>
                         <div>
-                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">Vendor (Optional)</label>
-                            <input type="text" id="txn_vendor" value="${txn.vendor || ''}"
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">
+                                Vendor (Optional)
+                                <span style="font-size: 11px; color: var(--accent-primary); margin-left: 4px;">💡 Auto-suggests based on category</span>
+                            </label>
+                            <input type="text" id="txn_vendor" value="${txn.vendor || ''}" list="vendorSuggestions"
                                    placeholder="Vendor name"
+                                   style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
+                                   border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                            ${vendorDatalist}
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500;">Date</label>
+                            <input type="date" id="txn_date" required value="${txn.date || ''}"
                                    style="width: 100%; padding: 12px; background: var(--bg-glass); border: 1px solid var(--glass-border); 
                                    border-radius: 8px; color: var(--text-primary); font-size: 14px;">
                         </div>
@@ -13571,6 +14838,9 @@ Are you absolutely sure you want to delete this campaign?`;
             
             const txnType = document.getElementById('txn_type').value;
             let amount = parseFloat(document.getElementById('txn_amount').value);
+            const budgetCategory = document.getElementById('txn_budget_category').value;
+            const oldBudgetCategory = txn.budgetCategory;
+            const oldAmount = Math.abs(txn.amount);
             
             // Make amount negative for expenses
             if ((txnType === 'Expense' || txnType === 'Expenses') && amount > 0) {
@@ -13579,12 +14849,53 @@ Are you absolutely sure you want to delete this campaign?`;
                 amount = Math.abs(amount);
             }
             
+            // Get budget category name if selected
+            let budgetCategoryName = '';
+            if (budgetCategory) {
+                const [category, indexStr] = budgetCategory.split('_');
+                const index = parseInt(indexStr);
+                if (appState.data.budgets && appState.data.budgets[category] && appState.data.budgets[category][index]) {
+                    budgetCategoryName = appState.data.budgets[category][index].name;
+                }
+            }
+            
+            // Update transaction
             txn.date = document.getElementById('txn_date').value;
             txn.description = document.getElementById('txn_description').value;
             txn.amount = amount;
             txn.type = txnType;
             txn.category = document.getElementById('txn_category').value;
+            txn.budgetCategory = budgetCategory;
+            txn.budgetCategoryName = budgetCategoryName;
             txn.vendor = document.getElementById('txn_vendor').value || '';
+            
+            // Update budget tracking if needed
+            if (oldBudgetCategory && oldBudgetCategory !== budgetCategory) {
+                // Remove from old budget
+                const [oldCat, oldIdx] = oldBudgetCategory.split('_');
+                const oldIndex = parseInt(oldIdx);
+                if (appState.data.budgets && appState.data.budgets[oldCat] && appState.data.budgets[oldCat][oldIndex]) {
+                    appState.data.budgets[oldCat][oldIndex].spent = Math.max(0, (appState.data.budgets[oldCat][oldIndex].spent || 0) - oldAmount);
+                }
+            }
+            
+            if (budgetCategory && amount < 0) {
+                const [category, indexStr] = budgetCategory.split('_');
+                const index = parseInt(indexStr);
+                
+                if (appState.data.budgets && appState.data.budgets[category] && appState.data.budgets[category][index]) {
+                    const budgetItem = appState.data.budgets[category][index];
+                    
+                    // If changing budget categories, adjust accordingly
+                    if (oldBudgetCategory === budgetCategory) {
+                        // Same budget, adjust for amount change
+                        budgetItem.spent = (budgetItem.spent || 0) - oldAmount + Math.abs(amount);
+                    } else {
+                        // New budget, just add
+                        budgetItem.spent = (budgetItem.spent || 0) + Math.abs(amount);
+                    }
+                }
+            }
             
             // Log activity
             addRecentActivity('transaction', `Updated transaction: ${txn.description}`, `${txn.amount > 0 ? '+' : ''}$${Math.abs(txn.amount).toLocaleString()} • ${txn.category}`, 'info');
@@ -14500,6 +15811,11 @@ Are you absolutely sure you want to delete this campaign?`;
                 notes: showAddNote,
                 calendar: showAddEvent,
                 'strategic-planning': showAddBusinessUnit,
+                'media-events': addMediaEventRow,
+                'launch-plan': addLaunchPlanRow,
+                transactions: showAddTransaction,
+                campaigns: showAddCampaign,
+                team: showAddTeamMember,
             };
             
             if (sections[appState.currentSection]) {
