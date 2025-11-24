@@ -2461,11 +2461,11 @@
             setInterval(updateGreeting, 60000);
             setInterval(renderSummaryTiles, 300000); // Update summary every 5 minutes
             
-            // Auto-save data every 60 seconds
+            // Auto-save data every 45 seconds
             setInterval(() => {
                 saveData(true); // Silent auto-save
                 console.log('Auto-saved at:', new Date().toLocaleTimeString());
-            }, 60000);
+            }, 45000);
             
             // Auto-refresh current section every 60 seconds
             setInterval(() => {
@@ -14366,9 +14366,9 @@ ${dev.name} (${dev.role})
                     <div style="text-align: center; padding: 60px 20px;">
                         <div style="font-size: 72px; margin-bottom: 20px; opacity: 0.3;">🔍</div>
                         <h3 style="color: var(--text-muted); font-weight: 600; margin-bottom: 12px;">Start Searching</h3>
-                        <p style="color: var(--text-secondary); font-size: 14px;">Type at least 3 characters to search across your platform</p>
+                        <p style="color: var(--text-secondary); font-size: 14px;">Type to search across your entire platform</p>
                         <div style="margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;">
-                            ${['Team Members', 'Contacts', 'Divisions', 'Tasks', 'Campaigns', 'Deals', 'Notes', 'Events', 'Transactions', 'Vendors'].map(category => 
+                            ${['Team', 'Contacts', 'Projects', 'Tasks', 'Deals', 'Notes', 'Events', 'Vendors', 'Invoices', 'Developers'].map(category => 
                                 `<span class="badge badge-info" style="font-size: 13px; padding: 8px 16px;">${category}</span>`
                             ).join('')}
                         </div>
@@ -14377,205 +14377,291 @@ ${dev.name} (${dev.role})
                 return;
             }
             
-            // Require at least 3 characters
-            if (query.trim().length < 3) {
-                searchResults.innerHTML = `
-                    <div style="text-align: center; padding: 60px 20px;">
-                        <div style="font-size: 72px; margin-bottom: 20px; opacity: 0.3;">⌨️</div>
-                        <h3 style="color: var(--text-muted); font-weight: 600; margin-bottom: 12px;">Keep Typing...</h3>
-                        <p style="color: var(--text-secondary); font-size: 14px;">
-                            You've entered ${query.trim().length} character${query.trim().length === 1 ? '' : 's'}. 
-                            Type ${3 - query.trim().length} more to start searching.
-                        </p>
-                        <div style="margin-top: 24px; padding: 16px; background: var(--bg-glass); border: 1px solid var(--glass-border); border-radius: 12px; display: inline-block;">
-                            <span style="font-size: 24px; font-weight: 800; color: var(--accent-primary);">${query.trim().length} / 3</span>
-                            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">characters</div>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
+            // Start searching from 1 character
+            if (query.trim().length < 1) return;
 
             const searchTerm = query.toLowerCase().trim();
-            let results = {
-                team: [],
-                contacts: [],
-                divisions: [],
-                tasks: [],
-                campaigns: [],
-                deals: [],
-                notes: [],
-                events: [],
-                transactions: [],
-                vendors: []
-            };
+            const searchTerms = searchTerm.split(/\s+/).filter(t => t.length > 0);
+            
+            // Smart search helper - calculates relevance score
+            function calculateRelevance(item, fields, primaryFields = []) {
+                let score = 0;
+                let matchedFields = [];
+                
+                fields.forEach(field => {
+                    const value = item[field];
+                    if (value && typeof value === 'string') {
+                        const lowerValue = value.toLowerCase();
+                        searchTerms.forEach(term => {
+                            if (lowerValue === term) {
+                                score += primaryFields.includes(field) ? 100 : 50;
+                                matchedFields.push(field);
+                            } else if (lowerValue.startsWith(term)) {
+                                score += primaryFields.includes(field) ? 80 : 40;
+                                matchedFields.push(field);
+                            } else if (lowerValue.includes(term)) {
+                                score += primaryFields.includes(field) ? 60 : 30;
+                                matchedFields.push(field);
+                            }
+                        });
+                    } else if (value && typeof value === 'number') {
+                        if (value.toString().includes(searchTerm)) {
+                            score += 20;
+                            matchedFields.push(field);
+                        }
+                    } else if (value && Array.isArray(value)) {
+                        value.forEach(v => {
+                            if (typeof v === 'string' && v.toLowerCase().includes(searchTerm)) {
+                                score += 25;
+                                matchedFields.push(field);
+                            }
+                        });
+                    }
+                });
+                
+                return { score, matchedFields: [...new Set(matchedFields)] };
+            }
 
-            // Search Team Members - with null/undefined checks
+            let allResults = [];
+
+            // Search Team Members
             if (appState.data.team && Array.isArray(appState.data.team)) {
                 appState.data.team.forEach(member => {
-                    try {
-                        if ((member.name && member.name.toLowerCase().includes(searchTerm)) ||
-                            (member.email && member.email.toLowerCase().includes(searchTerm)) ||
-                            (member.role && member.role.toLowerCase().includes(searchTerm)) ||
-                            (member.department && member.department.toLowerCase().includes(searchTerm)) ||
-                            (member.phone && member.phone.toLowerCase().includes(searchTerm)) ||
-                            (member.location && member.location.toLowerCase().includes(searchTerm)) ||
-                            (member.status && member.status.toLowerCase().includes(searchTerm))) {
-                            results.team.push(member);
-                        }
-                    } catch (e) {
-                        console.warn('Error searching team member:', e);
+                    const { score, matchedFields } = calculateRelevance(member, 
+                        ['name', 'email', 'role', 'department', 'phone', 'location', 'status', 'bio', 'skills'],
+                        ['name', 'email', 'role']);
+                    if (score > 0) {
+                        allResults.push({ type: 'team', item: member, score, matchedFields, 
+                            icon: '👨‍💼', label: 'Team Member', section: 'team' });
                     }
                 });
             }
 
-            // Search Contacts - with null/undefined checks
+            // Search Contacts
             if (appState.data.contacts && Array.isArray(appState.data.contacts)) {
                 appState.data.contacts.forEach(contact => {
-                    try {
-                        if ((contact.name && contact.name.toLowerCase().includes(searchTerm)) ||
-                            (contact.email && contact.email.toLowerCase().includes(searchTerm)) ||
-                            (contact.company && contact.company.toLowerCase().includes(searchTerm)) ||
-                            (contact.phone && contact.phone.toLowerCase().includes(searchTerm)) ||
-                            (contact.status && contact.status.toLowerCase().includes(searchTerm)) ||
-                            (contact.source && contact.source.toLowerCase().includes(searchTerm))) {
-                            results.contacts.push(contact);
-                        }
-                    } catch (e) {
-                        console.warn('Error searching contact:', e);
+                    const { score, matchedFields } = calculateRelevance(contact, 
+                        ['name', 'firstName', 'lastName', 'email', 'company', 'phone', 'status', 'source', 'type', 'notes', 'tags'],
+                        ['name', 'email', 'company']);
+                    if (score > 0) {
+                        allResults.push({ type: 'contact', item: contact, score, matchedFields,
+                            icon: '👥', label: 'Contact', section: 'crm' });
                     }
                 });
             }
 
-            // Search Divisions - with null/undefined checks
+            // Search Gantt Projects
+            if (appState.data.ganttProjects && Array.isArray(appState.data.ganttProjects)) {
+                appState.data.ganttProjects.forEach(project => {
+                    const { score, matchedFields } = calculateRelevance(project, 
+                        ['name', 'description', 'division', 'status', 'assignee', 'notes'],
+                        ['name', 'description']);
+                    if (score > 0) {
+                        allResults.push({ type: 'project', item: project, score, matchedFields,
+                            icon: '📐', label: 'Gantt Project', section: 'gantt-projects' });
+                    }
+                    // Also search tasks within projects
+                    if (project.tasks && Array.isArray(project.tasks)) {
+                        project.tasks.forEach(task => {
+                            const taskScore = calculateRelevance(task, ['name', 'assignee'], ['name']);
+                            if (taskScore.score > 0) {
+                                allResults.push({ type: 'projectTask', item: { ...task, projectName: project.name, projectId: project.id }, 
+                                    score: taskScore.score, matchedFields: taskScore.matchedFields,
+                                    icon: '📋', label: 'Project Task', section: 'gantt-projects' });
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Search Divisions
             if (appState.data.divisions && Array.isArray(appState.data.divisions)) {
-                appState.data.divisions.forEach(division => {
-                    try {
-                        if ((division.name && division.name.toLowerCase().includes(searchTerm)) ||
-                            (division.fullName && division.fullName.toLowerCase().includes(searchTerm)) ||
-                            (division.description && division.description.toLowerCase().includes(searchTerm)) ||
-                            (division.type && division.type.toLowerCase().includes(searchTerm)) ||
-                            (division.status && division.status.toLowerCase().includes(searchTerm))) {
-                            results.divisions.push(division);
-                        }
-                    } catch (e) {
-                        console.warn('Error searching division:', e);
+                appState.data.divisions.forEach((division, index) => {
+                    const { score, matchedFields } = calculateRelevance(division, 
+                        ['name', 'fullName', 'description', 'type', 'status'],
+                        ['name', 'fullName']);
+                    if (score > 0) {
+                        allResults.push({ type: 'division', item: { ...division, index }, score, matchedFields,
+                            icon: '🏢', label: 'Division', section: 'divisions' });
                     }
                 });
             }
 
-            // Search Tasks - with null/undefined checks
+            // Search Tasks
             if (appState.data.tasks && Array.isArray(appState.data.tasks)) {
                 appState.data.tasks.forEach(task => {
-                    try {
-                        if ((task.title && task.title.toLowerCase().includes(searchTerm)) ||
-                            (task.description && task.description.toLowerCase().includes(searchTerm)) ||
-                            (task.assignee && task.assignee.toLowerCase().includes(searchTerm)) ||
-                            (task.status && task.status.toLowerCase().includes(searchTerm)) ||
-                            (task.priority && task.priority.toLowerCase().includes(searchTerm))) {
-                            results.tasks.push(task);
-                        }
-                    } catch (e) {
-                        console.warn('Error searching task:', e);
+                    const { score, matchedFields } = calculateRelevance(task, 
+                        ['title', 'description', 'assignee', 'status', 'priority'],
+                        ['title', 'description']);
+                    if (score > 0) {
+                        allResults.push({ type: 'task', item: task, score, matchedFields,
+                            icon: '✅', label: 'Task', section: 'tasks' });
                     }
                 });
             }
 
-            // Search Campaigns - with null/undefined checks
+            // Search Campaigns
             if (appState.data.campaigns && Array.isArray(appState.data.campaigns)) {
                 appState.data.campaigns.forEach(campaign => {
-                    try {
-                        if ((campaign.name && campaign.name.toLowerCase().includes(searchTerm)) ||
-                            (campaign.channel && campaign.channel.toLowerCase().includes(searchTerm)) ||
-                            (campaign.status && campaign.status.toLowerCase().includes(searchTerm))) {
-                            results.campaigns.push(campaign);
-                        }
-                    } catch (e) {
-                        console.warn('Error searching campaign:', e);
+                    const { score, matchedFields } = calculateRelevance(campaign, 
+                        ['name', 'channel', 'status', 'description'],
+                        ['name']);
+                    if (score > 0) {
+                        allResults.push({ type: 'campaign', item: campaign, score, matchedFields,
+                            icon: '📢', label: 'Campaign', section: 'marketing' });
                     }
                 });
             }
 
-            // Search Deals - with null/undefined checks
+            // Search Deals
             if (appState.data.deals && Array.isArray(appState.data.deals)) {
                 appState.data.deals.forEach(deal => {
-                    try {
-                        if ((deal.name && deal.name.toLowerCase().includes(searchTerm)) ||
-                            (deal.company && deal.company.toLowerCase().includes(searchTerm)) ||
-                            (deal.status && deal.status.toLowerCase().includes(searchTerm))) {
-                            results.deals.push(deal);
-                        }
-                    } catch (e) {
-                        console.warn('Error searching deal:', e);
+                    const { score, matchedFields } = calculateRelevance(deal, 
+                        ['name', 'company', 'contact', 'stage', 'status'],
+                        ['name', 'company']);
+                    if (score > 0) {
+                        allResults.push({ type: 'deal', item: deal, score, matchedFields,
+                            icon: '💰', label: 'Deal', section: 'deals' });
                     }
                 });
             }
 
-            // Search Notes - with null/undefined checks
+            // Search Notes
             if (appState.data.notes && Array.isArray(appState.data.notes)) {
                 appState.data.notes.forEach(note => {
-                    try {
-                        if ((note.title && note.title.toLowerCase().includes(searchTerm)) ||
-                            (note.content && note.content.toLowerCase().includes(searchTerm)) ||
-                            (note.category && note.category.toLowerCase().includes(searchTerm)) ||
-                            (note.author && note.author.toLowerCase().includes(searchTerm))) {
-                            results.notes.push(note);
-                        }
-                    } catch (e) {
-                        console.warn('Error searching note:', e);
+                    const { score, matchedFields } = calculateRelevance(note, 
+                        ['title', 'content', 'category', 'author', 'tags'],
+                        ['title', 'content']);
+                    if (score > 0) {
+                        allResults.push({ type: 'note', item: note, score, matchedFields,
+                            icon: '📝', label: 'Note', section: 'notes' });
                     }
                 });
             }
 
-            // Search Events - with null/undefined checks
+            // Search Events
             if (appState.data.events && Array.isArray(appState.data.events)) {
                 appState.data.events.forEach(event => {
-                    try {
-                        if ((event.title && event.title.toLowerCase().includes(searchTerm)) ||
-                            (event.location && event.location.toLowerCase().includes(searchTerm)) ||
-                            (event.description && event.description.toLowerCase().includes(searchTerm))) {
-                            results.events.push(event);
-                        }
-                    } catch (e) {
-                        console.warn('Error searching event:', e);
+                    const { score, matchedFields } = calculateRelevance(event, 
+                        ['title', 'location', 'description', 'type'],
+                        ['title']);
+                    if (score > 0) {
+                        allResults.push({ type: 'event', item: event, score, matchedFields,
+                            icon: '📅', label: 'Event', section: 'calendar' });
                     }
                 });
             }
 
-            // Search Transactions - with null/undefined checks
+            // Search Transactions
             if (appState.data.transactions && Array.isArray(appState.data.transactions)) {
                 appState.data.transactions.forEach(transaction => {
-                    try {
-                        if ((transaction.description && transaction.description.toLowerCase().includes(searchTerm)) ||
-                            (transaction.vendor && transaction.vendor.toLowerCase().includes(searchTerm)) ||
-                            (transaction.category && transaction.category.toLowerCase().includes(searchTerm)) ||
-                            (transaction.amount && transaction.amount.toString().includes(searchTerm))) {
-                            results.transactions.push(transaction);
-                        }
-                    } catch (e) {
-                        console.warn('Error searching transaction:', e);
+                    const { score, matchedFields } = calculateRelevance(transaction, 
+                        ['description', 'vendor', 'category', 'type', 'paymentMethod'],
+                        ['description', 'vendor']);
+                    if (score > 0) {
+                        allResults.push({ type: 'transaction', item: transaction, score, matchedFields,
+                            icon: '💳', label: 'Transaction', section: 'transactions' });
                     }
                 });
             }
 
-            // Search Vendors - with null/undefined checks
+            // Search Vendors
             if (appState.data.vendors && Array.isArray(appState.data.vendors)) {
                 appState.data.vendors.forEach(vendor => {
-                    try {
-                        if ((vendor.name && vendor.name.toLowerCase().includes(searchTerm)) ||
-                            (vendor.type && vendor.type.toLowerCase().includes(searchTerm)) ||
-                            (vendor.contact && vendor.contact.toLowerCase().includes(searchTerm)) ||
-                            (vendor.status && vendor.status.toLowerCase().includes(searchTerm))) {
-                            results.vendors.push(vendor);
-                        }
-                    } catch (e) {
-                        console.warn('Error searching vendor:', e);
+                    const { score, matchedFields } = calculateRelevance(vendor, 
+                        ['name', 'type', 'contact', 'status', 'contract'],
+                        ['name', 'type']);
+                    if (score > 0) {
+                        allResults.push({ type: 'vendor', item: vendor, score, matchedFields,
+                            icon: '🏪', label: 'Vendor', section: 'vendors' });
                     }
                 });
             }
 
-            // Calculate total results
-            const totalResults = Object.values(results).reduce((sum, arr) => sum + arr.length, 0);
+            // Search Invoices
+            if (appState.data.invoices && Array.isArray(appState.data.invoices)) {
+                appState.data.invoices.forEach(invoice => {
+                    const { score, matchedFields } = calculateRelevance(invoice, 
+                        ['customer', 'status', 'number'],
+                        ['customer']);
+                    if (score > 0) {
+                        allResults.push({ type: 'invoice', item: invoice, score, matchedFields,
+                            icon: '🧾', label: 'Invoice', section: 'invoices' });
+                    }
+                });
+            }
+
+            // Search Alerts
+            if (appState.data.alerts && Array.isArray(appState.data.alerts)) {
+                appState.data.alerts.forEach(alert => {
+                    const { score, matchedFields } = calculateRelevance(alert, 
+                        ['title', 'message', 'type', 'priority'],
+                        ['title', 'message']);
+                    if (score > 0) {
+                        allResults.push({ type: 'alert', item: alert, score, matchedFields,
+                            icon: '🔔', label: 'Alert', section: 'alerts' });
+                    }
+                });
+            }
+
+            // Search Developers
+            if (appState.data.developers && Array.isArray(appState.data.developers)) {
+                appState.data.developers.forEach(dev => {
+                    const { score, matchedFields } = calculateRelevance(dev, 
+                        ['name', 'role', 'email', 'currentProject', 'status', 'skills', 'specializations'],
+                        ['name', 'role', 'currentProject']);
+                    if (score > 0) {
+                        allResults.push({ type: 'developer', item: dev, score, matchedFields,
+                            icon: '💻', label: 'Developer', section: 'developers' });
+                    }
+                });
+            }
+
+            // Search Strategic Goals
+            if (appState.data.strategicGoals && Array.isArray(appState.data.strategicGoals)) {
+                appState.data.strategicGoals.forEach(goal => {
+                    const { score, matchedFields } = calculateRelevance(goal, 
+                        ['title', 'description', 'category', 'status', 'owner'],
+                        ['title', 'description']);
+                    if (score > 0) {
+                        allResults.push({ type: 'goal', item: goal, score, matchedFields,
+                            icon: '🎯', label: 'Strategic Goal', section: 'strategic-planning' });
+                    }
+                });
+            }
+
+            // Search Business Units
+            if (appState.data.businessUnits && Array.isArray(appState.data.businessUnits)) {
+                appState.data.businessUnits.forEach(unit => {
+                    const { score, matchedFields } = calculateRelevance(unit, 
+                        ['name', 'description', 'type', 'status', 'manager'],
+                        ['name', 'description']);
+                    if (score > 0) {
+                        allResults.push({ type: 'businessUnit', item: unit, score, matchedFields,
+                            icon: '🏛️', label: 'Business Unit', section: 'strategic-planning' });
+                    }
+                });
+            }
+
+            // Search Customers
+            if (appState.data.customers && Array.isArray(appState.data.customers)) {
+                appState.data.customers.forEach(customer => {
+                    const { score, matchedFields } = calculateRelevance(customer, 
+                        ['name', 'email', 'company', 'phone', 'status', 'industry'],
+                        ['name', 'email', 'company']);
+                    if (score > 0) {
+                        allResults.push({ type: 'customer', item: customer, score, matchedFields,
+                            icon: '🧑‍💼', label: 'Customer', section: 'crm' });
+                    }
+                });
+            }
+
+            // Sort by relevance score (highest first)
+            allResults.sort((a, b) => b.score - a.score);
+
+            // Limit to top 50 results
+            const topResults = allResults.slice(0, 50);
+            const totalResults = allResults.length;
 
             if (totalResults === 0) {
                 searchResults.innerHTML = `
@@ -14584,165 +14670,223 @@ ${dev.name} (${dev.role})
                         <h3 style="color: var(--text-muted); font-weight: 600; margin-bottom: 12px;">No Results Found</h3>
                         <p style="color: var(--text-secondary); font-size: 14px;">No matches for "<strong>${query}</strong>"</p>
                         <p style="color: var(--text-muted); font-size: 13px; margin-top: 12px;">Try different keywords or check your spelling</p>
+                        <div style="margin-top: 24px;">
+                            <button class="btn-secondary" onclick="document.getElementById('globalSearchInput').value=''; performGlobalSearch('');">Clear Search</button>
+                        </div>
                     </div>
                 `;
                 return;
             }
 
-            // Display Results
+            // Group results by type
+            const groupedResults = {};
+            topResults.forEach(result => {
+                if (!groupedResults[result.type]) {
+                    groupedResults[result.type] = [];
+                }
+                groupedResults[result.type].push(result);
+            });
+
+            // Build results HTML
             let resultsHTML = `
                 <div style="margin-bottom: 20px; padding: 16px; background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(124,92,255,0.1)); border-radius: 12px; border: 1px solid var(--glass-border);">
-                    <div style="font-size: 18px; font-weight: 700; color: var(--accent-primary);">
-                        Found ${totalResults} result${totalResults !== 1 ? 's' : ''} for "${query}"
-                    </div>
-                    <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
-                        Searching from first character • Real-time results
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <div style="font-size: 18px; font-weight: 700; color: var(--accent-primary);">
+                                Found ${totalResults} result${totalResults !== 1 ? 's' : ''} for "${query}"
+                            </div>
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+                                Ranked by relevance • Showing top ${topResults.length}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            ${Object.keys(groupedResults).map(type => {
+                                const count = groupedResults[type].length;
+                                const { icon } = groupedResults[type][0];
+                                return `<span class="badge badge-info" style="font-size: 11px;">${icon} ${count}</span>`;
+                            }).join('')}
+                        </div>
                     </div>
                 </div>
             `;
 
-            // Team Members Results
-            if (results.team.length > 0) {
+            // Render each group
+            const typeOrder = ['team', 'contact', 'customer', 'project', 'projectTask', 'division', 'task', 'deal', 
+                              'campaign', 'developer', 'goal', 'businessUnit', 'note', 'event', 'transaction', 'vendor', 'invoice', 'alert'];
+            
+            typeOrder.forEach(type => {
+                if (!groupedResults[type] || groupedResults[type].length === 0) return;
+                
+                const results = groupedResults[type];
+                const { icon, label, section } = results[0];
+                
                 resultsHTML += `
                     <div class="card" style="margin-bottom: 20px;">
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                            <span style="font-size: 28px;">👨‍💼</span>
-                            <div>
-                                <div class="card-title" style="margin-bottom: 4px;">Team Members</div>
-                                <div style="font-size: 13px; color: var(--text-muted);">${results.team.length} result${results.team.length !== 1 ? 's' : ''}</div>
-                            </div>
-                        </div>
-                        <div style="display: grid; gap: 12px;">
-                            ${results.team.map(member => `
-                                <div onclick="switchSection('team'); setTimeout(() => viewTeamMemberDetails(${member.id}), 100);" 
-                                     style="padding: 16px; background: var(--bg-glass); border: 1px solid var(--glass-border); border-radius: 12px; cursor: pointer; transition: all 0.3s ease;"
-                                     onmouseover="this.style.transform='translateX(4px)'; this.style.borderColor='var(--accent-primary)'"
-                                     onmouseout="this.style.transform='translateX(0)'; this.style.borderColor='var(--glass-border)'">
-                                    <div style="display: flex; align-items: center; gap: 16px;">
-                                        <div style="font-size: 40px;">${member.avatar || '👤'}</div>
-                                        <div style="flex: 1;">
-                                            <div style="font-weight: 700; font-size: 16px; margin-bottom: 4px;">${member.name}</div>
-                                            <div style="font-size: 13px; color: var(--accent-primary); margin-bottom: 4px;">${member.role}</div>
-                                            <div style="font-size: 12px; color: var(--text-muted);">
-                                                📧 ${member.email} • 📱 ${member.phone || 'Not set'}
-                                            </div>
-                                        </div>
-                                        <span class="badge badge-success">${member.status}</span>
-                                    </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 28px;">${icon}</span>
+                                <div>
+                                    <div class="card-title" style="margin-bottom: 2px;">${label}s</div>
+                                    <div style="font-size: 12px; color: var(--text-muted);">${results.length} result${results.length !== 1 ? 's' : ''}</div>
                                 </div>
-                            `).join('')}
+                            </div>
+                            <button class="btn-secondary" style="font-size: 12px; padding: 6px 12px;" onclick="switchSection('${section}')">
+                                View All →
+                            </button>
+                        </div>
+                        <div style="display: grid; gap: 10px;">
+                            ${results.slice(0, 5).map(result => renderSearchResultItem(result)).join('')}
+                            ${results.length > 5 ? `
+                                <div style="text-align: center; padding: 8px; color: var(--text-muted); font-size: 12px;">
+                                    +${results.length - 5} more results in this category
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
                 `;
-            }
-
-            // Contacts Results
-            if (results.contacts.length > 0) {
-                resultsHTML += `
-                    <div class="card" style="margin-bottom: 20px;">
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                            <span style="font-size: 28px;">👥</span>
-                            <div>
-                                <div class="card-title" style="margin-bottom: 4px;">CRM Contacts</div>
-                                <div style="font-size: 13px; color: var(--text-muted);">${results.contacts.length} result${results.contacts.length !== 1 ? 's' : ''}</div>
-                            </div>
-                        </div>
-                        <div style="display: grid; gap: 12px;">
-                            ${results.contacts.map(contact => `
-                                <div onclick="switchSection('crm'); setTimeout(() => showContactDetails(${contact.id}), 100);"
-                                     style="padding: 16px; background: var(--bg-glass); border: 1px solid var(--glass-border); border-radius: 12px; cursor: pointer; transition: all 0.3s ease;"
-                                     onmouseover="this.style.transform='translateX(4px)'; this.style.borderColor='var(--accent-primary)'"
-                                     onmouseout="this.style.transform='translateX(0)'; this.style.borderColor='var(--glass-border)'">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <div>
-                                            <div style="font-weight: 700; font-size: 16px; margin-bottom: 4px;">${contact.name}</div>
-                                            <div style="font-size: 13px; color: var(--accent-tertiary); margin-bottom: 4px;">${contact.company || 'No company'}</div>
-                                            <div style="font-size: 12px; color: var(--text-muted);">
-                                                📧 ${contact.email} • $${contact.value.toLocaleString()} value
-                                            </div>
-                                        </div>
-                                        <span class="badge ${contact.status === 'Customer' ? 'badge-success' : 'badge-warning'}">${contact.status}</span>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Divisions Results
-            if (results.divisions.length > 0) {
-                resultsHTML += `
-                    <div class="card" style="margin-bottom: 20px;">
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                            <span style="font-size: 28px;">🏢</span>
-                            <div>
-                                <div class="card-title" style="margin-bottom: 4px;">Business Divisions</div>
-                                <div style="font-size: 13px; color: var(--text-muted);">${results.divisions.length} result${results.divisions.length !== 1 ? 's' : ''}</div>
-                            </div>
-                        </div>
-                        <div style="display: grid; gap: 12px;">
-                            ${results.divisions.map((division, index) => `
-                                <div onclick="switchSection('divisions'); setTimeout(() => viewDivisionDetails(${index}), 100);"
-                                     style="padding: 16px; background: var(--bg-glass); border: 1px solid var(--glass-border); border-radius: 12px; cursor: pointer; transition: all 0.3s ease;"
-                                     onmouseover="this.style.transform='translateX(4px)'; this.style.borderColor='var(--accent-primary)'"
-                                     onmouseout="this.style.transform='translateX(0)'; this.style.borderColor='var(--glass-border)'">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <div>
-                                            <div style="font-weight: 700; font-size: 16px; margin-bottom: 4px;">${division.name}</div>
-                                            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">${division.description}</div>
-                                            <div style="font-size: 12px; color: var(--text-muted);">
-                                                Revenue: $${(division.revenue/1000).toFixed(1)}K • ${division.employees} employees
-                                            </div>
-                                        </div>
-                                        <span class="badge badge-success">${division.status}</span>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Tasks Results (keeping it shorter to manage token usage)
-            if (results.tasks.length > 0) {
-                resultsHTML += `
-                    <div class="card" style="margin-bottom: 20px;">
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                            <span style="font-size: 28px;">✅</span>
-                            <div>
-                                <div class="card-title" style="margin-bottom: 4px;">Tasks</div>
-                                <div style="font-size: 13px; color: var(--text-muted);">${results.tasks.length} result${results.tasks.length !== 1 ? 's' : ''}</div>
-                            </div>
-                        </div>
-                        <div style="display: grid; gap: 12px;">
-                            ${results.tasks.map(task => `
-                                <div onclick="switchSection('tasks');"
-                                     style="padding: 16px; background: var(--bg-glass); border: 1px solid var(--glass-border); border-radius: 12px; cursor: pointer; transition: all 0.3s ease;"
-                                     onmouseover="this.style.transform='translateX(4px)'; this.style.borderColor='var(--accent-primary)'"
-                                     onmouseout="this.style.transform='translateX(0)'; this.style.borderColor='var(--glass-border)'">
-                                    <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">${task.title}</div>
-                                    <div style="font-size: 12px; color: var(--text-muted);">
-                                        Assigned to: ${task.assignee || 'Unassigned'} • Due: ${task.dueDate || 'No due date'}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Add other categories similarly...
-            if (results.campaigns.length > 0 || results.deals.length > 0 || results.notes.length > 0 || 
-                results.events.length > 0 || results.transactions.length > 0 || results.vendors.length > 0) {
-                resultsHTML += `<div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px;">
-                    ${results.campaigns.length} campaigns, ${results.deals.length} deals, ${results.notes.length} notes, 
-                    ${results.events.length} events, ${results.transactions.length} transactions, ${results.vendors.length} vendors
-                </div>`;
-            }
+            });
 
             searchResults.innerHTML = resultsHTML;
         }
+
+        function renderSearchResultItem(result) {
+            const { type, item, score, matchedFields, section } = result;
+            
+            let clickHandler = `switchSection('${section}')`;
+            let subtitle = '';
+            let badges = '';
+            let title = '';
+            
+            switch(type) {
+                case 'team':
+                    clickHandler = `switchSection('team'); setTimeout(() => viewTeamMemberDetails(${item.id}), 100)`;
+                    title = item.name || 'Unknown';
+                    subtitle = `${item.role || 'No role'} • ${item.department || 'No department'} • ${item.email || ''}`;
+                    badges = `<span class="badge ${item.status === 'Active' ? 'badge-success' : 'badge-warning'}">${item.status || 'Unknown'}</span>`;
+                    break;
+                case 'contact':
+                case 'customer':
+                    clickHandler = `switchSection('crm'); setTimeout(() => showContactDetails(${item.id}), 100)`;
+                    title = item.name || 'Unknown';
+                    subtitle = `${item.company || 'No company'} • ${item.email || ''} • $${(item.value || 0).toLocaleString()}`;
+                    badges = `<span class="badge ${item.status === 'Customer' ? 'badge-success' : 'badge-warning'}">${item.status || 'Unknown'}</span>`;
+                    break;
+                case 'project':
+                    clickHandler = `switchSection('gantt-projects'); setTimeout(() => drilldownGanttProject(${item.id}), 100)`;
+                    title = item.name || 'Unknown';
+                    subtitle = `${item.division || 'No division'} • ${item.assignee || 'Unassigned'} • ${item.progress || 0}% complete`;
+                    badges = `<span class="badge ${item.status === 'Completed' ? 'badge-success' : item.status === 'In Progress' ? 'badge-warning' : 'badge-info'}">${item.status || 'Unknown'}</span>`;
+                    break;
+                case 'projectTask':
+                    clickHandler = `switchSection('gantt-projects'); setTimeout(() => drilldownGanttProject(${item.projectId}), 100)`;
+                    title = item.name || 'Unknown';
+                    subtitle = `Project: ${item.projectName} • ${item.assignee || 'Unassigned'} • ${item.progress || 0}% complete`;
+                    break;
+                case 'division':
+                    clickHandler = `switchSection('divisions'); setTimeout(() => viewDivisionDetails(${item.index}), 100)`;
+                    title = item.name || 'Unknown';
+                    subtitle = `${item.description || ''} • Revenue: $${((item.revenue || 0)/1000).toFixed(1)}K`;
+                    badges = `<span class="badge badge-success">${item.status || 'Active'}</span>`;
+                    break;
+                case 'task':
+                    clickHandler = `switchSection('tasks'); setTimeout(() => drilldownTask(${item.id}), 100)`;
+                    title = item.title || 'Unknown';
+                    subtitle = `${item.assignee || 'Unassigned'} • Due: ${item.dueDate || 'No date'}`;
+                    badges = `<span class="badge ${item.status === 'Completed' ? 'badge-success' : item.status === 'In Progress' ? 'badge-warning' : 'badge-info'}">${item.status || 'Unknown'}</span>
+                              <span class="badge ${item.priority === 'High' ? 'badge-danger' : item.priority === 'Medium' ? 'badge-warning' : 'badge-info'}">${item.priority || 'Normal'}</span>`;
+                    break;
+                case 'deal':
+                    clickHandler = `switchSection('deals')`;
+                    title = item.name || 'Unknown';
+                    subtitle = `${item.company || 'No company'} • $${(item.value || 0).toLocaleString()} • ${item.stage || 'Unknown stage'}`;
+                    badges = `<span class="badge badge-success">${item.probability || 0}% probability</span>`;
+                    break;
+                case 'campaign':
+                    clickHandler = `switchSection('marketing')`;
+                    title = item.name || 'Unknown';
+                    subtitle = `${item.channel || 'Unknown channel'} • Budget: $${(item.budget || 0).toLocaleString()}`;
+                    badges = `<span class="badge ${item.status === 'Active' ? 'badge-success' : 'badge-warning'}">${item.status || 'Unknown'}</span>`;
+                    break;
+                case 'note':
+                    clickHandler = `switchSection('notes')`;
+                    title = item.title || 'Unknown';
+                    subtitle = `${item.category || 'General'} • ${item.content ? item.content.substring(0, 80) + '...' : ''}`;
+                    break;
+                case 'event':
+                    clickHandler = `switchSection('calendar')`;
+                    title = item.title || 'Unknown';
+                    subtitle = `${item.date || ''} ${item.time || ''} • ${item.location || 'No location'}`;
+                    badges = `<span class="badge badge-info">${item.type || 'Event'}</span>`;
+                    break;
+                case 'transaction':
+                    clickHandler = `switchSection('transactions')`;
+                    title = item.description || 'Unknown';
+                    subtitle = `${item.vendor || 'Unknown'} • ${item.category || ''} • $${Math.abs(item.amount || 0).toLocaleString()}`;
+                    badges = `<span class="badge ${item.type === 'income' ? 'badge-success' : 'badge-danger'}">${item.type || 'Unknown'}</span>`;
+                    break;
+                case 'vendor':
+                    clickHandler = `switchSection('vendors'); setTimeout(() => editVendor(${item.id}), 100)`;
+                    title = item.name || 'Unknown';
+                    subtitle = `${item.type || 'Unknown type'} • $${(item.cost || 0).toLocaleString()}/mo • ${item.contract || ''}`;
+                    badges = `<span class="badge ${item.status === 'Active' ? 'badge-success' : 'badge-warning'}">${item.status || 'Unknown'}</span>`;
+                    break;
+                case 'invoice':
+                    clickHandler = `switchSection('invoices')`;
+                    title = `Invoice #${item.number || item.id}`;
+                    subtitle = `${item.customer || 'Unknown'} • $${(item.amount || 0).toLocaleString()}`;
+                    badges = `<span class="badge ${item.status === 'Paid' ? 'badge-success' : item.status === 'Sent' ? 'badge-warning' : 'badge-info'}">${item.status || 'Unknown'}</span>`;
+                    break;
+                case 'alert':
+                    clickHandler = `switchSection('alerts')`;
+                    title = item.title || 'Unknown';
+                    subtitle = item.message || '';
+                    badges = `<span class="badge ${item.priority === 'High' ? 'badge-danger' : item.priority === 'Medium' ? 'badge-warning' : 'badge-info'}">${item.priority || 'Normal'}</span>`;
+                    break;
+                case 'developer':
+                    clickHandler = `switchSection('developers'); setTimeout(() => viewDeveloperProfile(${item.id}), 100)`;
+                    title = item.name || 'Unknown';
+                    subtitle = `${item.role || 'Developer'} • ${item.currentProject || 'No project'} • ${item.email || ''}`;
+                    badges = `<span class="badge ${item.status === 'Active' ? 'badge-success' : 'badge-warning'}">${item.status || 'Unknown'}</span>`;
+                    break;
+                case 'goal':
+                    clickHandler = `switchSection('strategic-planning')`;
+                    title = item.title || 'Unknown';
+                    subtitle = `${item.category || ''} • ${item.owner || 'Unassigned'} • ${item.progress || 0}%`;
+                    badges = `<span class="badge ${item.status === 'On Track' ? 'badge-success' : item.status === 'At Risk' ? 'badge-danger' : 'badge-warning'}">${item.status || 'Unknown'}</span>`;
+                    break;
+                case 'businessUnit':
+                    clickHandler = `switchSection('strategic-planning')`;
+                    title = item.name || 'Unknown';
+                    subtitle = `${item.description || ''} • ${item.manager || 'No manager'}`;
+                    badges = `<span class="badge badge-success">${item.status || 'Active'}</span>`;
+                    break;
+                default:
+                    title = item.name || item.title || 'Unknown';
+            }
+
+            const matchIndicator = matchedFields.length > 0 ? 
+                `<div style="font-size: 10px; color: var(--accent-primary); margin-top: 4px;">Matched: ${matchedFields.join(', ')}</div>` : '';
+
+            return `
+                <div onclick="${clickHandler}"
+                     style="padding: 14px; background: var(--bg-glass); border: 1px solid var(--glass-border); border-radius: 10px; cursor: pointer; transition: all 0.2s ease;"
+                     onmouseover="this.style.transform='translateX(4px)'; this.style.borderColor='var(--accent-primary)'; this.style.background='rgba(110,231,183,0.05)'"
+                     onmouseout="this.style.transform='translateX(0)'; this.style.borderColor='var(--glass-border)'; this.style.background='var(--bg-glass)'">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${title}</div>
+                            <div style="font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${subtitle}</div>
+                            ${matchIndicator}
+                        </div>
+                        <div style="display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end;">
+                            ${badges}
+                            <span style="font-size: 10px; color: var(--text-muted); background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px;">${Math.round(score)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
 
         // INTEGRATIONS
         function renderIntegrations(container) {
