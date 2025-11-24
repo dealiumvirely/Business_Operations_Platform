@@ -1633,6 +1633,7 @@
                 channelBudgetHistory: {}, // NEW: Track budget spend history for marketing channels
                 mediaEvents: [], // NEW: Media & Events opportunities
                 launchPlans: [], // NEW: Launch plans by state/DMA
+                ganttProjects: [], // NEW: Gantt chart project timelines
                 mrr: { current: 284750, growth: 12.4, target: 300000 },
                 subscriptions: { active: 1847, growth: 8.3, churned: 23 },
                 customers: { total: 3245, new: 187, churned: 23, churn_rate: 2.8 },
@@ -2032,6 +2033,130 @@
                 { id: 14, type: 'danger', title: 'Critical Task Overdue', message: 'High priority task missed deadline', priority: 'Critical', date: '2025-11-12', read: false, enabled: true },
                 { id: 15, type: 'info', title: 'Team Expansion', message: 'New hire starts next Monday', priority: 'Low', date: '2025-11-12', read: false, enabled: true }
             ];
+
+            // GANTT PROJECTS - Project timeline and scheduling data
+            appState.data.ganttProjects = [
+                {
+                    id: 1,
+                    name: 'Dealsby.io API v2',
+                    description: 'Complete API refactoring with improved performance and new endpoints',
+                    division: 'Referrals',
+                    status: 'In Progress',
+                    priority: 'High',
+                    progress: 65,
+                    startDate: '2025-10-01',
+                    endDate: '2025-12-31',
+                    assignee: 'Mike Chen',
+                    team: ['Mike Chen', 'James Wilson'],
+                    color: '#6ee7b7',
+                    milestones: [
+                        { id: 1, name: 'Architecture Design', date: '2025-10-15', completed: true },
+                        { id: 2, name: 'Core Endpoints', date: '2025-11-15', completed: true },
+                        { id: 3, name: 'Integration Testing', date: '2025-12-01', completed: false },
+                        { id: 4, name: 'Production Deploy', date: '2025-12-31', completed: false }
+                    ],
+                    tasks: [
+                        { id: 1, name: 'Database schema update', startDate: '2025-10-01', endDate: '2025-10-15', progress: 100, assignee: 'Mike Chen' },
+                        { id: 2, name: 'API endpoint development', startDate: '2025-10-16', endDate: '2025-11-30', progress: 75, assignee: 'James Wilson' },
+                        { id: 3, name: 'Authentication module', startDate: '2025-11-01', endDate: '2025-11-20', progress: 90, assignee: 'Mike Chen' },
+                        { id: 4, name: 'Documentation', startDate: '2025-12-01', endDate: '2025-12-15', progress: 20, assignee: 'James Wilson' },
+                        { id: 5, name: 'Load testing', startDate: '2025-12-10', endDate: '2025-12-25', progress: 0, assignee: 'Mike Chen' }
+                    ],
+                    budget: 45000,
+                    spent: 28500,
+                    notes: 'On track for Q4 release. Performance improvements showing 35% gains.'
+                },
+                {
+                    id: 2,
+                    name: 'Q4 Marketing Campaign',
+                    description: 'Multi-channel marketing campaign for holiday season',
+                    division: 'Marketing',
+                    status: 'In Progress',
+                    priority: 'High',
+                    progress: 45,
+                    startDate: '2025-11-01',
+                    endDate: '2026-01-15',
+                    assignee: 'Emily Rodriguez',
+                    team: ['Emily Rodriguez', 'Sarah Johnson'],
+                    color: '#7c5cff',
+                    milestones: [
+                        { id: 1, name: 'Creative Assets Ready', date: '2025-11-15', completed: true },
+                        { id: 2, name: 'Campaign Launch', date: '2025-11-25', completed: false },
+                        { id: 3, name: 'Mid-Campaign Review', date: '2025-12-15', completed: false },
+                        { id: 4, name: 'Campaign Wrap-up', date: '2026-01-15', completed: false }
+                    ],
+                    tasks: [
+                        { id: 1, name: 'Creative development', startDate: '2025-11-01', endDate: '2025-11-15', progress: 100, assignee: 'Emily Rodriguez' },
+                        { id: 2, name: 'Ad platform setup', startDate: '2025-11-10', endDate: '2025-11-20', progress: 80, assignee: 'Emily Rodriguez' },
+                        { id: 3, name: 'Landing page optimization', startDate: '2025-11-15', endDate: '2025-11-25', progress: 50, assignee: 'James Wilson' },
+                        { id: 4, name: 'Email sequences', startDate: '2025-11-20', endDate: '2025-12-01', progress: 30, assignee: 'Emily Rodriguez' },
+                        { id: 5, name: 'Performance monitoring', startDate: '2025-11-25', endDate: '2026-01-15', progress: 0, assignee: 'Emily Rodriguez' }
+                    ],
+                    budget: 25000,
+                    spent: 12800,
+                    notes: 'Creative assets approved. Launching on schedule.'
+                },
+                {
+                    id: 3,
+                    name: 'Dealsby Reservations v2.0',
+                    description: 'Major feature update including AI-powered table recommendations',
+                    division: 'Reservations',
+                    status: 'Planning',
+                    priority: 'Medium',
+                    progress: 15,
+                    startDate: '2025-12-01',
+                    endDate: '2026-03-31',
+                    assignee: 'Mike Chen',
+                    team: ['Mike Chen', 'James Wilson', 'Sarah Johnson'],
+                    color: '#60a5fa',
+                    milestones: [
+                        { id: 1, name: 'Requirements Complete', date: '2025-12-15', completed: false },
+                        { id: 2, name: 'Design Approval', date: '2026-01-15', completed: false },
+                        { id: 3, name: 'Alpha Release', date: '2026-02-28', completed: false },
+                        { id: 4, name: 'Production Launch', date: '2026-03-31', completed: false }
+                    ],
+                    tasks: [
+                        { id: 1, name: 'Requirements gathering', startDate: '2025-12-01', endDate: '2025-12-15', progress: 60, assignee: 'Sarah Johnson' },
+                        { id: 2, name: 'UI/UX design', startDate: '2025-12-10', endDate: '2026-01-10', progress: 20, assignee: 'Emily Rodriguez' },
+                        { id: 3, name: 'AI model development', startDate: '2026-01-01', endDate: '2026-02-15', progress: 0, assignee: 'Mike Chen' },
+                        { id: 4, name: 'Backend integration', startDate: '2026-01-15', endDate: '2026-03-01', progress: 0, assignee: 'James Wilson' },
+                        { id: 5, name: 'Testing & QA', startDate: '2026-02-15', endDate: '2026-03-25', progress: 0, assignee: 'Mike Chen' }
+                    ],
+                    budget: 75000,
+                    spent: 8500,
+                    notes: 'Initial planning phase. Stakeholder interviews in progress.'
+                },
+                {
+                    id: 4,
+                    name: 'Mobile App Development',
+                    description: 'Native iOS and Android apps for Dealsby platform',
+                    division: 'Growth Suite',
+                    status: 'On Hold',
+                    priority: 'Low',
+                    progress: 5,
+                    startDate: '2026-01-15',
+                    endDate: '2026-06-30',
+                    assignee: 'James Wilson',
+                    team: ['James Wilson', 'Mike Chen'],
+                    color: '#fbbf24',
+                    milestones: [
+                        { id: 1, name: 'Tech Stack Decision', date: '2026-02-01', completed: false },
+                        { id: 2, name: 'iOS Beta', date: '2026-04-15', completed: false },
+                        { id: 3, name: 'Android Beta', date: '2026-05-15', completed: false },
+                        { id: 4, name: 'App Store Launch', date: '2026-06-30', completed: false }
+                    ],
+                    tasks: [
+                        { id: 1, name: 'Platform evaluation', startDate: '2026-01-15', endDate: '2026-02-01', progress: 25, assignee: 'James Wilson' },
+                        { id: 2, name: 'iOS development', startDate: '2026-02-01', endDate: '2026-04-15', progress: 0, assignee: 'James Wilson' },
+                        { id: 3, name: 'Android development', startDate: '2026-03-01', endDate: '2026-05-15', progress: 0, assignee: 'Mike Chen' },
+                        { id: 4, name: 'API integration', startDate: '2026-02-15', endDate: '2026-05-01', progress: 0, assignee: 'Mike Chen' },
+                        { id: 5, name: 'App store submission', startDate: '2026-05-15', endDate: '2026-06-30', progress: 0, assignee: 'James Wilson' }
+                    ],
+                    budget: 120000,
+                    spent: 0,
+                    notes: 'Pending completion of API v2 project before starting.'
+                }
+            ];
         }
 
         const navItems = [
@@ -2048,6 +2173,7 @@
             { id: 'media-events', icon: '📺', label: 'Media & Events' },
             { id: 'launch-plan', icon: '🚀', label: 'Launch Plan' },
             { id: 'strategic-planning', icon: '🎯', label: 'Strategic Planning' },
+            { id: 'gantt-projects', icon: '📐', label: 'Gantt Projects' },
             { id: 'vendors', icon: '🔧', label: 'Vendor Management' },
             { id: 'tasks', icon: '✅', label: 'Task Management' },
             { id: 'invoices', icon: '📄', label: 'Invoices & Billing' },
@@ -2321,6 +2447,7 @@
             ensureDataArray('invoices');
             ensureDataArray('alerts');
             ensureDataArray('recentActivity');
+            ensureDataArray('ganttProjects');
             
             renderNavigation();
             switchSection('dashboard');
@@ -2354,6 +2481,7 @@
                     deals: renderDeals,
                     marketing: renderMarketing,
                     'strategic-planning': renderStrategicPlanning,
+                    'gantt-projects': renderGanttProjects,
                     vendors: renderVendors,
                     tasks: renderTasks,
                     invoices: renderInvoices,
@@ -2561,6 +2689,7 @@
                 'media-events': renderMediaEvents,
                 'launch-plan': renderLaunchPlan,
                 'strategic-planning': renderStrategicPlanning,
+                'gantt-projects': renderGanttProjects,
                 vendors: renderVendors,
                 tasks: renderTasks,
                 invoices: renderInvoices,
@@ -2612,7 +2741,8 @@
                 'deals': '🎯 Sales Pipeline: Track deals through each stage to close more sales',
                 'marketing': '📢 Marketing Center: Launch campaigns and measure their effectiveness',
                 'team': '👥 Team Directory: Manage your team and track performance',
-                'reports': '📈 Comprehensive Reports: Generate insights across all business areas'
+                'reports': '📈 Comprehensive Reports: Generate insights across all business areas',
+                'gantt-projects': '📐 Gantt Projects: Visualize project timelines and track multiple projects concurrently'
             };
             
             if (guidanceMessages[section]) {
@@ -8827,6 +8957,1766 @@ Are you absolutely sure you want to delete this campaign?`;
                 switchSection('strategic-planning');
                 showToast('Strategic goal deleted');
             }
+        }
+
+        // ============================================
+        // GANTT PROJECTS - COMPREHENSIVE PROJECT TIMELINE MANAGEMENT
+        // ============================================
+        
+        // Gantt view state
+        const ganttState = {
+            viewMode: 'month', // 'week', 'month', 'quarter'
+            selectedProjects: [], // IDs of projects to show on timeline
+            currentDate: new Date(),
+            zoomLevel: 1,
+            showMilestones: true,
+            showTasks: true,
+            editMode: 'spreadsheet', // 'spreadsheet' or 'timeline'
+            // Drag state
+            isDragging: false,
+            dragType: null, // 'move', 'resize-left', 'resize-right'
+            dragProjectId: null,
+            dragTaskId: null,
+            dragStartX: 0,
+            dragStartDate: null,
+            dragEndDate: null,
+            dragDayWidth: 0,
+            dragDates: []
+        };
+
+        // Inject Gantt drag-drop CSS styles
+        const ganttDragStyles = document.createElement('style');
+        ganttDragStyles.textContent = `
+            .gantt-bar {
+                cursor: grab;
+                transition: box-shadow 0.2s, transform 0.1s;
+                user-select: none;
+            }
+            .gantt-bar:hover {
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                transform: translateY(-1px);
+            }
+            .gantt-bar.dragging {
+                cursor: grabbing;
+                opacity: 0.9;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+                z-index: 100;
+            }
+            .gantt-handle {
+                position: absolute;
+                top: 0;
+                width: 10px;
+                height: 100%;
+                cursor: ew-resize;
+                z-index: 10;
+                opacity: 0;
+                transition: opacity 0.2s, background 0.2s;
+            }
+            .gantt-bar:hover .gantt-handle {
+                opacity: 1;
+            }
+            .gantt-handle-left {
+                left: 0;
+                border-radius: 6px 0 0 6px;
+                background: linear-gradient(90deg, rgba(255,255,255,0.3), transparent);
+            }
+            .gantt-handle-right {
+                right: 0;
+                border-radius: 0 6px 6px 0;
+                background: linear-gradient(-90deg, rgba(255,255,255,0.3), transparent);
+            }
+            .gantt-handle:hover {
+                background: rgba(255,255,255,0.4);
+            }
+            .gantt-task-bar {
+                cursor: grab;
+                transition: box-shadow 0.2s;
+            }
+            .gantt-task-bar:hover {
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            }
+            .gantt-task-bar.dragging {
+                cursor: grabbing;
+                opacity: 0.9;
+            }
+            .gantt-date-tooltip {
+                position: fixed;
+                background: var(--bg-tertiary);
+                border: 1px solid var(--accent-primary);
+                padding: 8px 12px;
+                border-radius: 6px;
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--accent-primary);
+                z-index: 1000;
+                pointer-events: none;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            }
+        `;
+        document.head.appendChild(ganttDragStyles);
+
+        function renderGanttProjects(container) {
+            ensureDataArray('ganttProjects');
+            const projects = appState.data.ganttProjects || [];
+            
+            // Calculate project stats
+            const activeProjects = projects.filter(p => p.status === 'In Progress').length;
+            const completedProjects = projects.filter(p => p.status === 'Completed').length;
+            const totalBudget = projects.reduce((sum, p) => sum + (p.budget || 0), 0);
+            const totalSpent = projects.reduce((sum, p) => sum + (p.spent || 0), 0);
+            const avgProgress = projects.length > 0 ? Math.round(projects.reduce((sum, p) => sum + (p.progress || 0), 0) / projects.length) : 0;
+            
+            container.innerHTML = `
+                <!-- Stats Overview -->
+                <div class="data-grid" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 24px;">
+                    <div class="data-item" style="background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(110,231,183,0.05)); border-color: var(--accent-primary);">
+                        <div class="data-item-label">Total Projects</div>
+                        <div class="data-item-value" style="color: var(--accent-primary);">${projects.length}</div>
+                    </div>
+                    <div class="data-item" style="background: linear-gradient(135deg, rgba(124,92,255,0.1), rgba(124,92,255,0.05)); border-color: var(--accent-secondary);">
+                        <div class="data-item-label">Active</div>
+                        <div class="data-item-value" style="color: var(--accent-secondary);">${activeProjects}</div>
+                    </div>
+                    <div class="data-item" style="background: linear-gradient(135deg, rgba(74,222,128,0.1), rgba(74,222,128,0.05)); border-color: var(--success);">
+                        <div class="data-item-label">Completed</div>
+                        <div class="data-item-value" style="color: var(--success);">${completedProjects}</div>
+                    </div>
+                    <div class="data-item" style="background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(251,191,36,0.05)); border-color: var(--accent-gold);">
+                        <div class="data-item-label">Avg. Progress</div>
+                        <div class="data-item-value" style="color: var(--accent-gold);">${avgProgress}%</div>
+                    </div>
+                    <div class="data-item" style="background: linear-gradient(135deg, rgba(96,165,250,0.1), rgba(96,165,250,0.05)); border-color: var(--accent-tertiary);">
+                        <div class="data-item-label">Budget Used</div>
+                        <div class="data-item-value" style="color: var(--accent-tertiary);">$${totalSpent.toLocaleString()}</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">of $${totalBudget.toLocaleString()}</div>
+                    </div>
+                </div>
+
+                <!-- View Controls -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-weight: 600; color: var(--text-secondary);">View Mode:</span>
+                            <div style="display: flex; gap: 4px;">
+                                <button class="btn-secondary ${ganttState.editMode === 'timeline' ? 'active' : ''}" 
+                                        onclick="setGanttEditMode('timeline')" 
+                                        style="padding: 8px 16px; ${ganttState.editMode === 'timeline' ? 'background: var(--accent-primary); color: var(--bg-primary);' : ''}">
+                                    📊 Timeline
+                                </button>
+                                <button class="btn-secondary ${ganttState.editMode === 'spreadsheet' ? 'active' : ''}" 
+                                        onclick="setGanttEditMode('spreadsheet')"
+                                        style="padding: 8px 16px; ${ganttState.editMode === 'spreadsheet' ? 'background: var(--accent-primary); color: var(--bg-primary);' : ''}">
+                                    📋 Spreadsheet
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-weight: 600; color: var(--text-secondary);">Time Scale:</span>
+                            <div style="display: flex; gap: 4px;">
+                                <button class="btn-secondary ${ganttState.viewMode === 'week' ? 'active' : ''}" 
+                                        onclick="setGanttViewMode('week')"
+                                        style="padding: 8px 12px; ${ganttState.viewMode === 'week' ? 'background: var(--accent-secondary); color: white;' : ''}">Week</button>
+                                <button class="btn-secondary ${ganttState.viewMode === 'month' ? 'active' : ''}" 
+                                        onclick="setGanttViewMode('month')"
+                                        style="padding: 8px 12px; ${ganttState.viewMode === 'month' ? 'background: var(--accent-secondary); color: white;' : ''}">Month</button>
+                                <button class="btn-secondary ${ganttState.viewMode === 'quarter' ? 'active' : ''}" 
+                                        onclick="setGanttViewMode('quarter')"
+                                        style="padding: 8px 12px; ${ganttState.viewMode === 'quarter' ? 'background: var(--accent-secondary); color: white;' : ''}">Quarter</button>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn-secondary" onclick="navigateGanttTime(-1)" style="padding: 8px 12px;">◀ Prev</button>
+                            <button class="btn-secondary" onclick="navigateGanttTime(0)" style="padding: 8px 12px;">Today</button>
+                            <button class="btn-secondary" onclick="navigateGanttTime(1)" style="padding: 8px 12px;">Next ▶</button>
+                        </div>
+
+                        <div style="display: flex; gap: 8px;">
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="checkbox" ${ganttState.showMilestones ? 'checked' : ''} onchange="toggleGanttMilestones()" style="width: 16px; height: 16px;">
+                                <span style="font-size: 13px;">Milestones</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="checkbox" ${ganttState.showTasks ? 'checked' : ''} onchange="toggleGanttTasks()" style="width: 16px; height: 16px;">
+                                <span style="font-size: 13px;">Tasks</span>
+                            </label>
+                        </div>
+
+                        <button class="btn-primary" onclick="addGanttProject()" style="padding: 10px 20px;">
+                            ➕ Add Project
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div id="ganttMainContent">
+                    ${ganttState.editMode === 'timeline' ? renderGanttTimeline(projects) : renderGanttSpreadsheet(projects)}
+                </div>
+            `;
+        }
+
+        function setGanttEditMode(mode) {
+            ganttState.editMode = mode;
+            switchSection('gantt-projects');
+        }
+
+        function setGanttViewMode(mode) {
+            ganttState.viewMode = mode;
+            switchSection('gantt-projects');
+        }
+
+        function navigateGanttTime(direction) {
+            if (direction === 0) {
+                ganttState.currentDate = new Date();
+            } else {
+                const offset = ganttState.viewMode === 'week' ? 7 : ganttState.viewMode === 'month' ? 30 : 90;
+                ganttState.currentDate = new Date(ganttState.currentDate.getTime() + (direction * offset * 24 * 60 * 60 * 1000));
+            }
+            switchSection('gantt-projects');
+        }
+
+        function toggleGanttMilestones() {
+            ganttState.showMilestones = !ganttState.showMilestones;
+            switchSection('gantt-projects');
+        }
+
+        function toggleGanttTasks() {
+            ganttState.showTasks = !ganttState.showTasks;
+            switchSection('gantt-projects');
+        }
+
+        function renderGanttTimeline(projects) {
+            if (projects.length === 0) {
+                return `
+                    <div class="card" style="text-align: center; padding: 60px;">
+                        <div style="font-size: 64px; margin-bottom: 20px;">📐</div>
+                        <h3 style="margin-bottom: 12px;">No Projects Yet</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 20px;">Create your first project to see it on the Gantt timeline</p>
+                        <button class="btn-primary" onclick="addGanttProject()">➕ Create Project</button>
+                    </div>
+                `;
+            }
+
+            // Calculate date range
+            const { startDate, endDate, dates } = calculateGanttDateRange(projects);
+            const dayWidth = ganttState.viewMode === 'week' ? 40 : ganttState.viewMode === 'month' ? 20 : 8;
+            const totalWidth = dates.length * dayWidth;
+
+            return `
+                <!-- Drag & Drop Instructions -->
+                <div style="background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(124,92,255,0.05)); 
+                            border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px 16px; margin-bottom: 16px;
+                            display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                    <span style="font-size: 18px;">💡</span>
+                    <div style="flex: 1; min-width: 200px;">
+                        <div style="font-weight: 600; font-size: 13px; margin-bottom: 4px;">Interactive Timeline</div>
+                        <div style="font-size: 12px; color: var(--text-secondary);">
+                            <strong>Drag bar center</strong> to move dates • 
+                            <strong>Drag edges</strong> to resize • 
+                            <strong>Double-click</strong> to edit • 
+                            <strong>Click milestone</strong> ◇ to toggle completion
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card" style="overflow: hidden;">
+                    <div class="card-title" style="margin-bottom: 16px;">
+                        📊 Project Timeline 
+                        <span style="font-size: 12px; color: var(--text-muted); margin-left: 12px;">
+                            ${startDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - 
+                            ${endDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                        </span>
+                    </div>
+                    
+                    <div style="display: flex; overflow-x: auto;">
+                        <!-- Project Names Column -->
+                        <div style="flex-shrink: 0; width: 280px; border-right: 2px solid var(--glass-border); background: var(--bg-secondary); z-index: 10;">
+                            <!-- Header -->
+                            <div style="height: 60px; border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; padding: 0 16px; font-weight: 700; background: var(--bg-tertiary);">
+                                Project Name
+                            </div>
+                            <!-- Project Rows -->
+                            ${projects.map(project => `
+                                <div style="border-bottom: 1px solid var(--glass-border);">
+                                    <div style="height: 50px; display: flex; align-items: center; padding: 0 16px; gap: 10px; cursor: pointer;" onclick="drilldownGanttProject(${project.id})">
+                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: ${project.color || '#6ee7b7'}; flex-shrink: 0;"></div>
+                                        <div style="flex: 1; overflow: hidden;">
+                                            <div style="font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${project.name}</div>
+                                            <div style="font-size: 11px; color: var(--text-muted);">${project.assignee || 'Unassigned'}</div>
+                                        </div>
+                                        <span class="badge ${getProjectStatusBadge(project.status)}" style="font-size: 10px; padding: 2px 6px;">${project.progress}%</span>
+                                    </div>
+                                    ${ganttState.showTasks && project.tasks ? project.tasks.map(task => `
+                                        <div style="height: 36px; display: flex; align-items: center; padding: 0 16px 0 40px; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.03);">
+                                            <div style="font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">↳ ${task.name}</div>
+                                        </div>
+                                    `).join('') : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <!-- Timeline Area -->
+                        <div style="flex: 1; overflow-x: auto;">
+                            <!-- Date Headers -->
+                            <div style="height: 60px; display: flex; border-bottom: 1px solid var(--glass-border); background: var(--bg-tertiary); min-width: ${totalWidth}px;">
+                                ${renderGanttDateHeaders(dates, dayWidth)}
+                            </div>
+                            
+                            <!-- Timeline Bars -->
+                            <div style="min-width: ${totalWidth}px; position: relative;">
+                                ${renderGanttTodayLine(dates, dayWidth, projects)}
+                                ${projects.map(project => renderGanttProjectRow(project, dates, dayWidth)).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project Legend -->
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-title" style="margin-bottom: 12px;">📌 Project Legend</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 16px;">
+                        ${projects.map(p => `
+                            <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--bg-glass); border-radius: 8px; cursor: pointer;" onclick="drilldownGanttProject(${p.id})">
+                                <div style="width: 16px; height: 16px; border-radius: 4px; background: ${p.color || '#6ee7b7'};"></div>
+                                <span style="font-size: 13px; font-weight: 500;">${p.name}</span>
+                                <span style="font-size: 11px; color: var(--text-muted);">${p.progress}%</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function calculateGanttDateRange(projects) {
+            let minDate = new Date();
+            let maxDate = new Date();
+            
+            // Find the earliest start and latest end dates
+            projects.forEach(project => {
+                const projectStart = new Date(project.startDate);
+                const projectEnd = new Date(project.endDate);
+                if (projectStart < minDate) minDate = projectStart;
+                if (projectEnd > maxDate) maxDate = projectEnd;
+            });
+
+            // Add some padding
+            minDate = new Date(minDate.getTime() - (7 * 24 * 60 * 60 * 1000));
+            maxDate = new Date(maxDate.getTime() + (14 * 24 * 60 * 60 * 1000));
+
+            // Generate dates array
+            const dates = [];
+            let currentDate = new Date(minDate);
+            while (currentDate <= maxDate) {
+                dates.push(new Date(currentDate));
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            return { startDate: minDate, endDate: maxDate, dates };
+        }
+
+        function renderGanttDateHeaders(dates, dayWidth) {
+            // Group dates by month
+            const months = {};
+            dates.forEach((date, index) => {
+                const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+                if (!months[monthKey]) {
+                    months[monthKey] = { start: index, count: 0, date: date };
+                }
+                months[monthKey].count++;
+            });
+
+            let html = '<div style="display: flex; flex-direction: column; width: 100%;">';
+            
+            // Month row
+            html += '<div style="display: flex; height: 30px;">';
+            Object.values(months).forEach(month => {
+                html += `
+                    <div style="width: ${month.count * dayWidth}px; border-right: 1px solid var(--glass-border); 
+                                display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px;">
+                        ${month.date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            // Day row (only show if week view or specific days)
+            if (ganttState.viewMode === 'week' || ganttState.viewMode === 'month') {
+                html += '<div style="display: flex; height: 30px;">';
+                dates.forEach((date, index) => {
+                    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                    const isToday = date.toDateString() === new Date().toDateString();
+                    const showDay = ganttState.viewMode === 'week' || date.getDate() === 1 || date.getDate() === 15 || isToday;
+                    
+                    html += `
+                        <div style="width: ${dayWidth}px; border-right: 1px solid rgba(255,255,255,0.03); 
+                                    display: flex; align-items: center; justify-content: center; font-size: 10px;
+                                    background: ${isToday ? 'rgba(110,231,183,0.2)' : isWeekend ? 'rgba(0,0,0,0.2)' : 'transparent'};
+                                    color: ${isToday ? 'var(--accent-primary)' : 'var(--text-muted)'};">
+                            ${showDay ? date.getDate() : ''}
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            return html;
+        }
+
+        function renderGanttTodayLine(dates, dayWidth, projects) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const todayIndex = dates.findIndex(d => d.toDateString() === today.toDateString());
+            if (todayIndex === -1) return '';
+
+            // Calculate total height
+            let totalHeight = 0;
+            projects.forEach(project => {
+                totalHeight += 50; // Project row height
+                if (ganttState.showTasks && project.tasks) {
+                    totalHeight += project.tasks.length * 36; // Task row height
+                }
+            });
+
+            return `
+                <div style="position: absolute; left: ${todayIndex * dayWidth + dayWidth/2}px; top: 0; 
+                            width: 2px; height: ${totalHeight}px; background: var(--accent-primary); z-index: 5; opacity: 0.7;">
+                    <div style="position: absolute; top: -20px; left: -20px; width: 40px; text-align: center; 
+                                font-size: 10px; font-weight: 700; color: var(--accent-primary);">TODAY</div>
+                </div>
+            `;
+        }
+
+        function renderGanttProjectRow(project, dates, dayWidth) {
+            const projectStart = new Date(project.startDate);
+            const projectEnd = new Date(project.endDate);
+            
+            // Find start and end indices
+            const startIndex = dates.findIndex(d => d.toDateString() === projectStart.toDateString());
+            const endIndex = dates.findIndex(d => d.toDateString() === projectEnd.toDateString());
+            
+            const barLeft = Math.max(0, startIndex) * dayWidth;
+            const barWidth = (Math.min(endIndex, dates.length - 1) - Math.max(0, startIndex) + 1) * dayWidth;
+            const progressWidth = (barWidth * (project.progress || 0)) / 100;
+
+            let html = `
+                <div style="border-bottom: 1px solid var(--glass-border);" data-project-row="${project.id}">
+                    <!-- Project Bar -->
+                    <div style="height: 50px; position: relative; background: repeating-linear-gradient(90deg, transparent, transparent ${dayWidth - 1}px, rgba(255,255,255,0.02) ${dayWidth}px);" 
+                         class="gantt-timeline-row" data-day-width="${dayWidth}">
+                        <div class="gantt-bar"
+                             data-project-id="${project.id}"
+                             data-start-date="${project.startDate}"
+                             data-end-date="${project.endDate}"
+                             style="position: absolute; top: 10px; left: ${barLeft}px; width: ${barWidth}px; height: 30px;
+                                    background: ${project.color || '#6ee7b7'}20; border: 2px solid ${project.color || '#6ee7b7'}; 
+                                    border-radius: 6px; overflow: visible;"
+                             title="${project.name}: ${project.progress}% complete&#10;Drag to move • Drag edges to resize">
+                            <!-- Left resize handle -->
+                            <div class="gantt-handle gantt-handle-left" 
+                                 onmousedown="startGanttDrag(event, ${project.id}, null, 'resize-left')"></div>
+                            <!-- Right resize handle -->
+                            <div class="gantt-handle gantt-handle-right" 
+                                 onmousedown="startGanttDrag(event, ${project.id}, null, 'resize-right')"></div>
+                            <!-- Progress fill -->
+                            <div style="height: 100%; width: ${progressWidth}px; background: ${project.color || '#6ee7b7'}60; pointer-events: none;"></div>
+                            <!-- Draggable area (center) -->
+                            <div style="position: absolute; top: 0; left: 10px; right: 10px; height: 100%; cursor: grab;"
+                                 onmousedown="startGanttDrag(event, ${project.id}, null, 'move')"
+                                 ondblclick="drilldownGanttProject(${project.id})"></div>
+                            <!-- Label -->
+                            <div style="position: absolute; top: 0; left: 14px; height: 100%; display: flex; align-items: center;
+                                        font-size: 11px; font-weight: 600; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+                                        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: ${Math.max(barWidth - 30, 20)}px;
+                                        pointer-events: none;">
+                                ${project.name}
+                            </div>
+                        </div>
+                        
+                        ${ganttState.showMilestones && project.milestones ? project.milestones.map(milestone => {
+                            const msDate = new Date(milestone.date);
+                            const msIndex = dates.findIndex(d => d.toDateString() === msDate.toDateString());
+                            if (msIndex === -1) return '';
+                            return `
+                                <div style="position: absolute; top: 18px; left: ${msIndex * dayWidth + dayWidth/2 - 6}px; 
+                                            width: 12px; height: 12px; transform: rotate(45deg);
+                                            background: ${milestone.completed ? 'var(--success)' : 'var(--accent-gold)'};
+                                            border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); cursor: pointer;"
+                                     onclick="toggleGanttMilestone(${project.id}, ${milestone.id})"
+                                     title="${milestone.name}: ${milestone.date}${milestone.completed ? ' ✓ (Click to toggle)' : ' (Click to toggle)'}"></div>
+                            `;
+                        }).join('') : ''}
+                    </div>
+                    
+                    ${ganttState.showTasks && project.tasks ? project.tasks.map(task => {
+                        const taskStart = new Date(task.startDate);
+                        const taskEnd = new Date(task.endDate);
+                        const taskStartIndex = dates.findIndex(d => d.toDateString() === taskStart.toDateString());
+                        const taskEndIndex = dates.findIndex(d => d.toDateString() === taskEnd.toDateString());
+                        const taskBarLeft = Math.max(0, taskStartIndex) * dayWidth;
+                        const taskBarWidth = (Math.min(taskEndIndex, dates.length - 1) - Math.max(0, taskStartIndex) + 1) * dayWidth;
+                        const taskProgressWidth = (taskBarWidth * (task.progress || 0)) / 100;
+                        
+                        return `
+                            <div style="height: 36px; position: relative; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.03);"
+                                 class="gantt-timeline-row" data-day-width="${dayWidth}">
+                                <div class="gantt-task-bar"
+                                     data-project-id="${project.id}"
+                                     data-task-id="${task.id}"
+                                     data-start-date="${task.startDate}"
+                                     data-end-date="${task.endDate}"
+                                     style="position: absolute; top: 8px; left: ${taskBarLeft}px; width: ${taskBarWidth}px; height: 20px;
+                                            background: rgba(255,255,255,0.1); border-radius: 4px; overflow: visible; cursor: grab;"
+                                     onmousedown="startGanttDrag(event, ${project.id}, ${task.id}, 'move')"
+                                     ondblclick="editGanttTask(${project.id}, ${task.id})"
+                                     title="${task.name}: ${task.progress}%&#10;Drag to move • Double-click to edit">
+                                    <!-- Task resize handles -->
+                                    <div class="gantt-handle gantt-handle-left" style="height: 100%;"
+                                         onmousedown="startGanttDrag(event, ${project.id}, ${task.id}, 'resize-left')"></div>
+                                    <div class="gantt-handle gantt-handle-right" style="height: 100%;"
+                                         onmousedown="startGanttDrag(event, ${project.id}, ${task.id}, 'resize-right')"></div>
+                                    <div style="height: 100%; width: ${taskProgressWidth}px; background: ${project.color || '#6ee7b7'}40; pointer-events: none;"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('') : ''}
+                </div>
+            `;
+            
+            return html;
+        }
+
+        // ============================================
+        // GANTT DRAG AND DROP FUNCTIONALITY
+        // ============================================
+
+        function startGanttDrag(event, projectId, taskId, dragType) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const projects = appState.data.ganttProjects || [];
+            const { dates } = calculateGanttDateRange(projects);
+            const dayWidth = ganttState.viewMode === 'week' ? 40 : ganttState.viewMode === 'month' ? 20 : 8;
+            
+            // Get the target element (bar)
+            const bar = taskId ? 
+                document.querySelector(`[data-project-id="${projectId}"][data-task-id="${taskId}"]`) :
+                document.querySelector(`.gantt-bar[data-project-id="${projectId}"]`);
+            
+            if (!bar) return;
+            
+            // Store initial state
+            ganttState.isDragging = true;
+            ganttState.dragType = dragType;
+            ganttState.dragProjectId = projectId;
+            ganttState.dragTaskId = taskId;
+            ganttState.dragStartX = event.clientX;
+            ganttState.dragStartDate = bar.dataset.startDate;
+            ganttState.dragEndDate = bar.dataset.endDate;
+            ganttState.dragDayWidth = dayWidth;
+            ganttState.dragDates = dates;
+            ganttState.dragInitialLeft = parseFloat(bar.style.left);
+            ganttState.dragInitialWidth = parseFloat(bar.style.width);
+            
+            // Add dragging class
+            bar.classList.add('dragging');
+            
+            // Create date tooltip
+            createGanttTooltip(event);
+            
+            // Add global event listeners
+            document.addEventListener('mousemove', handleGanttDrag);
+            document.addEventListener('mouseup', endGanttDrag);
+            
+            // Change cursor globally
+            document.body.style.cursor = dragType === 'move' ? 'grabbing' : 'ew-resize';
+            document.body.style.userSelect = 'none';
+        }
+
+        function handleGanttDrag(event) {
+            if (!ganttState.isDragging) return;
+            
+            const { dragType, dragProjectId, dragTaskId, dragStartX, dragDayWidth, dragDates, dragInitialLeft, dragInitialWidth } = ganttState;
+            const deltaX = event.clientX - dragStartX;
+            const daysDelta = Math.round(deltaX / dragDayWidth);
+            
+            if (daysDelta === 0 && !ganttState.lastDaysDelta) {
+                ganttState.lastDaysDelta = 0;
+                return;
+            }
+            
+            if (daysDelta === ganttState.lastDaysDelta) return;
+            ganttState.lastDaysDelta = daysDelta;
+            
+            // Get the bar element
+            const bar = dragTaskId ? 
+                document.querySelector(`[data-project-id="${dragProjectId}"][data-task-id="${dragTaskId}"]`) :
+                document.querySelector(`.gantt-bar[data-project-id="${dragProjectId}"]`);
+            
+            if (!bar) return;
+            
+            // Calculate new dates
+            const startDate = new Date(ganttState.dragStartDate);
+            const endDate = new Date(ganttState.dragEndDate);
+            let newStartDate, newEndDate;
+            
+            if (dragType === 'move') {
+                // Move the entire bar
+                newStartDate = new Date(startDate.getTime() + (daysDelta * 24 * 60 * 60 * 1000));
+                newEndDate = new Date(endDate.getTime() + (daysDelta * 24 * 60 * 60 * 1000));
+                
+                // Update bar position
+                bar.style.left = (dragInitialLeft + (daysDelta * dragDayWidth)) + 'px';
+                
+            } else if (dragType === 'resize-left') {
+                // Resize from the left (change start date)
+                newStartDate = new Date(startDate.getTime() + (daysDelta * 24 * 60 * 60 * 1000));
+                newEndDate = endDate;
+                
+                // Ensure start doesn't go past end
+                if (newStartDate >= newEndDate) {
+                    newStartDate = new Date(newEndDate.getTime() - (24 * 60 * 60 * 1000));
+                }
+                
+                const newWidth = dragInitialWidth - (daysDelta * dragDayWidth);
+                if (newWidth >= dragDayWidth) { // Minimum 1 day
+                    bar.style.left = (dragInitialLeft + (daysDelta * dragDayWidth)) + 'px';
+                    bar.style.width = newWidth + 'px';
+                }
+                
+            } else if (dragType === 'resize-right') {
+                // Resize from the right (change end date)
+                newStartDate = startDate;
+                newEndDate = new Date(endDate.getTime() + (daysDelta * 24 * 60 * 60 * 1000));
+                
+                // Ensure end doesn't go before start
+                if (newEndDate <= newStartDate) {
+                    newEndDate = new Date(newStartDate.getTime() + (24 * 60 * 60 * 1000));
+                }
+                
+                const newWidth = dragInitialWidth + (daysDelta * dragDayWidth);
+                if (newWidth >= dragDayWidth) { // Minimum 1 day
+                    bar.style.width = newWidth + 'px';
+                }
+            }
+            
+            // Update tooltip
+            updateGanttTooltip(event, newStartDate, newEndDate);
+            
+            // Store calculated dates for use in endGanttDrag
+            ganttState.calculatedStartDate = newStartDate;
+            ganttState.calculatedEndDate = newEndDate;
+        }
+
+        function endGanttDrag(event) {
+            if (!ganttState.isDragging) return;
+            
+            const { dragProjectId, dragTaskId, calculatedStartDate, calculatedEndDate } = ganttState;
+            
+            // Remove event listeners
+            document.removeEventListener('mousemove', handleGanttDrag);
+            document.removeEventListener('mouseup', endGanttDrag);
+            
+            // Reset cursor
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            
+            // Remove dragging class from bar
+            const bar = dragTaskId ? 
+                document.querySelector(`[data-project-id="${dragProjectId}"][data-task-id="${dragTaskId}"]`) :
+                document.querySelector(`.gantt-bar[data-project-id="${dragProjectId}"]`);
+            
+            if (bar) {
+                bar.classList.remove('dragging');
+            }
+            
+            // Remove tooltip
+            removeGanttTooltip();
+            
+            // Update the data if dates changed
+            if (calculatedStartDate && calculatedEndDate) {
+                const newStartStr = formatDateForInput(calculatedStartDate);
+                const newEndStr = formatDateForInput(calculatedEndDate);
+                
+                // Check if dates actually changed
+                if (newStartStr !== ganttState.dragStartDate || newEndStr !== ganttState.dragEndDate) {
+                    if (dragTaskId) {
+                        // Update task dates
+                        updateGanttTaskDates(dragProjectId, dragTaskId, newStartStr, newEndStr);
+                    } else {
+                        // Update project dates
+                        updateGanttProjectDates(dragProjectId, newStartStr, newEndStr);
+                    }
+                }
+            }
+            
+            // Reset state
+            ganttState.isDragging = false;
+            ganttState.dragType = null;
+            ganttState.dragProjectId = null;
+            ganttState.dragTaskId = null;
+            ganttState.lastDaysDelta = undefined;
+            ganttState.calculatedStartDate = null;
+            ganttState.calculatedEndDate = null;
+        }
+
+        function updateGanttProjectDates(projectId, newStartDate, newEndDate) {
+            const project = appState.data.ganttProjects.find(p => p.id === projectId);
+            if (!project) return;
+            
+            const oldStart = project.startDate;
+            const oldEnd = project.endDate;
+            
+            project.startDate = newStartDate;
+            project.endDate = newEndDate;
+            project.updatedAt = new Date().toISOString();
+            
+            // Calculate the shift in days
+            const startShift = Math.round((new Date(newStartDate) - new Date(oldStart)) / (24 * 60 * 60 * 1000));
+            
+            // Optionally shift all tasks and milestones by the same amount
+            if (startShift !== 0 && project.tasks && project.tasks.length > 0) {
+                const shiftTasks = confirm(`Project moved by ${startShift} days. Do you want to shift all tasks and milestones by the same amount?`);
+                
+                if (shiftTasks) {
+                    project.tasks.forEach(task => {
+                        const taskStart = new Date(task.startDate);
+                        const taskEnd = new Date(task.endDate);
+                        taskStart.setDate(taskStart.getDate() + startShift);
+                        taskEnd.setDate(taskEnd.getDate() + startShift);
+                        task.startDate = formatDateForInput(taskStart);
+                        task.endDate = formatDateForInput(taskEnd);
+                    });
+                    
+                    if (project.milestones) {
+                        project.milestones.forEach(milestone => {
+                            const msDate = new Date(milestone.date);
+                            msDate.setDate(msDate.getDate() + startShift);
+                            milestone.date = formatDateForInput(msDate);
+                        });
+                    }
+                }
+            }
+            
+            addRecentActivity('project', 'Project Timeline Updated', `Updated dates for "${project.name}": ${newStartDate} to ${newEndDate}`, 'info');
+            saveData();
+            showToast(`📅 Project "${project.name}" dates updated`, 'success');
+            
+            // Refresh the view
+            switchSection('gantt-projects');
+        }
+
+        function updateGanttTaskDates(projectId, taskId, newStartDate, newEndDate) {
+            const project = appState.data.ganttProjects.find(p => p.id === projectId);
+            if (!project || !project.tasks) return;
+            
+            const task = project.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            task.startDate = newStartDate;
+            task.endDate = newEndDate;
+            
+            addRecentActivity('task', 'Task Timeline Updated', `Updated dates for "${task.name}": ${newStartDate} to ${newEndDate}`, 'info');
+            saveData();
+            showToast(`📅 Task "${task.name}" dates updated`, 'success');
+            
+            // Refresh the view
+            switchSection('gantt-projects');
+        }
+
+        function formatDateForInput(date) {
+            const d = new Date(date);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function createGanttTooltip(event) {
+            removeGanttTooltip(); // Remove any existing tooltip
+            
+            const tooltip = document.createElement('div');
+            tooltip.className = 'gantt-date-tooltip';
+            tooltip.id = 'ganttDragTooltip';
+            tooltip.style.left = (event.clientX + 10) + 'px';
+            tooltip.style.top = (event.clientY - 30) + 'px';
+            tooltip.innerHTML = 'Dragging...';
+            document.body.appendChild(tooltip);
+        }
+
+        function updateGanttTooltip(event, startDate, endDate) {
+            const tooltip = document.getElementById('ganttDragTooltip');
+            if (!tooltip) return;
+            
+            const startStr = startDate ? startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+            const endStr = endDate ? endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+            const duration = startDate && endDate ? Math.ceil((endDate - startDate) / (24 * 60 * 60 * 1000)) + 1 : 0;
+            
+            tooltip.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <div>📅 ${startStr} → ${endStr}</div>
+                    <div style="font-size: 10px; color: var(--text-secondary);">Duration: ${duration} days</div>
+                </div>
+            `;
+            tooltip.style.left = (event.clientX + 15) + 'px';
+            tooltip.style.top = (event.clientY - 40) + 'px';
+        }
+
+        function removeGanttTooltip() {
+            const tooltip = document.getElementById('ganttDragTooltip');
+            if (tooltip) {
+                tooltip.remove();
+            }
+        }
+
+        function toggleGanttMilestone(projectId, milestoneId) {
+            const project = appState.data.ganttProjects.find(p => p.id === projectId);
+            if (!project || !project.milestones) return;
+            
+            const milestone = project.milestones.find(m => m.id === milestoneId);
+            if (!milestone) return;
+            
+            milestone.completed = !milestone.completed;
+            
+            addRecentActivity('milestone', 'Milestone Updated', `"${milestone.name}" marked as ${milestone.completed ? 'completed' : 'incomplete'}`, milestone.completed ? 'success' : 'info');
+            saveData();
+            showToast(`🎯 Milestone "${milestone.name}" ${milestone.completed ? 'completed!' : 'marked incomplete'}`, milestone.completed ? 'success' : 'info');
+            
+            switchSection('gantt-projects');
+        }
+
+        function getProjectStatusBadge(status) {
+            const badges = {
+                'Planning': 'badge-info',
+                'In Progress': 'badge-warning',
+                'Completed': 'badge-success',
+                'On Hold': 'badge-danger'
+            };
+            return badges[status] || 'badge-info';
+        }
+
+        // ============================================
+        // SPREADSHEET VIEW FOR GANTT PROJECTS
+        // ============================================
+
+        function renderGanttSpreadsheet(projects) {
+            return `
+                <div class="card">
+                    <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <span>📋 Project Details Spreadsheet</span>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn-secondary" onclick="exportGanttToCSV()" style="padding: 6px 12px; font-size: 12px;">
+                                📥 Export CSV
+                            </button>
+                            <button class="btn-secondary" onclick="toggleSpreadsheetEdit()" style="padding: 6px 12px; font-size: 12px;">
+                                ✏️ Quick Edit Mode
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; min-width: 1200px;">
+                            <thead>
+                                <tr style="background: var(--bg-tertiary);">
+                                    <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border); width: 40px;">#</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border); min-width: 200px;">Project Name</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border); min-width: 100px;">Division</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border); width: 100px;">Status</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border); width: 80px;">Priority</th>
+                                    <th style="padding: 12px; text-align: center; border: 1px solid var(--glass-border); width: 80px;">Progress</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border); width: 110px;">Start Date</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border); width: 110px;">End Date</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border); width: 100px;">Duration</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border); min-width: 120px;">Assignee</th>
+                                    <th style="padding: 12px; text-align: right; border: 1px solid var(--glass-border); width: 100px;">Budget</th>
+                                    <th style="padding: 12px; text-align: right; border: 1px solid var(--glass-border); width: 100px;">Spent</th>
+                                    <th style="padding: 12px; text-align: center; border: 1px solid var(--glass-border); width: 120px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ganttSpreadsheetBody">
+                                ${projects.map((project, index) => renderGanttSpreadsheetRow(project, index)).join('')}
+                            </tbody>
+                            <tfoot>
+                                <tr style="background: var(--bg-tertiary); font-weight: 600;">
+                                    <td colspan="5" style="padding: 12px; border: 1px solid var(--glass-border);">TOTALS</td>
+                                    <td style="padding: 12px; text-align: center; border: 1px solid var(--glass-border);">
+                                        ${projects.length > 0 ? Math.round(projects.reduce((sum, p) => sum + (p.progress || 0), 0) / projects.length) : 0}% avg
+                                    </td>
+                                    <td colspan="2" style="padding: 12px; border: 1px solid var(--glass-border);"></td>
+                                    <td style="padding: 12px; border: 1px solid var(--glass-border);">
+                                        ${calculateTotalDuration(projects)} days
+                                    </td>
+                                    <td style="padding: 12px; border: 1px solid var(--glass-border);"></td>
+                                    <td style="padding: 12px; text-align: right; border: 1px solid var(--glass-border); color: var(--accent-primary);">
+                                        $${projects.reduce((sum, p) => sum + (p.budget || 0), 0).toLocaleString()}
+                                    </td>
+                                    <td style="padding: 12px; text-align: right; border: 1px solid var(--glass-border); color: var(--accent-secondary);">
+                                        $${projects.reduce((sum, p) => sum + (p.spent || 0), 0).toLocaleString()}
+                                    </td>
+                                    <td style="padding: 12px; border: 1px solid var(--glass-border);"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    
+                    <!-- Add New Row Button -->
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--glass-border);">
+                        <button class="btn-primary" onclick="addGanttProject()" style="width: 100%; padding: 12px;">
+                            ➕ Add New Project Row
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Task Breakdown Section -->
+                ${projects.length > 0 ? `
+                    <div class="card" style="margin-top: 20px;">
+                        <div class="card-title" style="margin-bottom: 16px;">📝 Task Breakdown by Project</div>
+                        ${projects.map(project => `
+                            <div style="margin-bottom: 20px; background: var(--bg-glass); border-radius: 12px; overflow: hidden;">
+                                <div style="padding: 12px 16px; background: ${project.color}20; border-left: 4px solid ${project.color}; display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <strong>${project.name}</strong>
+                                        <span class="badge ${getProjectStatusBadge(project.status)}">${project.status}</span>
+                                    </div>
+                                    <button class="btn-secondary" onclick="addGanttTask(${project.id})" style="padding: 4px 12px; font-size: 11px;">
+                                        ➕ Add Task
+                                    </button>
+                                </div>
+                                ${project.tasks && project.tasks.length > 0 ? `
+                                    <div style="overflow-x: auto;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <thead>
+                                                <tr style="background: rgba(0,0,0,0.2);">
+                                                    <th style="padding: 8px 12px; text-align: left; font-size: 11px; color: var(--text-muted);">Task Name</th>
+                                                    <th style="padding: 8px 12px; text-align: left; font-size: 11px; color: var(--text-muted);">Start</th>
+                                                    <th style="padding: 8px 12px; text-align: left; font-size: 11px; color: var(--text-muted);">End</th>
+                                                    <th style="padding: 8px 12px; text-align: center; font-size: 11px; color: var(--text-muted);">Progress</th>
+                                                    <th style="padding: 8px 12px; text-align: left; font-size: 11px; color: var(--text-muted);">Assignee</th>
+                                                    <th style="padding: 8px 12px; text-align: center; font-size: 11px; color: var(--text-muted);">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${project.tasks.map(task => `
+                                                    <tr style="border-top: 1px solid rgba(255,255,255,0.05);">
+                                                        <td style="padding: 10px 12px; font-size: 13px;">${task.name}</td>
+                                                        <td style="padding: 10px 12px; font-size: 12px; color: var(--text-secondary);">${task.startDate}</td>
+                                                        <td style="padding: 10px 12px; font-size: 12px; color: var(--text-secondary);">${task.endDate}</td>
+                                                        <td style="padding: 10px 12px;">
+                                                            <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+                                                                <div style="flex: 1; max-width: 80px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                                                                    <div style="height: 100%; width: ${task.progress}%; background: ${project.color};"></div>
+                                                                </div>
+                                                                <span style="font-size: 11px; color: var(--text-muted);">${task.progress}%</span>
+                                                            </div>
+                                                        </td>
+                                                        <td style="padding: 10px 12px; font-size: 12px; color: var(--text-secondary);">${task.assignee}</td>
+                                                        <td style="padding: 10px 12px; text-align: center;">
+                                                            <button class="btn-secondary" onclick="editGanttTask(${project.id}, ${task.id})" style="padding: 2px 8px; font-size: 10px; margin-right: 4px;">Edit</button>
+                                                            <button class="btn-secondary" onclick="deleteGanttTask(${project.id}, ${task.id})" style="padding: 2px 8px; font-size: 10px; color: var(--danger);">Del</button>
+                                                        </td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ` : `
+                                    <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">
+                                        No tasks yet. Click "Add Task" to create one.
+                                    </div>
+                                `}
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        function renderGanttSpreadsheetRow(project, index) {
+            const startDate = new Date(project.startDate);
+            const endDate = new Date(project.endDate);
+            const duration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            const budgetUsedPercent = project.budget > 0 ? Math.round((project.spent / project.budget) * 100) : 0;
+            
+            return `
+                <tr style="transition: background 0.2s;" onmouseover="this.style.background='rgba(110,231,183,0.05)'" onmouseout="this.style.background='transparent'">
+                    <td style="padding: 10px 12px; border: 1px solid var(--glass-border); color: var(--text-muted);">${index + 1}</td>
+                    <td style="padding: 10px 12px; border: 1px solid var(--glass-border);">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 10px; height: 10px; border-radius: 50%; background: ${project.color || '#6ee7b7'};"></div>
+                            <div>
+                                <div style="font-weight: 600; cursor: pointer;" onclick="drilldownGanttProject(${project.id})">${project.name}</div>
+                                <div style="font-size: 11px; color: var(--text-muted); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${project.description || ''}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="padding: 10px 12px; border: 1px solid var(--glass-border); font-size: 12px;">${project.division || '-'}</td>
+                    <td style="padding: 10px 12px; border: 1px solid var(--glass-border);">
+                        <span class="badge ${getProjectStatusBadge(project.status)}">${project.status}</span>
+                    </td>
+                    <td style="padding: 10px 12px; border: 1px solid var(--glass-border);">
+                        <span class="priority-${(project.priority || 'Medium').toLowerCase()}">${project.priority || 'Medium'}</span>
+                    </td>
+                    <td style="padding: 10px 12px; border: 1px solid var(--glass-border); text-align: center;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                            <div style="width: 50px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                                <div style="height: 100%; width: ${project.progress}%; background: ${project.color || '#6ee7b7'};"></div>
+                            </div>
+                            <span style="font-size: 11px; font-weight: 600;">${project.progress}%</span>
+                        </div>
+                    </td>
+                    <td style="padding: 10px 12px; border: 1px solid var(--glass-border); font-size: 12px;">${project.startDate}</td>
+                    <td style="padding: 10px 12px; border: 1px solid var(--glass-border); font-size: 12px;">${project.endDate}</td>
+                    <td style="padding: 10px 12px; border: 1px solid var(--glass-border); font-size: 12px; text-align: center;">
+                        <span style="background: var(--bg-glass); padding: 2px 8px; border-radius: 4px;">${duration}d</span>
+                    </td>
+                    <td style="padding: 10px 12px; border: 1px solid var(--glass-border); font-size: 12px;">${project.assignee || '-'}</td>
+                    <td style="padding: 10px 12px; border: 1px solid var(--glass-border); text-align: right; font-size: 12px;">
+                        $${(project.budget || 0).toLocaleString()}
+                    </td>
+                    <td style="padding: 10px 12px; border: 1px solid var(--glass-border); text-align: right; font-size: 12px;">
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+                            <span>$${(project.spent || 0).toLocaleString()}</span>
+                            <span style="font-size: 10px; color: ${budgetUsedPercent > 90 ? 'var(--danger)' : budgetUsedPercent > 75 ? 'var(--warning)' : 'var(--text-muted)'};">${budgetUsedPercent}%</span>
+                        </div>
+                    </td>
+                    <td style="padding: 10px 12px; border: 1px solid var(--glass-border); text-align: center;">
+                        <div style="display: flex; gap: 4px; justify-content: center;">
+                            <button class="btn-secondary" onclick="editGanttProject(${project.id})" style="padding: 4px 8px; font-size: 10px;">✏️</button>
+                            <button class="btn-secondary" onclick="drilldownGanttProject(${project.id})" style="padding: 4px 8px; font-size: 10px;">👁️</button>
+                            <button class="btn-secondary" onclick="deleteGanttProject(${project.id})" style="padding: 4px 8px; font-size: 10px; color: var(--danger);">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function calculateTotalDuration(projects) {
+            if (projects.length === 0) return 0;
+            let minStart = new Date(projects[0].startDate);
+            let maxEnd = new Date(projects[0].endDate);
+            
+            projects.forEach(p => {
+                const start = new Date(p.startDate);
+                const end = new Date(p.endDate);
+                if (start < minStart) minStart = start;
+                if (end > maxEnd) maxEnd = end;
+            });
+            
+            return Math.ceil((maxEnd - minStart) / (1000 * 60 * 60 * 24));
+        }
+
+        // ============================================
+        // GANTT PROJECT CRUD OPERATIONS
+        // ============================================
+
+        function addGanttProject() {
+            const teamMembers = appState.data.team.map(t => t.name);
+            const divisions = appState.data.divisions.map(d => d.name);
+            const colors = ['#6ee7b7', '#7c5cff', '#60a5fa', '#fbbf24', '#f472b6', '#a78bfa', '#34d399', '#fb923c'];
+            
+            const today = new Date().toISOString().split('T')[0];
+            const threeMonthsLater = new Date(Date.now() + 90*24*60*60*1000).toISOString().split('T')[0];
+            
+            const formHTML = `
+                <form onsubmit="handleAddGanttProject(event)" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Project Name *</label>
+                            <input type="text" id="gantt_name" class="form-input" required placeholder="e.g., Website Redesign">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Division</label>
+                            <select id="gantt_division" class="form-select">
+                                <option value="">Select Division</option>
+                                ${divisions.map(d => `<option value="${d}">${d}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Description</label>
+                        <textarea id="gantt_description" class="form-textarea" rows="2" placeholder="Brief project description..."></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Start Date *</label>
+                            <input type="date" id="gantt_startDate" class="form-input" required value="${today}">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">End Date *</label>
+                            <input type="date" id="gantt_endDate" class="form-input" required value="${threeMonthsLater}">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Status</label>
+                            <select id="gantt_status" class="form-select">
+                                <option value="Planning">Planning</option>
+                                <option value="In Progress" selected>In Progress</option>
+                                <option value="On Hold">On Hold</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Priority</label>
+                            <select id="gantt_priority" class="form-select">
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Project Lead</label>
+                            <select id="gantt_assignee" class="form-select">
+                                <option value="">Select Lead</option>
+                                ${teamMembers.map(t => `<option value="${t}">${t}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Progress (%)</label>
+                            <input type="number" id="gantt_progress" class="form-input" min="0" max="100" value="0">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Budget ($)</label>
+                            <input type="number" id="gantt_budget" class="form-input" min="0" value="0" placeholder="0">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Color</label>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                ${colors.map((color, i) => `
+                                    <label style="cursor: pointer;">
+                                        <input type="radio" name="gantt_color" value="${color}" ${i === 0 ? 'checked' : ''} style="display: none;">
+                                        <div style="width: 28px; height: 28px; border-radius: 6px; background: ${color}; border: 3px solid transparent;" 
+                                             onclick="this.parentElement.querySelector('input').checked = true; document.querySelectorAll('[name=gantt_color]').forEach(r => r.parentElement.querySelector('div').style.borderColor = 'transparent'); this.style.borderColor = 'white';"></div>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Notes</label>
+                        <textarea id="gantt_notes" class="form-textarea" rows="2" placeholder="Additional project notes..."></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; margin-top: 8px;">
+                        <button type="button" class="btn-secondary" onclick="closeModal()" style="flex: 1;">Cancel</button>
+                        <button type="submit" class="btn-primary" style="flex: 2;">Create Project</button>
+                    </div>
+                </form>
+            `;
+            
+            showModal('➕ Add New Gantt Project', formHTML);
+            
+            // Highlight first color
+            setTimeout(() => {
+                const firstColor = document.querySelector('[name=gantt_color]');
+                if (firstColor) {
+                    firstColor.parentElement.querySelector('div').style.borderColor = 'white';
+                }
+            }, 100);
+        }
+
+        function handleAddGanttProject(event) {
+            event.preventDefault();
+            
+            const selectedColor = document.querySelector('[name=gantt_color]:checked');
+            
+            const newProject = {
+                id: Date.now(),
+                name: document.getElementById('gantt_name').value,
+                description: document.getElementById('gantt_description').value,
+                division: document.getElementById('gantt_division').value,
+                status: document.getElementById('gantt_status').value,
+                priority: document.getElementById('gantt_priority').value,
+                progress: parseInt(document.getElementById('gantt_progress').value) || 0,
+                startDate: document.getElementById('gantt_startDate').value,
+                endDate: document.getElementById('gantt_endDate').value,
+                assignee: document.getElementById('gantt_assignee').value,
+                team: [document.getElementById('gantt_assignee').value].filter(Boolean),
+                color: selectedColor ? selectedColor.value : '#6ee7b7',
+                budget: parseFloat(document.getElementById('gantt_budget').value) || 0,
+                spent: 0,
+                notes: document.getElementById('gantt_notes').value,
+                milestones: [],
+                tasks: [],
+                createdAt: new Date().toISOString()
+            };
+            
+            ensureDataArray('ganttProjects');
+            appState.data.ganttProjects.push(newProject);
+            
+            addRecentActivity('project', 'Gantt Project Created', `Created project: ${newProject.name}`, 'success');
+            saveData();
+            closeModal();
+            showToast(`✅ Project "${newProject.name}" created successfully!`, 'success');
+            switchSection('gantt-projects');
+        }
+
+        function editGanttProject(id) {
+            const project = appState.data.ganttProjects.find(p => p.id === id);
+            if (!project) return;
+            
+            const teamMembers = appState.data.team.map(t => t.name);
+            const divisions = appState.data.divisions.map(d => d.name);
+            const colors = ['#6ee7b7', '#7c5cff', '#60a5fa', '#fbbf24', '#f472b6', '#a78bfa', '#34d399', '#fb923c'];
+            
+            const formHTML = `
+                <form onsubmit="handleEditGanttProject(event, ${id})" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Project Name *</label>
+                            <input type="text" id="gantt_name" class="form-input" required value="${project.name}">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Division</label>
+                            <select id="gantt_division" class="form-select">
+                                <option value="">Select Division</option>
+                                ${divisions.map(d => `<option value="${d}" ${project.division === d ? 'selected' : ''}>${d}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Description</label>
+                        <textarea id="gantt_description" class="form-textarea" rows="2">${project.description || ''}</textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Start Date *</label>
+                            <input type="date" id="gantt_startDate" class="form-input" required value="${project.startDate}">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">End Date *</label>
+                            <input type="date" id="gantt_endDate" class="form-input" required value="${project.endDate}">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Status</label>
+                            <select id="gantt_status" class="form-select">
+                                <option value="Planning" ${project.status === 'Planning' ? 'selected' : ''}>Planning</option>
+                                <option value="In Progress" ${project.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                <option value="On Hold" ${project.status === 'On Hold' ? 'selected' : ''}>On Hold</option>
+                                <option value="Completed" ${project.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Priority</label>
+                            <select id="gantt_priority" class="form-select">
+                                <option value="Low" ${project.priority === 'Low' ? 'selected' : ''}>Low</option>
+                                <option value="Medium" ${project.priority === 'Medium' ? 'selected' : ''}>Medium</option>
+                                <option value="High" ${project.priority === 'High' ? 'selected' : ''}>High</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Project Lead</label>
+                            <select id="gantt_assignee" class="form-select">
+                                <option value="">Select Lead</option>
+                                ${teamMembers.map(t => `<option value="${t}" ${project.assignee === t ? 'selected' : ''}>${t}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Progress (%)</label>
+                            <input type="number" id="gantt_progress" class="form-input" min="0" max="100" value="${project.progress || 0}">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Budget ($)</label>
+                            <input type="number" id="gantt_budget" class="form-input" min="0" value="${project.budget || 0}">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Spent ($)</label>
+                            <input type="number" id="gantt_spent" class="form-input" min="0" value="${project.spent || 0}">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Color</label>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            ${colors.map(color => `
+                                <label style="cursor: pointer;">
+                                    <input type="radio" name="gantt_color" value="${color}" ${project.color === color ? 'checked' : ''} style="display: none;">
+                                    <div style="width: 28px; height: 28px; border-radius: 6px; background: ${color}; border: 3px solid ${project.color === color ? 'white' : 'transparent'};" 
+                                         onclick="this.parentElement.querySelector('input').checked = true; document.querySelectorAll('[name=gantt_color]').forEach(r => r.parentElement.querySelector('div').style.borderColor = 'transparent'); this.style.borderColor = 'white';"></div>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Notes</label>
+                        <textarea id="gantt_notes" class="form-textarea" rows="2">${project.notes || ''}</textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; margin-top: 8px;">
+                        <button type="button" class="btn-secondary" onclick="closeModal()" style="flex: 1;">Cancel</button>
+                        <button type="submit" class="btn-primary" style="flex: 2;">Save Changes</button>
+                    </div>
+                </form>
+            `;
+            
+            showModal('✏️ Edit Project', formHTML);
+        }
+
+        function handleEditGanttProject(event, id) {
+            event.preventDefault();
+            
+            const project = appState.data.ganttProjects.find(p => p.id === id);
+            if (!project) return;
+            
+            const selectedColor = document.querySelector('[name=gantt_color]:checked');
+            
+            project.name = document.getElementById('gantt_name').value;
+            project.description = document.getElementById('gantt_description').value;
+            project.division = document.getElementById('gantt_division').value;
+            project.status = document.getElementById('gantt_status').value;
+            project.priority = document.getElementById('gantt_priority').value;
+            project.progress = parseInt(document.getElementById('gantt_progress').value) || 0;
+            project.startDate = document.getElementById('gantt_startDate').value;
+            project.endDate = document.getElementById('gantt_endDate').value;
+            project.assignee = document.getElementById('gantt_assignee').value;
+            project.budget = parseFloat(document.getElementById('gantt_budget').value) || 0;
+            project.spent = parseFloat(document.getElementById('gantt_spent').value) || 0;
+            project.color = selectedColor ? selectedColor.value : project.color;
+            project.notes = document.getElementById('gantt_notes').value;
+            project.updatedAt = new Date().toISOString();
+            
+            addRecentActivity('project', 'Gantt Project Updated', `Updated project: ${project.name}`, 'info');
+            saveData();
+            closeModal();
+            showToast(`✅ Project "${project.name}" updated successfully!`, 'success');
+            switchSection('gantt-projects');
+        }
+
+        function deleteGanttProject(id) {
+            const project = appState.data.ganttProjects.find(p => p.id === id);
+            if (!project) return;
+            
+            if (confirm(`Are you sure you want to delete the project "${project.name}"?\n\nThis will also delete all associated tasks and milestones.`)) {
+                appState.data.ganttProjects = appState.data.ganttProjects.filter(p => p.id !== id);
+                addRecentActivity('project', 'Gantt Project Deleted', `Deleted project: ${project.name}`, 'warning');
+                saveData();
+                showToast(`🗑️ Project "${project.name}" deleted`, 'info');
+                switchSection('gantt-projects');
+            }
+        }
+
+        function drilldownGanttProject(id) {
+            const project = appState.data.ganttProjects.find(p => p.id === id);
+            if (!project) return;
+            
+            const startDate = new Date(project.startDate);
+            const endDate = new Date(project.endDate);
+            const duration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            const daysRemaining = Math.max(0, Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24)));
+            const budgetUsedPercent = project.budget > 0 ? Math.round((project.spent / project.budget) * 100) : 0;
+            
+            const completedMilestones = (project.milestones || []).filter(m => m.completed).length;
+            const totalMilestones = (project.milestones || []).length;
+            const completedTasks = (project.tasks || []).filter(t => t.progress === 100).length;
+            const totalTasks = (project.tasks || []).length;
+            
+            const detailHTML = `
+                <div style="max-height: 70vh; overflow-y: auto;">
+                    <!-- Header -->
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--glass-border);">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: ${project.color}; display: flex; align-items: center; justify-content: center; font-size: 24px;">📐</div>
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0 0 4px 0;">${project.name}</h3>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <span class="badge ${getProjectStatusBadge(project.status)}">${project.status}</span>
+                                <span class="priority-${(project.priority || 'Medium').toLowerCase()}">${project.priority}</span>
+                                <span style="font-size: 12px; color: var(--text-muted);">${project.division || 'No Division'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Section -->
+                    <div style="background: linear-gradient(135deg, ${project.color}15, ${project.color}05); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span style="font-weight: 600;">Overall Progress</span>
+                            <span style="font-weight: 700; color: ${project.color};">${project.progress}%</span>
+                        </div>
+                        <div style="height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden;">
+                            <div style="height: 100%; width: ${project.progress}%; background: ${project.color}; transition: width 0.3s;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
+                        <div style="background: var(--bg-glass); padding: 16px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 20px; font-weight: 700; color: var(--accent-primary);">${duration}</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">Total Days</div>
+                        </div>
+                        <div style="background: var(--bg-glass); padding: 16px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 20px; font-weight: 700; color: var(--accent-secondary);">${daysRemaining}</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">Days Left</div>
+                        </div>
+                        <div style="background: var(--bg-glass); padding: 16px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 20px; font-weight: 700; color: var(--accent-gold);">${completedMilestones}/${totalMilestones}</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">Milestones</div>
+                        </div>
+                        <div style="background: var(--bg-glass); padding: 16px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 20px; font-weight: 700; color: var(--success);">${completedTasks}/${totalTasks}</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">Tasks Done</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Details Grid -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                        <div>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">START DATE</div>
+                            <div style="font-weight: 600;">${project.startDate}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">END DATE</div>
+                            <div style="font-weight: 600;">${project.endDate}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">PROJECT LEAD</div>
+                            <div style="font-weight: 600;">${project.assignee || 'Unassigned'}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">TEAM</div>
+                            <div style="font-weight: 600;">${(project.team || []).join(', ') || 'No team assigned'}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Budget Section -->
+                    <div style="background: var(--bg-glass); padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span style="font-weight: 600;">💰 Budget</span>
+                            <span style="color: ${budgetUsedPercent > 90 ? 'var(--danger)' : budgetUsedPercent > 75 ? 'var(--warning)' : 'var(--success)'}; font-weight: 600;">${budgetUsedPercent}% used</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: var(--text-secondary);">Allocated: <strong>$${(project.budget || 0).toLocaleString()}</strong></span>
+                            <span style="color: var(--text-secondary);">Spent: <strong>$${(project.spent || 0).toLocaleString()}</strong></span>
+                        </div>
+                        <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                            <div style="height: 100%; width: ${Math.min(budgetUsedPercent, 100)}%; background: ${budgetUsedPercent > 90 ? 'var(--danger)' : budgetUsedPercent > 75 ? 'var(--warning)' : 'var(--success)'};"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Description -->
+                    ${project.description ? `
+                        <div style="margin-bottom: 20px;">
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">DESCRIPTION</div>
+                            <div style="color: var(--text-secondary); line-height: 1.6;">${project.description}</div>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Notes -->
+                    ${project.notes ? `
+                        <div style="margin-bottom: 20px;">
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">NOTES</div>
+                            <div style="color: var(--text-secondary); line-height: 1.6; background: var(--bg-glass); padding: 12px; border-radius: 8px; font-style: italic;">${project.notes}</div>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Actions -->
+                    <div style="display: flex; gap: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--glass-border);">
+                        <button class="btn-secondary" onclick="closeModal(); editGanttProject(${id});" style="flex: 1;">✏️ Edit Project</button>
+                        <button class="btn-secondary" onclick="closeModal(); addGanttTask(${id});" style="flex: 1;">➕ Add Task</button>
+                        <button class="btn-secondary" onclick="closeModal(); addGanttMilestone(${id});" style="flex: 1;">🎯 Add Milestone</button>
+                    </div>
+                </div>
+            `;
+            
+            showModal('📐 Project Details', detailHTML);
+        }
+
+        // ============================================
+        // GANTT TASK CRUD OPERATIONS
+        // ============================================
+
+        function addGanttTask(projectId) {
+            const project = appState.data.ganttProjects.find(p => p.id === projectId);
+            if (!project) return;
+            
+            const teamMembers = appState.data.team.map(t => t.name);
+            
+            const formHTML = `
+                <form onsubmit="handleAddGanttTask(event, ${projectId})" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="background: ${project.color}20; padding: 12px; border-radius: 8px; border-left: 4px solid ${project.color};">
+                        <div style="font-weight: 600;">Adding task to: ${project.name}</div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Task Name *</label>
+                        <input type="text" id="task_name" class="form-input" required placeholder="e.g., Design wireframes">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Start Date *</label>
+                            <input type="date" id="task_startDate" class="form-input" required value="${project.startDate}">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">End Date *</label>
+                            <input type="date" id="task_endDate" class="form-input" required value="${project.endDate}">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Assignee</label>
+                            <select id="task_assignee" class="form-select">
+                                <option value="">Select Assignee</option>
+                                ${teamMembers.map(t => `<option value="${t}">${t}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Progress (%)</label>
+                            <input type="number" id="task_progress" class="form-input" min="0" max="100" value="0">
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px;">
+                        <button type="button" class="btn-secondary" onclick="closeModal()" style="flex: 1;">Cancel</button>
+                        <button type="submit" class="btn-primary" style="flex: 2;">Add Task</button>
+                    </div>
+                </form>
+            `;
+            
+            showModal('➕ Add Task', formHTML);
+        }
+
+        function handleAddGanttTask(event, projectId) {
+            event.preventDefault();
+            
+            const project = appState.data.ganttProjects.find(p => p.id === projectId);
+            if (!project) return;
+            
+            if (!project.tasks) project.tasks = [];
+            
+            const newTask = {
+                id: Date.now(),
+                name: document.getElementById('task_name').value,
+                startDate: document.getElementById('task_startDate').value,
+                endDate: document.getElementById('task_endDate').value,
+                assignee: document.getElementById('task_assignee').value,
+                progress: parseInt(document.getElementById('task_progress').value) || 0
+            };
+            
+            project.tasks.push(newTask);
+            
+            // Recalculate project progress based on tasks
+            updateProjectProgressFromTasks(project);
+            
+            saveData();
+            closeModal();
+            showToast(`✅ Task "${newTask.name}" added to ${project.name}`, 'success');
+            switchSection('gantt-projects');
+        }
+
+        function editGanttTask(projectId, taskId) {
+            const project = appState.data.ganttProjects.find(p => p.id === projectId);
+            if (!project) return;
+            
+            const task = project.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            const teamMembers = appState.data.team.map(t => t.name);
+            
+            const formHTML = `
+                <form onsubmit="handleEditGanttTask(event, ${projectId}, ${taskId})" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Task Name *</label>
+                        <input type="text" id="task_name" class="form-input" required value="${task.name}">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Start Date *</label>
+                            <input type="date" id="task_startDate" class="form-input" required value="${task.startDate}">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">End Date *</label>
+                            <input type="date" id="task_endDate" class="form-input" required value="${task.endDate}">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Assignee</label>
+                            <select id="task_assignee" class="form-select">
+                                <option value="">Select Assignee</option>
+                                ${teamMembers.map(t => `<option value="${t}" ${task.assignee === t ? 'selected' : ''}>${t}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Progress (%)</label>
+                            <input type="number" id="task_progress" class="form-input" min="0" max="100" value="${task.progress || 0}">
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px;">
+                        <button type="button" class="btn-secondary" onclick="closeModal()" style="flex: 1;">Cancel</button>
+                        <button type="submit" class="btn-primary" style="flex: 2;">Save Changes</button>
+                    </div>
+                </form>
+            `;
+            
+            showModal('✏️ Edit Task', formHTML);
+        }
+
+        function handleEditGanttTask(event, projectId, taskId) {
+            event.preventDefault();
+            
+            const project = appState.data.ganttProjects.find(p => p.id === projectId);
+            if (!project) return;
+            
+            const task = project.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            task.name = document.getElementById('task_name').value;
+            task.startDate = document.getElementById('task_startDate').value;
+            task.endDate = document.getElementById('task_endDate').value;
+            task.assignee = document.getElementById('task_assignee').value;
+            task.progress = parseInt(document.getElementById('task_progress').value) || 0;
+            
+            // Recalculate project progress based on tasks
+            updateProjectProgressFromTasks(project);
+            
+            saveData();
+            closeModal();
+            showToast(`✅ Task updated successfully`, 'success');
+            switchSection('gantt-projects');
+        }
+
+        function deleteGanttTask(projectId, taskId) {
+            const project = appState.data.ganttProjects.find(p => p.id === projectId);
+            if (!project) return;
+            
+            if (confirm('Delete this task?')) {
+                project.tasks = project.tasks.filter(t => t.id !== taskId);
+                updateProjectProgressFromTasks(project);
+                saveData();
+                showToast('🗑️ Task deleted', 'info');
+                switchSection('gantt-projects');
+            }
+        }
+
+        function updateProjectProgressFromTasks(project) {
+            if (!project.tasks || project.tasks.length === 0) return;
+            
+            const totalProgress = project.tasks.reduce((sum, task) => sum + (task.progress || 0), 0);
+            project.progress = Math.round(totalProgress / project.tasks.length);
+        }
+
+        // ============================================
+        // GANTT MILESTONE OPERATIONS
+        // ============================================
+
+        function addGanttMilestone(projectId) {
+            const project = appState.data.ganttProjects.find(p => p.id === projectId);
+            if (!project) return;
+            
+            const formHTML = `
+                <form onsubmit="handleAddGanttMilestone(event, ${projectId})" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="background: ${project.color}20; padding: 12px; border-radius: 8px; border-left: 4px solid ${project.color};">
+                        <div style="font-weight: 600;">Adding milestone to: ${project.name}</div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Milestone Name *</label>
+                        <input type="text" id="milestone_name" class="form-input" required placeholder="e.g., Beta Release">
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Target Date *</label>
+                        <input type="date" id="milestone_date" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="milestone_completed" style="width: 18px; height: 18px;">
+                            <span>Mark as completed</span>
+                        </label>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px;">
+                        <button type="button" class="btn-secondary" onclick="closeModal()" style="flex: 1;">Cancel</button>
+                        <button type="submit" class="btn-primary" style="flex: 2;">Add Milestone</button>
+                    </div>
+                </form>
+            `;
+            
+            showModal('🎯 Add Milestone', formHTML);
+        }
+
+        function handleAddGanttMilestone(event, projectId) {
+            event.preventDefault();
+            
+            const project = appState.data.ganttProjects.find(p => p.id === projectId);
+            if (!project) return;
+            
+            if (!project.milestones) project.milestones = [];
+            
+            const newMilestone = {
+                id: Date.now(),
+                name: document.getElementById('milestone_name').value,
+                date: document.getElementById('milestone_date').value,
+                completed: document.getElementById('milestone_completed').checked
+            };
+            
+            project.milestones.push(newMilestone);
+            project.milestones.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            saveData();
+            closeModal();
+            showToast(`🎯 Milestone "${newMilestone.name}" added`, 'success');
+            switchSection('gantt-projects');
+        }
+
+        // ============================================
+        // GANTT UTILITY FUNCTIONS
+        // ============================================
+
+        function exportGanttToCSV() {
+            const projects = appState.data.ganttProjects || [];
+            if (projects.length === 0) {
+                showToast('No projects to export', 'warning');
+                return;
+            }
+            
+            let csv = 'Project Name,Division,Status,Priority,Progress,Start Date,End Date,Assignee,Budget,Spent,Notes\n';
+            
+            projects.forEach(p => {
+                csv += `"${p.name}","${p.division || ''}","${p.status}","${p.priority}",${p.progress}%,"${p.startDate}","${p.endDate}","${p.assignee || ''}",${p.budget || 0},${p.spent || 0},"${(p.notes || '').replace(/"/g, '""')}"\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `gantt-projects-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showToast('📥 Projects exported to CSV', 'success');
+        }
+
+        function toggleSpreadsheetEdit() {
+            showToast('💡 Click on any row to edit. Use the ✏️ button for quick edits.', 'info');
         }
 
         // VENDORS - NOW FULLY IMPLEMENTED
@@ -18994,6 +20884,7 @@ ${dev.name} (${dev.role})
                 'strategic-planning': showAddBusinessUnit,
                 'media-events': addMediaEventRow,
                 'launch-plan': addLaunchPlanRow,
+                'gantt-projects': addGanttProject,
                 transactions: showAddTransaction,
                 campaigns: showAddCampaign,
                 team: showAddTeamMember,
